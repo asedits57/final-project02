@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { Brain, Home, CheckSquare, Trophy, User } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AnimatedBackground from "@/components/AnimatedBackground";
 import TranslateCard from "@/components/TranslateCard";
 import GrammarCard from "@/components/GrammarCard";
 import SentenceCard from "@/components/SentenceCard";
@@ -19,25 +18,7 @@ const Index = () => {
   const location = useLocation();
 
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden">
-      {/* Gradient overlays */}
-      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-        <div
-          className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-20"
-          style={{
-            background: "radial-gradient(circle, hsl(270 80% 55% / 0.4), transparent 70%)",
-          }}
-        />
-        <div
-          className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full opacity-15"
-          style={{
-            background: "radial-gradient(circle, hsl(280 85% 60% / 0.4), transparent 70%)",
-          }}
-        />
-      </div>
-
-      <AnimatedBackground />
-
+    <div className="min-h-screen animated-bg relative overflow-hidden text-foreground">
       {/* Scrollable content with bottom padding for nav bar */}
       <div className="relative z-10 max-w-[1200px] mx-auto px-4 sm:px-6 py-12 sm:py-16 pb-28">
         {/* Header */}

@@ -38,10 +38,10 @@ const Leaderboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { data: users = PLACEHOLDER_USERS, isFetching } = useQuery({
+    const { data: users = PLACEHOLDER_USERS, isFetching } = useQuery<LeaderboardUser[]>({
         queryKey: ['leaderboard'],
         queryFn: fetchLeaderboardData,
-        placeholderData: PLACEHOLDER_USERS, // ← show this INSTANTLY, no loading state
+        initialData: PLACEHOLDER_USERS, // Use initialData to ensure type match
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
@@ -51,7 +51,7 @@ const Leaderboard = () => {
     const remaining = users.slice(3);
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen animated-bg text-foreground">
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-transparent to-transparent pointer-events-none" />
 

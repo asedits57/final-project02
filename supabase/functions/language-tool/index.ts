@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { tool, text, fromLang } = await req.json();
+    const { tool, text, fromLang, toLang, messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -20,7 +20,7 @@ serve(async (req) => {
 
     switch (tool) {
       case "translate":
-        systemPrompt = `You are an expert translator from ${fromLang} to English. Translate the following text accurately and naturally. Only return the translated text, nothing else.`;
+        systemPrompt = `You are an expert translator from ${fromLang} to ${toLang || "English"}. Translate the following text accurately and naturally. Only return the translated text, nothing else.`;
         break;
       case "grammar":
         systemPrompt = `You are an expert English grammar checker. Analyze the text and return a JSON array of objects with "issue" and "suggestion" fields. Each object describes one grammar issue found. If no issues, return an empty array. Only return valid JSON, nothing else.`;
@@ -30,6 +30,12 @@ serve(async (req) => {
         break;
       case "spelling":
         systemPrompt = `You are an expert English spelling checker. Find misspelled words and return a JSON array of objects with "word" (the misspelled word) and "suggestion" (the correct spelling). If no errors, return an empty array. Only return valid JSON, nothing else.`;
+        break;
+      case "tutor":
+        systemPrompt = `You are an expert English Tutor. Help the student with their grammar, vocabulary, and general English learning questions. Provide encouraging, clear, and educational responses. Keep your answers concise but comprehensive.`;
+        break;
+      case "evaluate":
+        systemPrompt = `You are an expert English evaluator scoring a spoken response. Analyze the transcribed speech and return a JSON object with two fields: "score" (a number between 0 and 100 indicating overall fluency, grammar, and vocabulary) and "feedback" (a brief string explaining the score and offering 1-2 tips). If the input is empty or unintelligible, give a score of 0. Only return valid JSON, nothing else.`;
         break;
       default:
         throw new Error("Invalid tool specified");
@@ -44,11 +50,13 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: text },
-          ],
+          model: "google/gemini-1.5-flash",
+          messages: tool === "tutor" && messages && Array.isArray(messages)
+            ? [{ role: "system", content: systemPrompt }, ...messages]
+            : [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: text || " " },
+              ],
         }),
       }
     );

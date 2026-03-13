@@ -3,19 +3,25 @@ import { motion } from "framer-motion";
 import { Languages, Mic, Loader2 } from "lucide-react";
 import { callLanguageTool } from "@/lib/languageTool";
 
-const INDIAN_LANGUAGES = ["Hindi", "Bengali", "Telugu", "Marathi", "Tamil", "Urdu", "Gujarati", "Kannada", "Malayalam", "Odia", "Punjabi", "Assamese", "Sanskrit"];
-
 const TranslateCard = () => {
   const [input, setInput] = useState("");
-  const [fromLang, setFromLang] = useState("Hindi");
+  const [mode, setMode] = useState<"tamil-to-english" | "english-to-tamil">("tamil-to-english");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const fromLang = mode === "tamil-to-english" ? "Tamil" : "English";
+  const toLang = mode === "tamil-to-english" ? "English" : "Tamil";
 
   const handleTranslate = async () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const result = await callLanguageTool({ tool: "translate", text: input.trim(), fromLang });
+      const result = await callLanguageTool({ 
+        tool: "translate", 
+        text: input.trim(), 
+        fromLang,
+        toLang
+      });
       setOutput(result);
     } catch {
       // error handled by toast in callLanguageTool
@@ -24,40 +30,42 @@ const TranslateCard = () => {
     }
   };
 
+
+
   return (
     <motion.div
-      className="glass-card p-6 flex flex-col gap-4"
+      className="glass-card p-6 flex flex-col gap-4 h-full"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
           <Languages className="w-5 h-5 text-violet-bright" />
         </div>
-        <h2 className="font-display text-xl font-semibold glow-text">Translate</h2>
+        <h2 className="font-display text-xl font-semibold glow-text text-center">Translate</h2>
       </div>
 
-      <div className="flex gap-2 items-center">
+      <div className="space-y-2">
+        <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest ml-1">Selection</label>
         <select
-          value={fromLang}
-          onChange={(e) => setFromLang(e.target.value)}
-          className="glass-input !rounded-xl !py-2 flex-1 appearance-none cursor-pointer"
+          value={mode}
+          onChange={(e) => {
+            setMode(e.target.value as any);
+            setInput("");
+            setOutput("");
+          }}
+          className="glass-input !rounded-xl !py-3 w-full appearance-none cursor-pointer text-sm font-bold text-violet-400 text-center"
         >
-          {INDIAN_LANGUAGES.map((l) => (
-            <option key={l} value={l} className="bg-card text-foreground">{l}</option>
-          ))}
+          <option value="tamil-to-english" className="bg-card text-foreground">Tamil → English</option>
+          <option value="english-to-tamil" className="bg-card text-foreground">English → Tamil</option>
         </select>
-        <span className="text-muted-foreground text-sm">→</span>
-        <div className="glass-input !rounded-xl !py-2 flex-1 text-sm opacity-70">
-          English
-        </div>
       </div>
 
-      <div className="relative">
+      <div className="relative flex-1 flex flex-col">
         <textarea
-          className="glass-input min-h-[100px]"
-          placeholder="Type text to translate..."
+          className="glass-input min-h-[100px] text-sm flex-1 resize-none"
+          placeholder={mode === "tamil-to-english" ? "Paste Tamil text here..." : "Paste English text here..."}
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
@@ -76,7 +84,7 @@ const TranslateCard = () => {
 
       {output && (
         <motion.div
-          className="output-area"
+          className="output-area text-sm leading-relaxed whitespace-pre-wrap p-4 bg-white/5 rounded-2xl border border-white/10"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
         >

@@ -147,7 +147,7 @@ export default function HelpSupportPage() {
     const glassStyle = { background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.14)" };
 
     return (
-        <div className="relative min-h-screen bg-background overflow-hidden">
+        <div className="relative min-h-screen animated-bg overflow-hidden text-foreground">
             {/* Gradient blobs */}
             <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
                 <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full opacity-20"

@@ -1,0 +1,73 @@
+import { createContext, useContext, useCallback, useRef, useState, type ReactNode } from "react";
+
+export type EventType = "info" | "success" | "warning" | "danger";
+export type EventSource = "camera" | "voice" | "screen" | "system";
+
+export interface ProctoringEvent {
+  id: number;
+  time: string;
+  message: string;
+  type: EventType;
+  source: EventSource;
+}
+
+interface ProctoringContextValue {
+  events: ProctoringEvent[];
+  alerts: ProctoringEvent[];
+  riskScore: number;
+  pushEvent: (message: string, type: EventType, source: EventSource) => void;
+}
+
+const ProctoringCtx = createContext<ProctoringContextValue | null>(null);
+
+export const useProctoring = () => {
+  const ctx = useContext(ProctoringCtx);
+  if (!ctx) throw new Error("useProctoring must be used within ProctoringProvider");
+  return ctx;
+};
+
+const now = () =>
+  new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+export const ProctoringProvider = ({ children }: { children: ReactNode }) => {
+  const [events, setEvents] = useState<ProctoringEvent[]>([
+    { id: 0, time: now(), message: "Exam started", type: "info", source: "system" },
+  ]);
+  const [riskScore, setRiskScore] = useState(5);
+  const idRef = useRef(1);
+  // Dedup: track last message per source to avoid spamming identical events
+  const lastMsg = useRef<Record<string, string>>({});
+
+  const pushEvent = useCallback((message: string, type: EventType, source: EventSource) => {
+    // Deduplicate: skip if same source just emitted same message
+    if (lastMsg.current[source] === message) return;
+    lastMsg.current[source] = message;
+
+    const evt: ProctoringEvent = { id: idRef.current++, time: now(), message, type, source };
+    setEvents((prev) => [evt, ...prev].slice(0, 50));
+
+    // Adjust risk score based on event type
+    setRiskScore((prev) => {
+      if (type === "danger") return Math.min(100, prev + 12);
+      if (type === "warning") return Math.min(100, prev + 5);
+      if (type === "success") return Math.max(0, prev - 3);
+      return prev;
+    });
+  }, []);
+
+  // Decay risk score over time
+  useState(() => {
+    const t = setInterval(() => {
+      setRiskScore((prev) => Math.max(0, prev - 1));
+    }, 3000);
+    return () => clearInterval(t);
+  });
+
+  const alerts = events.filter((e) => e.type === "warning" || e.type === "danger");
+
+  return (
+    <ProctoringCtx.Provider value={{ events, alerts, riskScore, pushEvent }}>
+      {children}
+    </ProctoringCtx.Provider>
+  );
+};

@@ -41,7 +41,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="relative min-h-screen bg-background overflow-hidden">
+        <div className="relative min-h-screen animated-bg overflow-hidden text-foreground">
             {/* Background glows */}
             <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
                 <div

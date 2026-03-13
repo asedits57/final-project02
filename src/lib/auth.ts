@@ -2,12 +2,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 const USER_KEY = "li_user";
 
+export type UserLevel = "beginner" | "intermediate" | "advanced" | "expert";
+
 export interface AuthUser {
     id?: string;
     username: string;
     fullName?: string | null;
+    dept?: string | null;
     email?: string | null;
     phoneNumber?: string | null;
+    level?: UserLevel | null;
 }
 
 // ── Legacy localStorage helpers (kept for compatibility) ──────────

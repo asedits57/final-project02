@@ -2,14 +2,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface LanguageToolRequest {
-  tool: "translate" | "grammar" | "improve" | "spelling";
-  text: string;
+  tool: "translate" | "grammar" | "improve" | "spelling" | "tutor" | "evaluate";
+  text?: string;
   fromLang?: string;
+  toLang?: string;
+  messages?: { role: string; content: string }[];
 }
 
-export async function callLanguageTool({ tool, text, fromLang }: LanguageToolRequest): Promise<string> {
+export async function callLanguageTool({ tool, text, fromLang, toLang, messages }: LanguageToolRequest): Promise<string> {
   const { data, error } = await supabase.functions.invoke("language-tool", {
-    body: { tool, text, fromLang },
+    body: { tool, text, fromLang, toLang, messages },
   });
 
   if (error) {
