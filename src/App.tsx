@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthGuard from "./components/AuthGuard";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 import { supabase } from "./lib/leaderboard-supabase";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -24,8 +25,10 @@ const SpeakingModule = lazy(() => import("./pages/SpeakingModule"));
 const WritingModule = lazy(() => import("./pages/WritingModule"));
 const MockTest = lazy(() => import("./pages/MockTest"));
 const AITutorPage = lazy(() => import("./pages/AITutorPage"));
+const LearningPage = lazy(() => import("./pages/LearningPage"));
 const ExamDashboard = lazy(() => import("./exam-guardian/pages/ExamDashboard"));
 const Results = lazy(() => import("./exam-guardian/pages/Results"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
 
@@ -55,32 +58,36 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
-            <Route path="/task" element={<AuthGuard><TaskDashboard /></AuthGuard>} />
-            <Route path="/task/practice/:level" element={<AuthGuard><PracticeTest /></AuthGuard>} />
-            {/* Module Pages */}
-            <Route path="/task/grammar" element={<AuthGuard><GrammarModule /></AuthGuard>} />
-            <Route path="/task/reading" element={<AuthGuard><ReadingModule /></AuthGuard>} />
-            <Route path="/task/listening" element={<AuthGuard><ListeningModule /></AuthGuard>} />
-            <Route path="/task/speaking" element={<AuthGuard><SpeakingModule /></AuthGuard>} />
-            <Route path="/task/writing" element={<AuthGuard><WritingModule /></AuthGuard>} />
-            <Route path="/task/mock-test" element={<AuthGuard><MockTest /></AuthGuard>} />
-            {/* Other Pages */}
-            <Route path="/leaderboard" element={<AuthGuard><Leaderboard /></AuthGuard>} />
-            <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
-            <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
-            <Route path="/help" element={<AuthGuard><HelpSupportPage /></AuthGuard>} />
-            <Route path="/privacy" element={<AuthGuard><PrivacyPage /></AuthGuard>} />
-            <Route path="/ai-tutor" element={<AuthGuard><AITutorPage /></AuthGuard>} />
-            <Route path="/exam-proctor" element={<AuthGuard><ExamDashboard /></AuthGuard>} />
-            <Route path="/exam-results" element={<AuthGuard><Results /></AuthGuard>} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
+              <Route path="/task" element={<AuthGuard><TaskDashboard /></AuthGuard>} />
+              <Route path="/task/practice/:level" element={<AuthGuard><PracticeTest /></AuthGuard>} />
+              {/* Module Pages */}
+              <Route path="/task/grammar" element={<AuthGuard><GrammarModule /></AuthGuard>} />
+              <Route path="/task/reading" element={<AuthGuard><ReadingModule /></AuthGuard>} />
+              <Route path="/task/listening" element={<AuthGuard><ListeningModule /></AuthGuard>} />
+              <Route path="/task/speaking" element={<AuthGuard><SpeakingModule /></AuthGuard>} />
+              <Route path="/task/writing" element={<AuthGuard><WritingModule /></AuthGuard>} />
+              <Route path="/task/mock-test" element={<AuthGuard><MockTest /></AuthGuard>} />
+              {/* Other Pages */}
+              <Route path="/leaderboard" element={<AuthGuard><Leaderboard /></AuthGuard>} />
+              <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
+              <Route path="/settings" element={<AuthGuard><SettingsPage /></AuthGuard>} />
+              <Route path="/help" element={<AuthGuard><HelpSupportPage /></AuthGuard>} />
+              <Route path="/privacy" element={<AuthGuard><PrivacyPage /></AuthGuard>} />
+              <Route path="/ai-tutor" element={<AuthGuard><AITutorPage /></AuthGuard>} />
+              <Route path="/learning" element={<AuthGuard><LearningPage /></AuthGuard>} />
+              <Route path="/exam-proctor" element={<AuthGuard><ExamDashboard /></AuthGuard>} />
+              <Route path="/exam-results" element={<AuthGuard><Results /></AuthGuard>} />
+              <Route path="/admin" element={<AuthGuard><AdminDashboard /></AuthGuard>} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

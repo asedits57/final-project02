@@ -1,6 +1,6 @@
 import { Star, Lock, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "@/lib/auth";
+import { useStore } from "@/store/useStore";
 
 const levelOrder = ["beginner", "intermediate", "advanced", "expert"] as const;
 
@@ -65,8 +65,9 @@ interface TaskLevelsProps {
 
 const TaskLevels = ({ compact = false }: TaskLevelsProps) => {
     const navigate = useNavigate();
-    const user = getUser();
-    const userLevel = user?.level ?? "beginner";
+    const user = useStore(s => s.user);
+    const levelMap = ["beginner", "intermediate", "advanced", "expert"];
+    const userLevel = user?.level ? levelMap[user.level - 1] : "beginner";
 
     return (
         <section className={compact ? "py-2" : "py-16 relative"}>

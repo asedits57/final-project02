@@ -1,0 +1,105 @@
+﻿
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 2363 modules transformed.
+node.exe : [31mΓ£ù[39m 
+Build failed in 12.22s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: ([3  
+  1mΓ£ù[39m Build faile   
+ d in 12.22s:String) []    
+, RemoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+[31merror during build:
+[31msrc/App.tsx (9:9): 
+"supabase" is not exported 
+by "src/lib/leaderboard-sup
+abase.ts", imported by 
+"src/App.tsx".[31m
+file: [36mC:/Users/acer/On
+eDrive/Documents/mec/src/Ap
+p.tsx:9:9[31m
+[33m
+ 7: import AuthGuard from 
+"./components/AuthGuard";
+ 8: import ErrorBoundary 
+from "./components/shared/E
+rrorBoundary";
+ 9: import { supabase } 
+from "./lib/leaderboard-sup
+abase";
+             ^
+10: 
+11: const Index = lazy(() 
+=> 
+import("./pages/Index"));
+[31m
+    at getRollupError (file
+:///C:/Users/acer/OneDrive/
+Documents/mec/node_modules/
+rollup/dist/es/shared/parse
+Ast.js:406:41)
+    at error (file:///C:/Us
+ers/acer/OneDrive/Documents
+/mec/node_modules/rollup/di
+st/es/shared/parseAst.js:40
+2:42)
+    at Module.error (file:/
+//C:/Users/acer/OneDrive/Do
+cuments/mec/node_modules/ro
+llup/dist/es/shared/node-en
+try.js:17380:16)
+    at 
+Module.traceVariable (file:
+///C:/Users/acer/OneDrive/D
+ocuments/mec/node_modules/r
+ollup/dist/es/shared/node-e
+ntry.js:17813:29)
+    at 
+ModuleScope.findVariable (f
+ile:///C:/Users/acer/OneDri
+ve/Documents/mec/node_modul
+es/rollup/dist/es/shared/no
+de-entry.js:15403:39)
+    at ReturnValueScope.fin
+dVariable (file:///C:/Users
+/acer/OneDrive/Documents/me
+c/node_modules/rollup/dist/
+es/shared/node-entry.js:567
+6:38)
+    at FunctionBodyScope.fi
+ndVariable (file:///C:/User
+s/acer/OneDrive/Documents/m
+ec/node_modules/rollup/dist
+/es/shared/node-entry.js:56
+76:38)
+    at 
+MemberExpression.bind (file
+:///C:/Users/acer/OneDrive/
+Documents/mec/node_modules/
+rollup/dist/es/shared/node-
+entry.js:7395:49)
+    at CallExpression.bind 
+(file:///C:/Users/acer/OneD
+rive/Documents/mec/node_mod
+ules/rollup/dist/es/shared/
+node-entry.js:2832:23)
+    at CallExpression.bind 
+(file:///C:/Users/acer/OneD
+rive/Documents/mec/node_mod
+ules/rollup/dist/es/shared/
+node-entry.js:12512:15)[39
+m

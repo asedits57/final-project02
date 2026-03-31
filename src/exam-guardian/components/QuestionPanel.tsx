@@ -16,15 +16,18 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
   const [recordTime, setRecordTime] = useState(30);
   const [transcript, setTranscript] = useState("");
   const [isEvaluating, setIsEvaluating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognitionRef.current.onresult = (event: any) => {
         let currentTranscript = "";
         for (let i = 0; i < event.results.length; i++) {
@@ -47,6 +50,7 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
       });
     }, 1000);
     return () => clearInterval(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRecording]);
 
   const toggleRecording = async () => {

@@ -1,0 +1,6 @@
+﻿C:\Users\acer\OneDrive\Documents\mec\src\components\AuthGuard.tsx: line 62, col 8, Warning - React Hook useEffect has a missing dependency: 'setStoreUser'. Either include it or remove the dependency array. (react-hooks/exhaustive-deps)
+C:\Users\acer\OneDrive\Documents\mec\src\pages\AuthPage.tsx: line 104, col 37, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\acer\OneDrive\Documents\mec\src\pages\AuthPage.tsx: line 204, col 23, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+C:\Users\acer\OneDrive\Documents\mec\src\pages\AuthPage.tsx: line 228, col 25, Error - Unexpected any. Specify a different type. (@typescript-eslint/no-explicit-any)
+
+4 problems

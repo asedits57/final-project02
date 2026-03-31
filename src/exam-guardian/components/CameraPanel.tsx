@@ -62,10 +62,12 @@ const CameraPanel = () => {
       }
     };
     startCamera();
+    
+    const videoNode = videoRef.current;
 
     return () => {
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      if (videoNode?.srcObject) {
+        (videoNode.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
       }
     };
   }, [modelsLoaded]);
@@ -161,7 +163,7 @@ const CameraPanel = () => {
     });
 
     detectionRef.current = requestAnimationFrame(detect);
-  }, [cameraActive]);
+  }, [cameraActive, pushEvent]);
 
   useEffect(() => {
     if (cameraActive && modelsLoaded) {

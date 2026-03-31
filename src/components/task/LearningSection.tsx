@@ -1,59 +1,126 @@
+import { useState, useEffect } from "react";
 import { Mic, Headphones, BookOpen, PenTool, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
-const sections = [
-    {
-        icon: BookOpen,
-        title: "Grammar",
-        description: "Master grammar rules and sentence structures with interactive exercises",
-        color: "#7f5af0",
-        tasks: 45,
-        progress: 80,
-        path: "/task/grammar",
-        glow: "hsla(262, 83%, 58%, 0.4)",
-    },
-    {
-        icon: PenTool,
-        title: "Writing",
-        description: "Get AI feedback on essays and writing responses",
-        color: "#8b5cf6",
-        tasks: 50,
-        progress: 60,
-        path: "/task/writing",
-        glow: "hsla(262, 83%, 58%, 0.4)",
-    },
-    {
-        icon: BookOpen,
-        title: "Reading",
-        description: "Build comprehension with passage exercises and fill-in-the-blank tasks",
-        color: "#7f5af0",
-        tasks: 28,
-        progress: 65,
-        path: "/task/reading",
-        glow: "hsla(262, 83%, 58%, 0.4)",
-    },
-    {
-        icon: Headphones,
-        title: "Listening",
-        description: "Sharpen comprehension with diverse audio exercises and waveform analysis",
-        color: "#8b5cf6",
-        tasks: 32,
-        progress: 40,
-        path: "/task/listening",
-        glow: "hsla(262, 83%, 58%, 0.4)",
-    },
-    {
-        icon: Mic,
-        title: "Speaking",
-        description: "Practice pronunciation and fluency with AI-powered voice analysis",
-        color: "#a78bfa",
-        tasks: 24,
-        progress: 55,
-        path: "/task/speaking",
-        glow: "hsla(262, 83%, 58%, 0.4)",
-    },
-];
+const LearningSection = () => {
+    const navigate = useNavigate();
+    const [grammarProgress, setGrammarProgress] = useState({ completed: 0, percentage: 0 });
+    const [readingProgress, setReadingProgress] = useState({ completed: 0, percentage: 0 });
+    const [writingProgress, setWritingProgress] = useState({ completed: 0, percentage: 0 });
+    const [speakingProgress, setSpeakingProgress] = useState({ completed: 0, percentage: 0 });
+
+    useEffect(() => {
+        // Load grammar progress
+        const gSaved = JSON.parse(localStorage.getItem("grammar_progress") || '{"completed": 0}');
+        const gTotal = 57;
+        const gPercent = Math.round((gSaved.completed / gTotal) * 100);
+        setGrammarProgress({ completed: gSaved.completed, percentage: gPercent });
+
+        // Load reading progress
+        const rSaved = parseInt(localStorage.getItem("reading_progress_count") || "0");
+        const rTotal = 50;
+        const rPercent = Math.round((rSaved / rTotal) * 100);
+        setReadingProgress({ completed: rSaved, percentage: rPercent });
+
+        // Load writing progress
+        const wSaved = parseInt(localStorage.getItem("writing_progress_count") || "0");
+        const wTotal = 50;
+        const wPercent = Math.round((wSaved / wTotal) * 100);
+        setWritingProgress({ completed: wSaved, percentage: wPercent });
+
+        // Load speaking progress
+        const sSaved = parseInt(localStorage.getItem("speaking_progress_count") || "0");
+        const sTotal = 60;
+        const sPercent = Math.round((sSaved / sTotal) * 100);
+        setSpeakingProgress({ completed: sSaved, percentage: sPercent });
+    }, []);
+
+    const [expandedGuide, setExpandedGuide] = useState<string | null>(null);
+
+    const sections = [
+        {
+            icon: BookOpen,
+            title: "Grammar",
+            description: "Master grammar rules and sentence structures with interactive exercises",
+            color: "#7f5af0",
+            totalTasks: 57,
+            completedTasks: grammarProgress.completed,
+            progress: grammarProgress.percentage,
+            path: "/task/grammar",
+            glow: "hsla(262, 83%, 58%, 0.4)",
+            guide: [
+                "📌 Focus on tenses — past, present, and future are frequently tested.",
+                "📌 Learn subject-verb agreement to avoid common errors.",
+                "📌 Practice identifying adjectives, prepositions, and modal verbs daily.",
+            ],
+        },
+        {
+            icon: PenTool,
+            title: "Writing",
+            description: "Get AI feedback on essays and writing responses",
+            color: "#8b5cf6",
+            totalTasks: 50,
+            completedTasks: writingProgress.completed,
+            progress: writingProgress.percentage,
+            path: "/task/writing",
+            glow: "hsla(262, 83%, 58%, 0.4)",
+            guide: [
+                "📌 Always write an introduction, body, and conclusion.",
+                "📌 Aim for 100–150 words and stay within the word limit.",
+                "📌 Use linking words like 'however', 'therefore', and 'in addition'.",
+            ],
+        },
+        {
+            icon: BookOpen,
+            title: "Reading",
+            description: "Build comprehension with passage exercises and interactive MCQs",
+            color: "#7f5af0",
+            totalTasks: 50,
+            completedTasks: readingProgress.completed,
+            progress: readingProgress.percentage,
+            path: "/task/reading",
+            glow: "hsla(262, 83%, 58%, 0.4)",
+            guide: [
+                "📌 Read the questions before reading the passage to know what to look for.",
+                "📌 Underline key words in the passage when answering questions.",
+                "📌 Eliminate obviously wrong answers first to narrow your choices.",
+            ],
+        },
+        {
+            icon: Headphones,
+            title: "Listening",
+            description: "Sharpen comprehension with diverse audio exercises and waveform analysis",
+            color: "#8b5cf6",
+            totalTasks: 32,
+            completedTasks: 12,
+            progress: 40,
+            path: "/task/listening",
+            glow: "hsla(262, 83%, 58%, 0.4)",
+            guide: [
+                "📌 Focus on the main idea first, then listen for specific details.",
+                "📌 Pay attention to tone and emotion — they convey meaning.",
+                "📌 Practice with varied accents to improve adaptability.",
+            ],
+        },
+        {
+            icon: Mic,
+            title: "Speaking",
+            description: "Practice pronunciation and fluency with AI-powered voice analysis",
+            color: "#a78bfa",
+            totalTasks: 60,
+            completedTasks: speakingProgress.completed,
+            progress: speakingProgress.percentage,
+            path: "/task/speaking",
+            glow: "hsla(262, 83%, 58%, 0.4)",
+            guide: [
+                "📌 Use the 10-second prep time to plan 2–3 key points.",
+                "📌 Speak clearly and at a steady pace — avoid rushing.",
+                "📌 Use connectors like 'firstly', 'moreover', and 'in conclusion'.",
+            ],
+        },
+    ];
+
 
 interface CircularProgressProps {
     value: number;
@@ -112,8 +179,7 @@ const CircularProgress = ({ value, color, size = 56 }: CircularProgressProps) =>
     );
 };
 
-const LearningSection = () => {
-    const navigate = useNavigate();
+
 
     return (
         <section className="py-8 relative w-full">
@@ -144,15 +210,13 @@ const LearningSection = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: i * 0.1 }}
-                            onClick={() => navigate(section.path)}
-                            className="relative rounded-2xl p-6 cursor-pointer group overflow-hidden transition-all duration-400"
+                            className="relative rounded-2xl p-6 group overflow-hidden transition-all duration-400"
                             style={{
                                 background: "hsla(270, 20%, 8%, 0.7)",
                                 backdropFilter: "blur(20px)",
                                 border: "1px solid hsla(270, 60%, 60%, 0.12)",
                             }}
                             whileHover={{
-                                scale: 1.03,
                                 borderColor: section.color + "55",
                                 boxShadow: `0 0 30px ${section.glow}`,
                                 backgroundColor: "hsla(270, 20%, 10%, 0.8)",
@@ -166,24 +230,65 @@ const LearningSection = () => {
                                 }}
                             />
 
-                            {/* Icon */}
-                            <div
-                                className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110 relative z-10"
-                                style={{ background: `${section.color}18` }}
-                            >
-                                <section.icon className="w-6 h-6" style={{ color: section.color }} />
+                            {/* Icon + Guide Toggle */}
+                            <div className="flex items-start justify-between mb-4 relative z-10">
+                                <div
+                                    className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                                    style={{ background: `${section.color}18` }}
+                                >
+                                    <section.icon className="w-6 h-6" style={{ color: section.color }} />
+                                </div>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setExpandedGuide(expandedGuide === section.title ? null : section.title);
+                                    }}
+                                    className="text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-all duration-200 border font-poppins"
+                                    style={{
+                                        background: expandedGuide === section.title ? `${section.color}25` : "hsla(270, 20%, 12%, 0.6)",
+                                        border: `1px solid ${expandedGuide === section.title ? section.color + "60" : "hsla(270, 30%, 25%, 0.4)"}`,
+                                        color: expandedGuide === section.title ? section.color : "hsl(270, 10%, 65%)",
+                                    }}
+                                >
+                                    {expandedGuide === section.title ? "✕ Guide" : "📖 Guide"}
+                                </button>
                             </div>
 
                             {/* Content */}
                             <h3 className="font-poppins text-lg font-bold mb-2 relative z-10">{section.title}</h3>
-                            <p className="text-xs text-muted-foreground mb-5 leading-relaxed relative z-10 flex-1">
+                            <p className="text-xs text-muted-foreground mb-4 leading-relaxed relative z-10 flex-1">
                                 {section.description}
                             </p>
 
+                            {/* Learning Guide Panel */}
+                            {expandedGuide === section.title && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="mb-4 rounded-xl p-3 relative z-10"
+                                    style={{
+                                        background: `${section.color}0d`,
+                                        border: `1px solid ${section.color}30`,
+                                    }}
+                                >
+                                    <div className="text-[10px] font-bold uppercase tracking-widest mb-2 font-poppins" style={{ color: section.color }}>
+                                        💡 Learning Tips
+                                    </div>
+                                    <ul className="space-y-1.5">
+                                        {section.guide.map((tip, idx) => (
+                                            <li key={idx} className="text-[11px] text-muted-foreground font-poppins leading-snug">
+                                                {tip}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </motion.div>
+                            )}
+
                             {/* Progress bar inside the card */}
-                            <div className="mb-6 relative z-10">
+                            <div className="mb-4 relative z-10">
                                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                                    <span>{section.tasks} tasks completed</span>
+                                    <span>{section.completedTasks}/{section.totalTasks} completed</span>
                                     <span>{section.progress}%</span>
                                 </div>
                                 <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
@@ -199,8 +304,11 @@ const LearningSection = () => {
                             </div>
 
                             {/* Start Learning Button */}
-                            <div className="mt-auto pt-4 relative z-10">
-                                <button className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-violet-600/20 group-hover:text-violet-300 border border-transparent group-hover:border-violet-500/30 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] bg-white/5 text-white/80">
+                            <div className="mt-auto pt-2 relative z-10">
+                                <button
+                                    onClick={() => navigate(section.path)}
+                                    className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-300 group-hover:bg-violet-600/20 group-hover:text-violet-300 border border-transparent group-hover:border-violet-500/30 group-hover:shadow-[0_0_15px_rgba(139,92,246,0.3)] bg-white/5 text-white/80"
+                                >
                                     Start Learning
                                     <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                                 </button>

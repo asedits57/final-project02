@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft, HelpCircle, Search, ChevronDown,
     Mic, RefreshCw, AlertCircle, Zap,
-    Mail, MessageCircle, Home, CheckSquare, Trophy, User, X,
+    Mail, MessageCircle, Home, CheckSquare, Trophy, User, X, BookOpen
 } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,6 +12,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 const navItems = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Task", icon: CheckSquare, path: "/task" },
+    { label: "Learn", icon: BookOpen, path: "/learning" },
     { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
     { label: "Profile", icon: User, path: "/profile" },
 ];

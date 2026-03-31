@@ -1,7 +1,7 @@
 import { ArrowRight, Sparkles, BookOpen, Headphones, Mic, PenTool, Zap, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getUser } from "@/lib/auth";
+import { useStore } from "@/store/useStore";
 
 const features = [
     { icon: BookOpen, label: "Reading", desc: "Passage comprehension & fill-in-the-blank", color: "#7f5af0" },
@@ -12,8 +12,9 @@ const features = [
 
 const HeroSection = () => {
     const navigate = useNavigate();
-    const user = getUser();
-    const currentLevel = user?.level ?? "beginner";
+    const user = useStore(s => s.user);
+    const levelMap = ["beginner", "intermediate", "advanced", "expert"];
+    const currentLevel = user?.level ? levelMap[user.level - 1] : "beginner";
 
     return (
         <section className="relative py-20 md:py-28 overflow-hidden">

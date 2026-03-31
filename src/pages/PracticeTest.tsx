@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Zap, RotateCcw, Home, Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, Volume2, Trophy } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getUser } from "@/lib/auth";
+import { useStore } from "@/store/useStore";
 import { updateUserXP } from "@/lib/leaderboard-supabase";
 
 type Question = {
@@ -606,7 +606,7 @@ const PracticeTest = () => {
                 {totalAnswered === questions.length && (
                     <div className="mt-10 glass rounded-2xl p-8 glow-border-violet text-center animate-fade-in">
                         {(() => {
-                           const user = getUser();
+                           const user = useStore.getState().user;
                            // Award 10 XP per correct answer
                            const xpAwarded = correctCount * 10;
                            if (user?.id) {

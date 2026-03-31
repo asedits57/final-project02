@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Home, CheckSquare, Trophy, User, Bot, Shield, ArrowRight } from "lucide-react";
+import { Home, CheckSquare, Trophy, User, Bot, Shield, ArrowRight, BookOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeroSection from "@/components/task/HeroSection";
 import LearningSection from "@/components/task/LearningSection";
@@ -9,6 +9,7 @@ import StatsPanel from "@/components/task/StatsPanel";
 const navItems = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Task", icon: CheckSquare, path: "/task" },
+    { label: "Learn", icon: BookOpen, path: "/learning" },
     { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
     { label: "Profile", icon: User, path: "/profile" },
 ];

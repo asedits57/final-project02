@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Headphones, PenTool, Mic, ChevronRight, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "@/lib/auth";
+import { useStore } from "@/store/useStore";
 import { updateUserXP } from "@/lib/leaderboard-supabase";
 
 const TOTAL_TIME = 1800; // 30 minutes
-const TOTAL_QUESTIONS = 20;
+const TOTAL_QUESTIONS = 22;
 
 type QuestionType = "reading" | "listening" | "writing" | "speaking";
 
@@ -19,14 +19,37 @@ interface Question {
 }
 
 const questions: Question[] = [
-    { id: 1, type: "reading", prompt: "Which word best completes the sentence: 'The scientist made a remarkable _____ that changed our understanding of physics.'", options: ["decision", "discovery", "departure", "description"], answer: "discovery" },
-    { id: 2, type: "reading", prompt: "What is the primary purpose of an abstract in a research paper?", options: ["To list references", "To summarize the study", "To thank contributors", "To explain methodology only"], answer: "To summarize the study" },
-    { id: 3, type: "listening", prompt: "Read and identify the tone: 'Despite numerous setbacks, she remained undeterred in her pursuit of excellence.'", options: ["Pessimistic", "Determined", "Indifferent", "Nostalgic"], answer: "Determined" },
-    { id: 4, type: "writing", prompt: "Choose the grammatically correct sentence:", options: ["He don't know the answer.", "He doesn't knows the answer.", "He doesn't know the answer.", "He do not knows the answer."], answer: "He doesn't know the answer." },
-    { id: 5, type: "reading", prompt: "The word 'ephemeral' most nearly means:", options: ["Long-lasting", "Short-lived", "Complicated", "Essential"], answer: "Short-lived" },
-    { id: 6, type: "speaking", prompt: "Which phrase shows the highest level of formality?", options: ["Wanna grab a coffee?", "Let's meet later.", "Would you care to join me?", "Hey, meet up?"], answer: "Would you care to join me?" },
-    { id: 7, type: "reading", prompt: "A synonym for 'meticulous' is:", options: ["Careless", "Thorough", "Quick", "Vague"], answer: "Thorough" },
-    { id: 8, type: "writing", prompt: "Identify the sentence with correct punctuation:", options: ["Its a beautiful day.", "It's a beautiful day.", "Its' a beautiful day.", "It's a beautiful, day."], answer: "It's a beautiful day." },
+    // Grammar Section
+    { id: 1, type: "writing", prompt: "Choose the correct sentence:\nA. She go to school every day.\nB. She goes to school every day.\nC. She going to school every day.\nD. She gone to school every day.", options: ["A", "B", "C", "D"], answer: "B" },
+    { id: 2, type: "writing", prompt: "Fill in the blank: He ______ football every weekend.", options: ["play", "plays", "played", "playing"], answer: "B" },
+    { id: 3, type: "writing", prompt: "Choose the correct word: We ______ to the park yesterday.", options: ["go", "goes", "went", "going"], answer: "C" },
+    { id: 4, type: "writing", prompt: "Error detection: She don't like coffee.", options: ["She", "don't", "like", "coffee"], answer: "B" },
+    { id: 5, type: "writing", prompt: "Fill in the blank: She is interested ______ music.", options: ["on", "in", "at", "for"], answer: "B" },
+    { id: 6, type: "writing", prompt: "Choose the correct sentence:\nA. I have seen that movie yesterday.\nB. I saw that movie yesterday.\nC. I seeing that movie yesterday.\nD. I see that movie yesterday.", options: ["A", "B", "C", "D"], answer: "B" },
+    { id: 7, type: "writing", prompt: "Fill in the blank: If it rains, we ______ stay at home.", options: ["will", "would", "should", "could"], answer: "A" },
+    { id: 8, type: "writing", prompt: "Choose the correct word: She is ______ than her sister.", options: ["tall", "taller", "tallest", "more tall"], answer: "B" },
+    { id: 9, type: "writing", prompt: "Fill in the blank: I ______ my homework already.", options: ["finish", "finished", "have finished", "finishing"], answer: "C" },
+    { id: 10, type: "writing", prompt: "Choose the correct sentence:\nA. Everyone have finished the work.\nB. Everyone has finished the work.\nC. Everyone finished the work have.\nD. Everyone finishing the work.", options: ["A", "B", "C", "D"], answer: "B" },
+
+    // Reading Section
+    { id: 11, type: "reading", prompt: "Passage: Technology has changed the way people communicate. In the past, people relied on letters and telephone calls. Today, communication happens instantly through emails, messaging apps, and video calls. \n\nWhat is the main topic of the passage?", options: ["Letters", "Communication technology", "Telephones", "Internet safety"], answer: "B" },
+    { id: 12, type: "reading", prompt: "How did people communicate in the past?", options: ["Messaging apps", "Emails", "Letters and telephone calls", "Video calls"], answer: "C" },
+    { id: 13, type: "reading", prompt: "What is one benefit of modern communication?", options: ["It is slower", "It connects people instantly", "It removes technology", "It prevents communication"], answer: "B" },
+    { id: 14, type: "reading", prompt: "What does “instantly” mean?", options: ["Slowly", "Immediately", "Rarely", "Carefully"], answer: "B" },
+    { id: 15, type: "reading", prompt: "What is the author's opinion about technology?", options: ["It improves communication", "It makes life harder", "It is dangerous", "It should be avoided"], answer: "A" },
+
+    // Listening Section (Using prompt as text for now)
+    { id: 16, type: "listening", prompt: "Audio Script: Many students prefer online learning because it allows them to study from home and access materials anytime. However, some students believe classroom learning provides better interaction with teachers. \n\nWhy do students prefer online learning?", options: ["They can study from home", "It removes teachers", "It is always cheaper", "It replaces schools"], answer: "A" },
+    { id: 17, type: "listening", prompt: "What is a disadvantage of online learning mentioned?", options: ["Expensive books", "Less interaction with teachers", "No internet", "Difficult exams"], answer: "B" },
+    { id: 18, type: "listening", prompt: "What does the speaker compare?", options: ["Online learning and classroom learning", "Books and libraries", "Teachers and students", "Exams and homework"], answer: "A" },
+
+    // Writing Section (Task 1 & 2)
+    { id: 19, type: "writing", prompt: "TASK 1: Write about your favorite place to relax.\n\nInclude:\n- Where it is\n- Why you like it\n- What you do there\n\nWord limit: 100–120 words" },
+    { id: 20, type: "writing", prompt: "TASK 2: Do you think technology makes life easier or more difficult?\n\nExplain your opinion with examples.\n\nWord limit: 120–150 words" },
+
+    // Speaking Section (Task 1 & 2)
+    { id: 21, type: "speaking", prompt: "SPEAKING TASK 1: Describe a memorable event in your life.\n\nInclude:\n- What happened\n- Where it happened\n- Why it was important\n\nPreparation: 30s | Speaking: 45s" },
+    { id: 22, type: "speaking", prompt: "SPEAKING TASK 2: Do you prefer studying alone or studying with friends?\n\nExplain your answer.\n\nPreparation: 30s | Speaking: 60s" },
 ];
 
 const typeIcons: Record<QuestionType, React.ReactNode> = {
@@ -95,14 +118,14 @@ const MockTest = () => {
 
     useEffect(() => {
         if (finished) {
-            const user = getUser();
+            const user = useStore.getState().user;
             // Award 50 XP per correct answer in Mock Test (higher weighted)
             const xpAwarded = score * 50;
             if (user?.id) {
                 updateUserXP(user.id, xpAwarded).catch(console.error);
             }
         }
-    }, [finished]);
+    }, [finished, score, usedQuestions]);
 
     if (finished) {
         return (
@@ -265,11 +288,12 @@ const MockTest = () => {
                         {q.options && (
                             <div className="flex flex-col gap-3">
                                 {q.options.map((opt, i) => {
-                                    const isSelected = selected[current] === opt;
+                                    const letter = String.fromCharCode(65 + i);
+                                    const isSelected = selected[current] === letter;
                                     return (
                                         <motion.button
                                             key={i}
-                                            onClick={() => handleSelect(opt)}
+                                            onClick={() => handleSelect(letter)}
                                             whileHover={{ scale: 1.02 }}
                                             whileTap={{ scale: 0.98 }}
                                             className="text-left rounded-2xl px-5 py-4 font-poppins text-sm transition-all duration-200"
@@ -289,12 +313,38 @@ const MockTest = () => {
                                                 className="font-bold mr-3"
                                                 style={{ color: isSelected ? "hsl(270, 80%, 75%)" : "hsla(270, 30%, 55%, 0.6)" }}
                                             >
-                                                {String.fromCharCode(65 + i)}.
+                                                {letter}.
                                             </span>
                                             {opt}
                                         </motion.button>
                                     );
                                 })}
+                            </div>
+                        )}
+
+                        {/* Writing Task UI */}
+                        {q.type === "writing" && !q.options && (
+                            <textarea
+                                value={selected[current] || ""}
+                                onChange={(e) => handleSelect(e.target.value)}
+                                placeholder="Type your response here..."
+                                className="w-full h-48 rounded-2xl p-5 bg-black/20 border border-white/10 outline-none focus:border-violet-500/50 transition-all font-poppins text-sm resize-none"
+                            />
+                        )}
+
+                        {/* Speaking Task UI */}
+                        {q.type === "speaking" && (
+                            <div className="flex flex-col items-center gap-6 py-6">
+                                <div className="w-20 h-20 rounded-full flex items-center justify-center bg-violet-500/10 border border-violet-500/30 animate-pulse">
+                                    <Mic className="w-8 h-8 text-violet-400" />
+                                </div>
+                                <p className="text-xs text-muted-foreground font-poppins italic">Recording functionality will be integrated with our AI engine.</p>
+                                <button 
+                                    onClick={() => handleSelect("recorded")}
+                                    className="px-6 py-2 rounded-xl bg-violet-500/10 border border-violet-500/20 text-xs font-semibold text-violet-300 hover:bg-violet-500/20 transition-all"
+                                >
+                                    {selected[current] ? "Re-record" : "Start Recording"}
+                                </button>
                             </div>
                         )}
                     </motion.div>

@@ -15,9 +15,22 @@ export interface Database {
         Tables: {
             leaderboard_users: {
                 Row: LeaderboardUser;
-                Insert: Omit<LeaderboardUser, 'id' | 'created_at' | 'updated_at'>;
-                Update: Partial<Omit<LeaderboardUser, 'id' | 'created_at' | 'updated_at'>>;
+                Insert: Omit<LeaderboardUser, "created_at" | "updated_at">;
+                Update: Partial<Omit<LeaderboardUser, "id" | "created_at" | "updated_at">>;
+                Relationships: [];
             };
+        };
+        Views: {
+            [_ in never]: never;
+        };
+        Functions: {
+            [_ in never]: never;
+        };
+        Enums: {
+            [_ in never]: never;
+        };
+        CompositeTypes: {
+            [_ in never]: never;
         };
     };
 }

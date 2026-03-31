@@ -51,7 +51,7 @@ const TranslateCard = () => {
         <select
           value={mode}
           onChange={(e) => {
-            setMode(e.target.value as any);
+            setMode(e.target.value as "tamil-to-english" | "english-to-tamil");
             setInput("");
             setOutput("");
           }}

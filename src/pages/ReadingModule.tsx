@@ -1,296 +1,198 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Clock, CheckCircle, XCircle, ChevronRight } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, ChevronRight, BookOpen, Clock, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "@/lib/auth";
+import { readingPassages } from "@/data/readingPassages";
+import { useStore } from "@/store/useStore";
 import { updateUserXP } from "@/lib/leaderboard-supabase";
-
-const TIMER_DURATION = 300; // 5 minutes
-
-const passage = {
-    title: "The Rise of Artificial Intelligence",
-    text: [
-        { type: "text" as const, content: "Artificial intelligence has " },
-        { type: "blank" as const, id: 0, answer: "transformed" },
-        { type: "text" as const, content: " nearly every aspect of modern life. From healthcare to transportation, AI systems are becoming increasingly " },
-        { type: "blank" as const, id: 1, answer: "sophisticated" },
-        { type: "text" as const, content: ". Researchers continue to " },
-        { type: "blank" as const, id: 2, answer: "develop" },
-        { type: "text" as const, content: " new algorithms that enable machines to learn from " },
-        { type: "blank" as const, id: 3, answer: "experience" },
-        { type: "text" as const, content: " and improve their performance over time. However, ethical considerations remain " },
-        { type: "blank" as const, id: 4, answer: "crucial" },
-        { type: "text" as const, content: " as this technology continues to evolve." },
-    ],
-};
-
-const hints = ["transformed", "sophisticated", "develop", "experience", "crucial"];
 
 const ReadingModule = () => {
     const navigate = useNavigate();
-    const [answers, setAnswers] = useState<Record<number, string>>({});
-    const [validation, setValidation] = useState<Record<number, "correct" | "wrong" | null>>({});
-    const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
-    const [submitted, setSubmitted] = useState(false);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    const radius = 22;
-    const circumference = 2 * Math.PI * radius;
-    const timerOffset = circumference - (timeLeft / TIMER_DURATION) * circumference;
+    // State management
+    const [currentPassageIndex, setCurrentPassageIndex] = useState(() => {
+        const saved = localStorage.getItem("reading_passage_index");
+        return saved ? parseInt(saved) : 0;
+    });
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
+        const saved = localStorage.getItem("reading_question_index");
+        return saved ? parseInt(saved) : 0;
+    });
+    
+    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const [score, setScore] = useState(0);
+    const [isFinished, setIsFinished] = useState(false);
 
+    const currentPassage = readingPassages[currentPassageIndex];
+    const currentQuestion = currentPassage.questions[currentQuestionIndex];
+    const totalQuestions = readingPassages.reduce((acc, p) => acc + p.questions.length, 0);
+    const overallProgress = readingPassages.slice(0, currentPassageIndex).reduce((acc, p) => acc + p.questions.length, 0) + currentQuestionIndex;
+
+    // Persist progress
     useEffect(() => {
-        timerRef.current = setInterval(() => {
-            setTimeLeft(t => {
-                if (t <= 1) {
-                    clearInterval(timerRef.current!);
-                    handleSubmit();
-                    return 0;
-                }
-                return t - 1;
-            });
-        }, 1000);
-        return () => clearInterval(timerRef.current!);
-    }, []);
+        localStorage.setItem("reading_passage_index", currentPassageIndex.toString());
+        localStorage.setItem("reading_question_index", currentQuestionIndex.toString());
+        localStorage.setItem("reading_progress_count", overallProgress.toString());
+    }, [currentPassageIndex, currentQuestionIndex, overallProgress]);
 
-    const formatTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
-
-    const handleInput = (id: number, val: string) => {
-        setAnswers(prev => ({ ...prev, [id]: val }));
-        if (validation[id]) {
-            setValidation(prev => ({ ...prev, [id]: null }));
+    const handleCheck = () => {
+        if (!selectedAnswer) return;
+        setShowFeedback(true);
+        if (selectedAnswer === currentQuestion.answer) {
+            setScore(prev => prev + 1);
         }
     };
 
-    const handleSubmit = () => {
-        const newValidation: Record<number, "correct" | "wrong"> = {};
-        hints.forEach((ans, i) => {
-            newValidation[i] = answers[i]?.trim().toLowerCase() === ans.toLowerCase() ? "correct" : "wrong";
-        });
-        setValidation(newValidation);
-        setSubmitted(true);
-        clearInterval(timerRef.current!);
+    const handleNext = () => {
+        setShowFeedback(false);
+        setSelectedAnswer(null);
 
-        // Award 20 XP per correct answer in Reading Module
-        const correctCount = Object.values(newValidation).filter(v => v === "correct").length;
-        const user = getUser();
-        if (user?.id) {
-            updateUserXP(user.id, correctCount * 20).catch(console.error);
+        if (currentQuestionIndex < currentPassage.questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+        } else if (currentPassageIndex < readingPassages.length - 1) {
+            setCurrentPassageIndex(prev => prev + 1);
+            setCurrentQuestionIndex(0);
+        } else {
+            setIsFinished(true);
+            // Award XP based on score
+            const user = useStore.getState().user;
+            if (user?.id) {
+                updateUserXP(user.id, score * 10).catch(console.error);
+            }
         }
     };
 
-    const score = Object.values(validation).filter(v => v === "correct").length;
+    const resetModule = () => {
+        setCurrentPassageIndex(0);
+        setCurrentQuestionIndex(0);
+        setScore(0);
+        setIsFinished(false);
+        setSelectedAnswer(null);
+        setShowFeedback(false);
+        localStorage.removeItem("reading_passage_index");
+        localStorage.removeItem("reading_question_index");
+        localStorage.removeItem("reading_progress_count");
+    };
+
+    if (isFinished) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-foreground">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="glass-card p-10 max-w-md w-full text-center relative z-10"
+                    style={{ background: "hsla(270, 20%, 8%, 0.9)", border: "1px solid hsla(270, 80%, 55%, 0.2)" }}
+                >
+                    <Trophy className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                    <h2 className="font-display text-2xl font-bold mb-2">Reading Completed!</h2>
+                    <p className="text-muted-foreground mb-6">You've mastered all reading passages.</p>
+                    <div className="text-5xl font-bold text-violet-400 mb-8">{Math.round((score / totalQuestions) * 100)}%</div>
+                    <p className="text-sm text-muted-foreground mb-8">{score} / {totalQuestions} correct answers</p>
+                    <div className="flex gap-4">
+                        <button onClick={() => navigate("/task")} className="flex-1 py-3 rounded-xl bg-violet-500/10 border border-violet-500/20 font-semibold transition-all hover:bg-violet-500/20">Dashboard</button>
+                        <button onClick={resetModule} className="flex-1 py-3 rounded-xl bg-primary text-white font-semibold transition-all hover:opacity-90">Restart</button>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen animated-bg relative pb-10 text-foreground">
-            {/* Orbs */}
-            <div className="orb orb-violet w-[400px] h-[400px] -top-20 -right-20 float opacity-15 pointer-events-none" />
-            <div className="orb orb-cyan w-[250px] h-[250px] bottom-20 -left-10 float-delayed opacity-10 pointer-events-none" />
-
+        <div className="min-h-screen animated-bg relative pb-32 text-foreground">
             {/* Header */}
-            <div
-                className="sticky top-0 z-40 flex items-center justify-between px-6 py-4"
-                style={{
-                    background: "hsla(270, 25%, 6%, 0.85)",
-                    backdropFilter: "blur(20px)",
-                    borderBottom: "1px solid hsla(270, 40%, 35%, 0.15)",
-                }}
-            >
-                <button
-                    onClick={() => navigate("/task")}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-violet-300 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back
-                </button>
-
-                <div className="flex items-center gap-2 font-poppins font-semibold text-foreground">
-                    <span className="text-violet-400">📖</span>
-                    Reading Module
-                </div>
-
-                {/* Timer Ring */}
-                <div className="flex items-center gap-3">
-                    <div className="relative flex items-center justify-center">
-                        <svg width="56" height="56" className="-rotate-90">
-                            <circle cx="28" cy="28" r={radius} fill="none" strokeWidth="3" className="timer-ring-track" />
-                            <circle
-                                cx="28" cy="28" r={radius} fill="none" strokeWidth="3"
-                                stroke={timeLeft < 60 ? "hsl(0, 80%, 60%)" : "hsl(270, 80%, 65%)"}
-                                strokeLinecap="round"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={timerOffset}
-                                style={{
-                                    filter: `drop-shadow(0 0 6px ${timeLeft < 60 ? "hsl(0,80%,55%)" : "hsl(270,80%,55%)"})`,
-                                    transition: "stroke-dashoffset 1s linear, stroke 0.5s ease",
-                                }}
-                            />
-                        </svg>
-                        <div
-                            className="absolute text-[10px] font-bold font-poppins"
-                            style={{
-                                color: timeLeft < 60 ? "hsl(0, 80%, 65%)" : "hsl(270, 80%, 80%)",
-                                animation: timeLeft < 60 ? "timerPulse 1s infinite" : "none",
-                            }}
-                        >
-                            {formatTime(timeLeft)}
+            <header className="sticky top-0 z-50 glass-strong border-b border-border/50">
+                <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+                    <button onClick={() => navigate("/task")} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft className="w-4 h-4" /> Back</button>
+                    <div className="flex flex-col items-center">
+                        <span className="text-xs font-bold text-violet-400 uppercase tracking-widest mb-1">Passage {currentPassageIndex + 1}/{readingPassages.length}</span>
+                        <div className="w-32 h-1 bg-white/10 rounded-full overflow-hidden">
+                            <motion.div className="h-full bg-violet-500" animate={{ width: `${(overallProgress / totalQuestions) * 100}%` }} />
                         </div>
                     </div>
+                    <div className="w-20" /> {/* Spacer */}
                 </div>
-            </div>
+            </header>
 
-            <div className="container mx-auto px-6 py-8 max-w-3xl">
-                {/* Passage Card */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="rounded-2xl p-8 mb-6"
-                    style={{
-                        background: "hsla(270, 20%, 8%, 0.8)",
-                        backdropFilter: "blur(20px)",
-                        border: "1px solid hsla(270, 60%, 55%, 0.15)",
-                        boxShadow: "0 0 30px hsla(270, 80%, 55%, 0.06)",
-                    }}
-                >
-                    <div className="flex items-center gap-2 mb-5">
-                        <div className="h-1 w-6 rounded-full" style={{ background: "linear-gradient(90deg, #7f5af0, #8b5cf6)" }} />
-                        <h2 className="font-poppins font-bold text-xl">{passage.title}</h2>
-                    </div>
+            <main className="container mx-auto px-6 py-12 max-w-4xl">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={`${currentPassageIndex}-${currentQuestionIndex}`}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="space-y-8"
+                    >
+                        {/* Passage text */}
+                        <div className="glass-card p-8 leading-relaxed font-poppins text-lg" style={{ background: "hsla(270, 20%, 8%, 0.6)" }}>
+                            <h2 className="font-display font-bold text-xl mb-4 text-violet-300">{currentPassage.title}</h2>
+                            <p className="text-foreground/90">{currentPassage.content}</p>
+                        </div>
 
-                    <p className="text-base leading-relaxed text-foreground/90 font-poppins">
-                        {passage.text.map((segment, i) => {
-                            if (segment.type === "text") return <span key={i}>{segment.content}</span>;
-                            const blankId = segment.id;
-                            const state = validation[blankId];
-                            return (
-                                <span key={i} className="inline-block mx-1 align-baseline">
-                                    <input
-                                        type="text"
-                                        value={answers[blankId] ?? ""}
-                                        onChange={e => handleInput(blankId, e.target.value)}
-                                        disabled={submitted}
-                                        placeholder="___"
-                                        className="inline-block w-32 text-center text-sm font-medium rounded-lg px-2 py-1 outline-none transition-all duration-300 font-poppins"
-                                        style={{
-                                            background: "hsla(270, 30%, 14%, 0.8)",
-                                            border:
-                                                state === "correct"
-                                                    ? "1.5px solid hsl(142, 70%, 50%)"
-                                                    : state === "wrong"
-                                                        ? "1.5px solid hsl(0, 80%, 60%)"
-                                                        : "1.5px solid hsla(270, 60%, 55%, 0.3)",
-                                            boxShadow:
-                                                state === "correct"
-                                                    ? "0 0 12px hsla(142, 70%, 50%, 0.35)"
-                                                    : state === "wrong"
-                                                        ? "0 0 12px hsla(0, 80%, 60%, 0.35)"
-                                                        : "none",
-                                            color: state === "correct" ? "hsl(142, 70%, 60%)" : state === "wrong" ? "hsl(0, 80%, 70%)" : "inherit",
-                                        }}
-                                    />
-                                    {state && (
-                                        <span className="inline-block ml-1 align-middle">
-                                            {state === "correct"
-                                                ? <CheckCircle className="w-3.5 h-3.5 text-green-400 inline" />
-                                                : <XCircle className="w-3.5 h-3.5 text-red-400 inline" />}
-                                        </span>
-                                    )}
-                                </span>
-                            );
-                        })}
-                    </p>
-                </motion.div>
+                        {/* Question set */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-violet-500/20 text-violet-400 font-bold border border-violet-500/30">{currentQuestionIndex + 1}</div>
+                                <h3 className="text-xl font-semibold">{currentQuestion.question}</h3>
+                            </div>
 
-                {/* Hint Strip */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="rounded-xl px-5 py-3 flex flex-wrap gap-2 items-center mb-6"
-                    style={{
-                        background: "hsla(270, 20%, 7%, 0.7)",
-                        border: "1px solid hsla(270, 40%, 30%, 0.2)",
-                    }}
-                >
-                    <span className="text-xs text-muted-foreground mr-2 font-poppins font-medium">Word Bank:</span>
-                    {hints.map((h, i) => (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                const firstEmpty = hints.findIndex((_, idx) => !answers[idx]);
-                                if (firstEmpty !== -1) handleInput(firstEmpty, h);
-                            }}
-                            className="text-xs px-3 py-1 rounded-lg font-poppins font-medium transition-all duration-200 hover:scale-105"
-                            style={{
-                                background: "hsla(270, 80%, 55%, 0.12)",
-                                border: "1px solid hsla(270, 80%, 55%, 0.25)",
-                                color: "hsl(270, 80%, 75%)",
-                            }}
-                        >
-                            {h}
-                        </button>
-                    ))}
-                </motion.div>
+                            <div className="grid gap-3">
+                                {currentPassage.questions[currentQuestionIndex].options.map((opt, i) => {
+                                    const letter = String.fromCharCode(65 + i);
+                                    const isSelected = selectedAnswer === letter;
+                                    const isCorrect = letter === currentQuestion.answer;
+                                    
+                                    let btnStyle = "bg-white/5 border-white/10";
+                                    if (isSelected && !showFeedback) btnStyle = "bg-violet-500/20 border-violet-500/50 text-violet-300";
+                                    if (showFeedback) {
+                                        if (isCorrect) btnStyle = "bg-green-500/20 border-green-500/50 text-green-400";
+                                        else if (isSelected) btnStyle = "bg-red-500/20 border-red-500/50 text-red-400";
+                                    }
 
-                {/* Results */}
-                <AnimatePresence>
-                    {submitted && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="rounded-2xl p-6 mb-6"
-                            style={{
-                                background: score === 5
-                                    ? "hsla(142, 70%, 50%, 0.08)"
-                                    : "hsla(270, 30%, 10%, 0.8)",
-                                border: `1px solid ${score === 5 ? "hsla(142, 70%, 50%, 0.3)" : "hsla(270, 60%, 50%, 0.2)"}`,
-                            }}
-                        >
-                            <h3 className="font-poppins font-bold text-lg mb-1">
-                                {score === 5 ? "🎉 Perfect Score!" : `Score: ${score}/5`}
-                            </h3>
-                            <p className="text-sm text-muted-foreground font-poppins">
-                                {score === 5
-                                    ? "Excellent! All answers are correct."
-                                    : `${5 - score} answer${5 - score > 1 ? "s" : ""} need${5 - score === 1 ? "s" : ""} review.`}
-                            </p>
-                        </motion.div>
-                    )}
+                                    return (
+                                        <button
+                                            key={i}
+                                            disabled={showFeedback}
+                                            onClick={() => setSelectedAnswer(letter)}
+                                            className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl border text-left transition-all duration-300 ${btnStyle} ${!showFeedback && "hover:bg-white/10"}`}
+                                        >
+                                            <span className="font-bold opacity-50">{letter}.</span>
+                                            <span className="flex-1">{opt}</span>
+                                            {showFeedback && isCorrect && <CheckCircle className="w-5 h-5 text-green-400" />}
+                                            {showFeedback && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-red-400" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </motion.div>
                 </AnimatePresence>
+            </main>
 
-                {/* Submit Button */}
-                {!submitted ? (
-                    <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        onClick={handleSubmit}
-                        className="flex items-center gap-2 w-full justify-center rounded-2xl py-4 font-poppins font-semibold text-white transition-all duration-300 hover:scale-[1.02]"
-                        style={{
-                            background: "linear-gradient(135deg, #7f5af0, #8b5cf6)",
-                            boxShadow: "0 0 30px hsla(262, 83%, 58%, 0.4)",
-                        }}
-                    >
-                        Submit Answers
-                        <ChevronRight className="w-4 h-4" />
-                    </motion.button>
-                ) : (
-                    <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        onClick={() => navigate("/task")}
-                        className="flex items-center gap-2 w-full justify-center rounded-2xl py-4 font-poppins font-semibold text-violet-300 transition-all duration-300 hover:scale-[1.02]"
-                        style={{
-                            background: "hsla(270, 80%, 55%, 0.1)",
-                            border: "1px solid hsla(270, 80%, 55%, 0.3)",
-                        }}
-                    >
-                        Back to Dashboard
-                        <ArrowLeft className="w-4 h-4" />
-                    </motion.button>
-                )}
-            </div>
+            {/* Bottom Actions */}
+            <footer className="fixed bottom-0 left-0 right-0 p-6 glass-strong border-t border-border/50 backdrop-blur-3xl">
+                <div className="container mx-auto max-w-4xl flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground font-medium">Question {overallProgress + 1} of {totalQuestions}</div>
+                    
+                    {!showFeedback ? (
+                        <button
+                            onClick={handleCheck}
+                            disabled={!selectedAnswer}
+                            className="flex items-center gap-2 px-10 py-4 rounded-2xl bg-primary text-white font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(139,92,246,0.3)]"
+                        >
+                            Check Answer
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleNext}
+                            className="flex items-center gap-2 px-10 py-4 rounded-2xl bg-violet-600 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(139,92,246,0.3)]"
+                        >
+                            {currentQuestionIndex === currentPassage.questions.length - 1 && currentPassageIndex === readingPassages.length - 1 ? "Finish Results" : "Next Task"}
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
+                    )}
+                </div>
+            </footer>
         </div>
     );
 };

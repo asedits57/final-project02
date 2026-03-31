@@ -2,19 +2,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Home, CheckSquare, Trophy, User, Settings,
     Flame, Star, BookOpen, Clock, Target,
-    TrendingUp, Award, Crown, CheckCircle, Edit3,
+    TrendingUp, Award, Crown, Edit3,
     Bell, Lock, Volume2, X, Save, LogOut,
 } from "lucide-react";
-import { clearUser, getUser } from "@/lib/auth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import AnimatedBackground from "@/components/AnimatedBackground";
 import TaskLevels from "@/components/task/TaskLevels";
+import { useStore } from "@/store/useStore";
 
 /* ─── Nav ─── */
 const navItems = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Task", icon: CheckSquare, path: "/task" },
+    { label: "Learn", icon: BookOpen, path: "/learning" },
     { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
     { label: "Profile", icon: User, path: "/profile" },
 ];
@@ -49,13 +50,18 @@ const glassBtn = {
 export default function ProfilePage() {
     const navigate = useNavigate();
     const location = useLocation();
+    const logoutStore = useStore(s => s.logout);
+    const storeUser = useStore(s => s.user);
 
     /* ── profile state ── */
-    const authUser = getUser();
-    const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
-    const [name, setName] = useState(authUser?.fullName || authUser?.username || "Guest User");
-    const [dept, setDept] = useState(authUser?.dept || "Department not set");
-    const [level, setLevel] = useState(authUser?.level ? authUser.level.charAt(0).toUpperCase() + authUser.level.slice(1) : "Beginner");
+    const [avatarSrc, setAvatarSrc] = useState<string | null>(storeUser?.avatar_url || null);
+    const [name, setName] = useState(storeUser?.fullName || storeUser?.username || "Guest User");
+    const [dept, setDept] = useState(storeUser?.dept || "Department not set");
+    
+    const levelMap = ["Beginner", "Intermediate", "Advanced", "Expert"];
+    const levelStr = storeUser?.level ? levelMap[storeUser.level - 1] : "Beginner";
+    const [level, setLevel] = useState(levelStr);
+    
     const avatarInputRef = useRef<HTMLInputElement>(null);
 
     /* ── edit modal ── */
@@ -66,7 +72,6 @@ export default function ProfilePage() {
     /* ── toggles ── */
     const [notifs, setNotifs] = useState(true);
     const [pronounce, setPronounce] = useState(true);
-    const [grammar, setGrammar] = useState(false);
 
     /* ── toast ── */
     const [toast, setToast] = useState({ msg: "", show: false });
@@ -95,18 +100,17 @@ export default function ProfilePage() {
         setLevel(draftLevel);
         setEditOpen(false);
         showToast("Profile saved ✓");
+        // In a real app, we'd also update the backend/store here
     };
 
-
-
     const handleLogout = () => {
-        clearUser();
+        logoutStore();
         navigate("/login");
     };
 
     const statsCards = [
         { label: "Words Learned", value: "1,247", icon: BookOpen, color: "text-violet-400" },
-        { label: "Day Streak", value: "15", icon: Flame, color: "text-orange-400" },
+        { label: "Day Streak", value: storeUser?.streak?.toString() || "0", icon: Flame, color: "text-orange-400" },
         { label: "Accuracy", value: "89%", icon: Target, color: "text-fuchsia-400" },
         { label: "Practice Hours", value: "87h", icon: Clock, color: "text-blue-400" },
     ];
@@ -205,7 +209,7 @@ export default function ProfilePage() {
                                         </span>
                                         <span className="text-[11px] px-3.5 py-1 rounded-full font-bold"
                                             style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.25)", color: "hsl(270,80%,75%)" }}>
-                                            2,847 XP
+                                            {storeUser?.xp || 0} XP
                                         </span>
                                     </div>
                                     <button

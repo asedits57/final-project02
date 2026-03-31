@@ -1,14 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './leaderboard-types';
+import { supabase } from '@/integrations/supabase/client';
+export { supabase };
+import type { Database } from '@/integrations/supabase/types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export type LeaderboardUser = Database['public']['Tables']['leaderboard_users']['Row'];
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+// Use a type-safe helper for the leaderboard table
+const leaderboardTable = () => supabase.from('leaderboard_users');
 
 export async function updateUserXP(userId: string, xpToAdd: number) {
-    const { data: user, error: fetchError } = await (supabase
-        .from('leaderboard_users' as any) as any)
+    const { data: user, error: fetchError } = await leaderboardTable()
         .select('xp, weekly_xp')
         .eq('id', userId)
         .single();
@@ -16,8 +16,7 @@ export async function updateUserXP(userId: string, xpToAdd: number) {
     if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
 
     if (user) {
-        const { error: updateError } = await (supabase
-            .from('leaderboard_users' as any) as any)
+        const { error: updateError } = await leaderboardTable()
             .update({
                 xp: (user.xp || 0) + xpToAdd,
                 weekly_xp: (user.weekly_xp || 0) + xpToAdd,
@@ -28,8 +27,7 @@ export async function updateUserXP(userId: string, xpToAdd: number) {
 }
 
 export async function syncUserProfile(profile: { id: string; username: string; avatar_url?: string }) {
-    const { error } = await (supabase
-        .from('leaderboard_users' as any) as any)
+    const { error } = await leaderboardTable()
         .upsert({
             id: profile.id,
             username: profile.username,

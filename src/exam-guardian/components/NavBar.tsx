@@ -50,7 +50,7 @@ const NavBar = ({ timeLeft, progress }: NavBarProps) => {
   );
 };
 
-const StatusDot = ({ icon: Icon, label, active }: { icon: any; label: string; active: boolean }) => (
+const StatusDot = ({ icon: Icon, label, active }: { icon: React.ElementType; label: string; active: boolean }) => (
   <div className="flex items-center gap-1.5 text-sm">
     <div className={`w-2 h-2 rounded-full ${active ? "bg-success animate-pulse" : "bg-danger"}`} />
     <Icon className="w-4 h-4 text-muted-foreground" />

@@ -33,7 +33,7 @@ const ScreenPanel = () => {
     } catch {
       setError("Screen sharing denied");
     }
-  }, []);
+  }, [pushEvent]);
 
   // Tab visibility detection
   useEffect(() => {
@@ -45,7 +45,7 @@ const ScreenPanel = () => {
     };
     document.addEventListener("visibilitychange", handler);
     return () => document.removeEventListener("visibilitychange", handler);
-  }, []);
+  }, [pushEvent]);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft, Settings, Volume2, Bell, Moon,
     Shield, HelpCircle, LogOut, ChevronRight,
-    Home, CheckSquare, Trophy, User,
+    Home, CheckSquare, Trophy, User, BookOpen
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,6 +11,7 @@ import AnimatedBackground from "@/components/AnimatedBackground";
 const navItems = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Task", icon: CheckSquare, path: "/task" },
+    { label: "Learn", icon: BookOpen, path: "/learning" },
     { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
     { label: "Profile", icon: User, path: "/profile" },
 ];
@@ -150,6 +151,15 @@ export default function SettingsPage() {
                         label="Help & Support"
                         value=""
                         onClick={() => navigate("/help")}
+                    />
+
+                    <Divider />
+
+                    <NavRow
+                        icon={<Shield className="w-4 h-4" style={{ color: "hsl(270,80%,65%)" }} />}
+                        label="Admin Panel"
+                        value=""
+                        onClick={() => navigate("/admin")}
                     />
                 </motion.div>
 

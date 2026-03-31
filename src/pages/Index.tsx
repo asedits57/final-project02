@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Brain, Home, CheckSquare, Trophy, User } from "lucide-react";
+import { Brain, Home, CheckSquare, Trophy, User, BookOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import TranslateCard from "@/components/TranslateCard";
 import GrammarCard from "@/components/GrammarCard";
@@ -9,6 +9,7 @@ import SpellingCard from "@/components/SpellingCard";
 const navItems = [
   { label: "Home", icon: Home, path: "/" },
   { label: "Task", icon: CheckSquare, path: "/task" },
+  { label: "Learn", icon: BookOpen, path: "/learning" },
   { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
   { label: "Profile", icon: User, path: "/profile" },
 ];

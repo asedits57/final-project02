@@ -1,4 +1,4 @@
-import { Sparkles, Home, CheckSquare, Trophy, User } from 'lucide-react';
+import { Sparkles, Home, CheckSquare, Trophy, User, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/leaderboard-supabase';
@@ -10,6 +10,7 @@ import type { LeaderboardUser } from '@/lib/leaderboard-types';
 const navItems = [
     { label: 'Home', icon: Home, path: '/' },
     { label: 'Task', icon: CheckSquare, path: '/task' },
+    { label: 'Learn', icon: BookOpen, path: '/learning' },
     { label: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
     { label: 'Profile', icon: User, path: '/profile' },
 ];

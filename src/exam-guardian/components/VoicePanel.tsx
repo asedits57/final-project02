@@ -79,7 +79,7 @@ const VoicePanel = () => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [micActive]);
+  }, [micActive, pushEvent]);
 
   return (
     <div className="glass neon-border p-4">
