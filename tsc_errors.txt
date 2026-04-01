@@ -1,6 +1,0 @@
-﻿src/pages/AuthPage.tsx(82,9): error TS2322: Type '(values: { password?: string; userId?: string; } | { contact?: string; } | { username?: string; fullName?: string; dept?: string; password?: string; }, context: any, options: ResolverOptions<{ password?: string; userId?: string; } | { ...; } | { ...; }>) => unknown' is not assignable to type 'Resolver<{ password?: string; userId?: string; } | { contact?: string; } | { username?: string; fullName?: string; dept?: string; password?: string; }, any, { password?: string; userId?: string; } | { contact?: string; } | { ...; }>'.
-  Type 'unknown' is not assignable to type 'ResolverResult<{ password?: string; userId?: string; } | { contact?: string; } | { username?: string; fullName?: string; dept?: string; password?: string; }, { password?: string; userId?: string; } | { contact?: string; } | { ...; }> | Promise<...>'.
-src/pages/AuthPage.tsx(412,88): error TS2304: Cannot find name 'setShowPassword'.
-src/pages/AuthPage.tsx(412,105): error TS2304: Cannot find name 'showPassword'.
-src/pages/AuthPage.tsx(415,74): error TS2304: Cannot find name 'showPassword'.
-src/pages/AuthPage.tsx(418,79): error TS2304: Cannot find name 'showPassword'.

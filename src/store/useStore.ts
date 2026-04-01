@@ -18,7 +18,7 @@ interface AppState {
   user: UserProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  
+
   // Actions
   setUser: (user: UserProfile | null) => void;
   updateXP: (amount: number) => void;
@@ -33,17 +33,17 @@ export const useStore = create<AppState>()(
       isLoading: false,
       isAuthenticated: false,
 
-      setUser: (user) => set({ 
-        user, 
+      setUser: (user) => set({
+        user,
         isAuthenticated: !!user,
-        isLoading: false 
+        isLoading: false
       }),
 
       updateXP: (amount) => set((state) => {
         if (!state.user) return state;
         const newXP = state.user.xp + amount;
         const newLevel = Math.floor(newXP / 1000) + 1; // Simple level logic
-        
+
         return {
           user: {
             ...state.user,
@@ -55,9 +55,9 @@ export const useStore = create<AppState>()(
 
       setLoading: (loading) => set({ isLoading: loading }),
 
-      logout: () => set({ 
-        user: null, 
-        isAuthenticated: false 
+      logout: () => set({
+        user: null,
+        isAuthenticated: false
       }),
     }),
     {

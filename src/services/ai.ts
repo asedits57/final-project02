@@ -1,4 +1,4 @@
-export const correctGrammar = async (text) => {
+export const correctGrammar = async (text: string): Promise<string> => {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -13,6 +13,8 @@ export const correctGrammar = async (text) => {
         })
     });
 
-    const data = await res.json();
+    const data = await res.json() as {
+        choices: Array<{ message: { content: string } }>;
+    };
     return data.choices[0].message.content;
 };

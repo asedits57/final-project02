@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { supabase } from "../supabaseClient";
+import { supabase } from "../supabase/supabase";
+import { getTodayChallenge } from "../utils/dailyChallenge";
 
-function Dashboard() {
+function Dashboard(): JSX.Element {
+    const task = getTodayChallenge();
 
     useEffect(() => {
         const channel = supabase
@@ -23,13 +25,9 @@ function Dashboard() {
     return (
         <div>
             <h1>Dashboard Page</h1>
+            <h2>Today's Challenge: {task}</h2>
         </div>
     );
 }
 
 export default Dashboard;
-import { getTodayChallenge } from "../utils/dailyChallenge";
-
-const task = getTodayChallenge();
-
-return <h2>Today's Challenge: {task}</h2>;

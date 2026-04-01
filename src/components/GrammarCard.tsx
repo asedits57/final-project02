@@ -19,10 +19,21 @@ const GrammarCard = () => {
     setLoading(true);
     try {
       const result = await callLanguageTool({ tool: "grammar", text: input.trim() });
-      const parsed = JSON.parse(result);
+      let parsed;
+      if (typeof result === "string") {
+        try {
+          parsed = JSON.parse(result);
+        } catch (e) {
+          console.error("Failed to parse grammar result:", e);
+          parsed = [];
+        }
+      } else {
+        parsed = result;
+      }
       setIssues(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
-    } catch {
+    } catch (error) {
+      console.error("Grammar check error:", error);
       setIssues([]);
       setChecked(true);
     } finally {

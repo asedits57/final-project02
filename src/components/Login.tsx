@@ -1,28 +1,18 @@
-import { loginUser } from "./services/authService";
-
-const handleLogin = async () => {
-    try {
-        const user = await loginUser(email, password);
-        console.log("Logged in:", user.uid);
-    } catch (err) {
-        console.log(err);
-    }
-};
-import { loginUser } from "../services/authService";
+import { useState } from "react";
 import { supabase } from "../supabase/supabase";
 import { updateStreak } from "../utils/streak";
 
-const handleLoginSuccess = async (userId) => {
-    // 1. Get user data
+const handleLoginSuccess = async (userId: string): Promise<void> => {
     const { data } = await supabase
         .from("users")
         .select("*")
         .eq("id", userId)
         .single();
 
+    if (!data) return;
+
     const newStreak = updateStreak(data.last_login, data.streak);
 
-    // 2. Update in DB
     await supabase
         .from("users")
         .update({
@@ -31,15 +21,12 @@ const handleLoginSuccess = async (userId) => {
         })
         .eq("id", userId);
 };
-import { supabase } from "../supabase/supabase";
-import { useState } from "react";
 
-export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+export default function Login(): JSX.Element {
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
 
-    // 🔥 THIS IS WHERE YOUR CODE GOES
-    const handleLogin = async () => {
+    const handleLogin = async (): Promise<void> => {
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -50,7 +37,6 @@ export default function Login() {
             return;
         }
 
-        // ✅ PASTE HERE
         if (data.user) {
             await handleLoginSuccess(data.user.id);
         }
