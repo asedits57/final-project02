@@ -4,7 +4,7 @@ import { ArrowLeft, PenTool, ChevronRight, Trophy, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { writingTasks } from "@/data/writingTasks";
 import { useStore } from "@/store/useStore";
-import { updateUserXP } from "@/lib/leaderboard-supabase";
+
 import { callLanguageTool } from "@/lib/languageTool";
 import { toast } from "sonner";
 
@@ -71,7 +71,7 @@ const WritingModule = () => {
 
             const user = useStore.getState().user;
             if (user?.id) {
-                updateUserXP(user.id, Math.round(parsedFeedback.score * 0.5)).catch(console.error);
+                // XP update logic removed
             }
         } catch (error) {
             console.error("AI Evaluation Error:", error);

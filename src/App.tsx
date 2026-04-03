@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthGuard from "./components/AuthGuard";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
-import { supabase } from "./lib/leaderboard-supabase";
 
 const Index = lazy(() => import("./pages/Index"));
 const TaskDashboard = lazy(() => import("./pages/TaskDashboard"));
@@ -31,20 +30,6 @@ const Results = lazy(() => import("./exam-guardian/pages/Results"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 const queryClient = new QueryClient();
-
-// Prefetch leaderboard data immediately when the app loads.
-queryClient.prefetchQuery({
-  queryKey: ["leaderboard"],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from("leaderboard_users")
-      .select("*")
-      .order("weekly_xp", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-  },
-  staleTime: 5 * 60_000,
-});
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">

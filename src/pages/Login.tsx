@@ -1,30 +1,40 @@
 import { useState } from "react";
-import { supabase } from "../supabase/supabase";
 
-export default function Login(): JSX.Element {
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+const Login = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-    const login = async (): Promise<void> => {
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
+    const handleLogin = async () => {
+        try {
+            const result = { success: true };
 
-        if (error) {
-            console.log(error.message);
-            alert("Login failed");
-        } else {
-            alert("Login success");
+            console.log(result);
+            alert("Login success ✅");
+        } catch (error) {
+            console.error(error);
+            alert("Login failed ❌");
         }
     };
 
     return (
         <div>
             <h2>Login</h2>
-            <input type="email" onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-            <input type="password" onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-            <button onClick={login}>Login</button>
+
+            <input
+                type="email"
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+            />
+
+            <button onClick={handleLogin}>Login</button>
         </div>
     );
-}
+};
+
+export default Login;

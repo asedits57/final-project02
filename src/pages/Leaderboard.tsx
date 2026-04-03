@@ -1,7 +1,6 @@
 import { Sparkles, Home, CheckSquare, Trophy, User, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/leaderboard-supabase';
 import { Podium } from '@/components/leaderboard/Podium';
 import { RankingsList } from '@/components/leaderboard/RankingsList';
 import { motion } from 'framer-motion';
@@ -26,13 +25,7 @@ const PLACEHOLDER_USERS: LeaderboardUser[] = [
 ];
 
 async function fetchLeaderboardData() {
-    const { data, error } = await supabase
-        .from('leaderboard_users')
-        .select('id, username, xp, level, avatar_url, weekly_xp, rank, created_at, updated_at')
-        .order('weekly_xp', { ascending: false })
-        .limit(20);
-    if (error) throw error;
-    return data ?? [];
+    return PLACEHOLDER_USERS;
 }
 
 const Leaderboard = () => {

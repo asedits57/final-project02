@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Headphones, PenTool, Mic, ChevronRight, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "@/store/useStore";
-import { updateUserXP } from "@/lib/leaderboard-supabase";
+
 
 const TOTAL_TIME = 1800; // 30 minutes
 const TOTAL_QUESTIONS = 22;
@@ -122,7 +122,7 @@ const MockTest = () => {
             // Award 50 XP per correct answer in Mock Test (higher weighted)
             const xpAwarded = score * 50;
             if (user?.id) {
-                updateUserXP(user.id, xpAwarded).catch(console.error);
+                // XP update logic removed
             }
         }
     }, [finished, score, usedQuestions]);

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Zap, RotateCcw, Home, Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, Volume2, Trophy } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "@/store/useStore";
-import { updateUserXP } from "@/lib/leaderboard-supabase";
+
 
 type Question = {
     id: number;
@@ -610,7 +610,7 @@ const PracticeTest = () => {
                            // Award 10 XP per correct answer
                            const xpAwarded = correctCount * 10;
                            if (user?.id) {
-                               updateUserXP(user.id, xpAwarded).catch(console.error);
+                               // XP update logic removed
                            }
                            return null;
                         })()}

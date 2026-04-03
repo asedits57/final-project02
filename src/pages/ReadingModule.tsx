@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle, XCircle, ChevronRight, BookOpen, Clock, Trophy 
 import { useNavigate } from "react-router-dom";
 import { readingPassages } from "@/data/readingPassages";
 import { useStore } from "@/store/useStore";
-import { updateUserXP } from "@/lib/leaderboard-supabase";
+
 
 const ReadingModule = () => {
     const navigate = useNavigate();
@@ -58,7 +58,7 @@ const ReadingModule = () => {
             // Award XP based on score
             const user = useStore.getState().user;
             if (user?.id) {
-                updateUserXP(user.id, score * 10).catch(console.error);
+                // XP update logic removed
             }
         }
     };

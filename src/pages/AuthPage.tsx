@@ -12,7 +12,6 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { type UserLevel, type AuthUser } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
 import { useStore } from "@/store/useStore";
 
 // Deferred: load particle canvas only after card is visible
@@ -109,34 +108,21 @@ const AuthPage = () => {
                 const userId = values.userId as string;
                 const password = values.password as string;
                 const isEmail = userId.includes("@");
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: isEmail ? userId : `${userId.toLowerCase()}@app.local`,
-                    password: password,
+                
+                // MOCK LOGIN SUCCESS
+                setStoreUser({
+                    id: "mock_id",
+                    username: userId,
+                    fullName: "Mock User",
+                    dept: "Dept",
+                    email: isEmail ? userId : null,
+                    level: 1,
+                    xp: 0,
+                    streak: 0,
                 });
-                if (error) {
-                    toast({ title: "Login Failed", description: error.message, variant: "destructive" });
-                } else if (data.session) {
-                    const meta = data.user?.user_metadata;
-                    const savedLevel = meta?.level as UserLevel | undefined;
-                    
-                    setStoreUser({
-                        id: data.user?.id || "",
-                        username: userId,
-                        fullName: meta?.fullName ?? null,
-                        dept: meta?.dept ?? null,
-                        email: data.user?.email ?? null,
-                        level: savedLevel ? (savedLevel === "beginner" ? 1 : savedLevel === "intermediate" ? 2 : savedLevel === "advanced" ? 3 : 4) : 1,
-                        xp: meta?.xp || 0,
-                        streak: meta?.streak || 0,
-                    });
 
-                    toast({ title: "✅ Welcome back!", description: `Hello, ${meta?.fullName || userId}!` });
-                    if (savedLevel) {
-                        setTimeout(() => navigate("/"), 400);
-                    } else {
-                        setStep("level");
-                    }
-                }
+                toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
+                setTimeout(() => navigate("/"), 400);
 
                 // ── SIGNUP Step 1: Send OTP ──
             } else if (step === "credentials") {
@@ -163,43 +149,25 @@ const AuthPage = () => {
                 // ── SIGNUP Step 3: Create account ──
             } else if (step === "account") {
                 const username = values.username as string;
-                const password = values.password as string;
                 const fullNameVal = values.fullName as string;
                 const deptVal = values.dept as string;
                 const isEmail = contact.includes("@");
-                const email = isEmail ? contact : `${username.toLowerCase()}@app.local`;
 
-                const { data, error } = await supabase.auth.signUp({
-                    email,
-                    password: password,
-                    options: {
-                        data: { 
-                            username: username, 
-                            fullName: fullNameVal,
-                            dept: deptVal 
-                        },
-                        emailRedirectTo: undefined,
-                    },
+                // MOCK SIGNUP SUCCESS
+                toast({ title: "🎉 Account Created!", description: "Now choose your level." });
+                
+                setStoreUser({
+                    id: "mock_id",
+                    username: username,
+                    fullName: fullNameVal,
+                    dept: deptVal,
+                    email: isEmail ? contact : null,
+                    level: 1,
+                    xp: 0,
+                    streak: 0,
                 });
-
-                if (error) {
-                    toast({ title: "Error", description: error.message, variant: "destructive" });
-                } else {
-                    toast({ title: "🎉 Account Created!", description: "Now choose your level." });
-                    
-                    setStoreUser({
-                        id: data.user?.id || "",
-                        username: username,
-                        fullName: fullNameVal,
-                        dept: deptVal,
-                        email: isEmail ? contact : null,
-                        level: 1,
-                        xp: 0,
-                        streak: 0,
-                    });
-                    
-                    setStep("level");
-                }
+                
+                setStep("level");
             }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
@@ -215,12 +183,6 @@ const AuthPage = () => {
         if (!storeUser) return;
 
         try {
-            const { error } = await supabase.auth.updateUser({
-                data: { level }
-            });
-
-            if (error) throw error;
-
             const levelNum = level === "beginner" ? 1 : level === "intermediate" ? 2 : level === "advanced" ? 3 : 4;
             setStoreUser({ ...storeUser, level: levelNum });
             

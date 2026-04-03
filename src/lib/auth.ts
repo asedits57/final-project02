@@ -1,5 +1,3 @@
-import { supabase } from "@/integrations/supabase/client";
-
 const USER_KEY = "li_user";
 
 export type UserLevel = "beginner" | "intermediate" | "advanced" | "expert";
@@ -16,6 +14,5 @@ export interface AuthUser {
 
 // ── Supabase session check ────────────────────────────────────────
 export async function getSupabaseSession() {
-    const { data } = await supabase.auth.getSession();
-    return data.session;
+    return null;
 }
