@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import aiRoutes from "./routes/aiRoutes";
+import questionRoutes from "./routes/questionRoutes";
 import { protect } from "./middleware/authMiddleware";
 import { isAdmin } from "./middleware/adminMiddleware";
 
@@ -16,9 +17,22 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(",") 
+  : ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"];
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use(morgan("dev"));
+
+// ✅ DIAGNOSTIC ROUTES (FOR VERIFICATION)
+app.get("/", (req, res) => {
+  res.send("API Running 🚀");
+});
+
+app.get("/api", (req, res) => {
+  res.json({ status: "API Working", version: "1.0.0" });
+});
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -30,6 +44,7 @@ app.use(limiter);
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", aiRoutes);
+app.use("/api", questionRoutes);
 
 // ✅ ADMIN ONLY
 app.get("/api/admin/stats", protect, isAdmin, (req, res) => {
@@ -41,19 +56,15 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "Backend working ✅" });
 });
 
-// ✅ GET ALL QUESTIONS
-app.get("/api/questions", (req, res) => {
-  try {
-    const dataPath = path.join(__dirname, "data", "questions.json");
-    if (!fs.existsSync(dataPath)) {
-      return res.status(404).json({ error: "Questions data not found" });
-    }
-    const rawData = fs.readFileSync(dataPath, "utf-8");
-    const questions = JSON.parse(rawData);
-    res.json(questions);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+// ✅ SETUP PRODUCTION STATIC SERVE
+const distPath = path.join(__dirname, "../../dist");
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  // Keep /api routes separate
+  app.get("*", (req, res, next) => {
+    if (req.url.startsWith("/api")) return next();
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+}
 
 export default app;

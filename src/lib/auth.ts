@@ -12,7 +12,3 @@ export interface AuthUser {
     level?: UserLevel | null;
 }
 
-// ── Supabase session check ────────────────────────────────────────
-export async function getSupabaseSession() {
-    return null;
-}

@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export const api = {
   async request(endpoint: string, method = "GET", body?: any) {
@@ -47,10 +47,10 @@ export const api = {
   },
 
   async processAI(tool: string, text: string) {
-    return this.request("/ai", "POST", { prompt: `${tool}: ${text}` });
+    return this.request("/ai/generate", "POST", { prompt: `${tool}: ${text}` });
   },
 
   askAI(prompt: string) {
-    return this.request("/ai", "POST", { prompt });
+    return this.request("/ai/generate", "POST", { prompt });
   }
 };

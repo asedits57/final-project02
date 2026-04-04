@@ -1,4 +1,5 @@
 import User from "../models/User";
+import Leaderboard from "../models/Leaderboard";
 import redisClient from "../config/redis";
 
 export const updateUserProgress = async (userId: string, score: number) => {
@@ -26,6 +27,13 @@ export const updateUserProgress = async (userId: string, score: number) => {
 
   await user.save();
 
+  // UPSERT LEADERBOARD
+  await Leaderboard.findOneAndUpdate(
+    { userId },
+    { score: user.score },
+    { upsert: true, new: true }
+  );
+
   // Invalidate leaderboard cache when score is updated
   await redisClient.del("leaderboard:top10");
 
@@ -42,11 +50,20 @@ export const getLeaderboardCached = async () => {
     return JSON.parse(cachedData);
   }
 
-  // Check DB
-  const users = await User.find()
-    .select("email score streak")
+  // Check DB using new Leaderboard schema
+  const lbEntries = await Leaderboard.find()
+    .populate("userId", "email streak level")
     .sort({ score: -1 })
     .limit(10);
+
+  // Map to frontend expected format
+  const users = lbEntries.map((e: any) => ({
+    id: e.userId._id,
+    email: e.userId.email,
+    streak: e.userId.streak,
+    level: e.userId.level,
+    score: e.score,
+  }));
 
   // Cache in Redis (60 seconds)
   await redisClient.set(cacheKey, JSON.stringify(users), {

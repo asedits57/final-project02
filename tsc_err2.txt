@@ -1,7 +1,0 @@
-﻿src/firebase/firebase.ts(1,44): error TS2307: Cannot find module 'firebase/app' or its corresponding type declarations.
-src/firebase/firebase.ts(2,41): error TS2307: Cannot find module 'firebase/firestore' or its corresponding type declarations.
-src/firebase/firebase.ts(3,31): error TS2304: Cannot find name 'supabase'.
-src/firebase/firebase.ts(4,5): error TS18004: No value exists in scope for the shorthand property 'email'. Either declare one or provide an initializer.
-src/firebase/firebase.ts(5,5): error TS18004: No value exists in scope for the shorthand property 'password'. Either declare one or provide an initializer.
-src/firebase/firebase.ts(23,20): error TS2304: Cannot find name 'Auth'.
-src/firebase/firebase.ts(23,27): error TS2304: Cannot find name 'getAuth'.

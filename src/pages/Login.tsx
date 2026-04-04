@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useStore } from "../store/useStore";
 
 const Login = () => {
     const { setUser } = useStore();
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -16,7 +18,7 @@ const Login = () => {
             const data = await api.login(email, password);
             localStorage.setItem("token", data.token);
             if (data.user) setUser(data.user);
-            window.location.href = "/dashboard";
+            navigate("/dashboard");
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -30,7 +32,8 @@ const Login = () => {
         try {
             const data = await api.register(email, password);
             localStorage.setItem("token", data.token);
-            window.location.href = "/dashboard";
+            if (data.user) setUser(data.user);
+            navigate("/dashboard");
         } catch (err: any) {
             setError(err.message);
         } finally {

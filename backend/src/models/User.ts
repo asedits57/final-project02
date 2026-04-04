@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   score: { type: Number, default: 0 },
+  level: { type: Number, default: 1 },
   role: { type: String, default: "user" },
   streak: { type: Number, default: 0 },
   lastActive: { type: Date, default: Date.now },
