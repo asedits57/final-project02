@@ -221,6 +221,59 @@ const AuthPage = () => {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            setIsLoading(true);
+            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+            const redirectUri = `${window.location.origin}/auth/google/callback`;
+            const scope = "openid email profile";
+            const responseType = "code";
+            const state = "provider=google";
+
+            if (!clientId) {
+                toast({
+                    title: "Configuration Error",
+                    description: "Google OAuth is not properly configured. Please contact support.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=select_account&state=${encodeURIComponent(state)}`;
+            window.location.href = googleAuthUrl;
+        } catch (err: any) {
+            setError(err.message || "Google login failed");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGithubLogin = async () => {
+        try {
+            setIsLoading(true);
+            const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || "";
+            const redirectUri = `${window.location.origin}/auth/github/callback`;
+            const scope = "user:email";
+            const state = "provider=github";
+
+            if (!clientId) {
+                toast({
+                    title: "Configuration Error",
+                    description: "GitHub OAuth is not properly configured. Please contact support.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&allow_signup=true&state=${encodeURIComponent(state)}`;
+            window.location.href = githubAuthUrl;
+        } catch (err: any) {
+            setError(err.message || "GitHub login failed");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-foreground relative perspective-1000 overflow-hidden">
             <Suspense fallback={null}>
@@ -535,10 +588,22 @@ const AuthPage = () => {
 
                                         {isLogin && (
                                             <div className="grid grid-cols-2 gap-3">
-                                                <Button type="button" variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 gap-2 font-poppins">
+                                                <Button 
+                                                    type="button" 
+                                                    variant="outline" 
+                                                    className="rounded-2xl border-white/10 hover:bg-white/5 gap-2 font-poppins"
+                                                    onClick={handleGoogleLogin}
+                                                    disabled={isLoading}
+                                                >
                                                     <GoogleIcon className="w-4 h-4" /> Google
                                                 </Button>
-                                                <Button type="button" variant="outline" className="rounded-2xl border-white/10 hover:bg-white/5 gap-2 font-poppins">
+                                                <Button 
+                                                    type="button" 
+                                                    variant="outline" 
+                                                    className="rounded-2xl border-white/10 hover:bg-white/5 gap-2 font-poppins"
+                                                    onClick={handleGithubLogin}
+                                                    disabled={isLoading}
+                                                >
                                                     <Github className="w-4 h-4" /> GitHub
                                                 </Button>
                                             </div>

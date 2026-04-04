@@ -29,6 +29,7 @@ const ExamDashboard = lazy(() => import("./exam-guardian/pages/ExamDashboard"));
 const Results = lazy(() => import("./exam-guardian/pages/Results"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,10 @@ const App = () => (
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/login" element={<AuthPage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/auth/callback" element={<OAuthCallback />} />
+              <Route path="/auth/google/callback" element={<OAuthCallback />} />
+              <Route path="/auth/github/callback" element={<OAuthCallback />} />
               <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
               <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
               <Route path="/task" element={<AuthGuard><TaskDashboard /></AuthGuard>} />

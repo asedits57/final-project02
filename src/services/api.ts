@@ -68,5 +68,13 @@ export const api = {
 
   askAI(prompt: string) {
     return this.request("/ai/generate", "POST", { prompt });
+  },
+
+  googleCallback(code: string, redirectUri: string) {
+    return this.request("/oauth/google/callback", "POST", { code, redirectUri });
+  },
+
+  githubCallback(code: string, redirectUri: string) {
+    return this.request("/oauth/github/callback", "POST", { code, redirectUri });
   }
 };

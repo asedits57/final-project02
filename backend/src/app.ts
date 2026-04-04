@@ -7,6 +7,7 @@ import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
+import oauthRoutes from "./routes/oauthRoutes";
 import userRoutes from "./routes/userRoutes";
 import aiRoutes from "./routes/aiRoutes";
 import questionRoutes from "./routes/questionRoutes";
@@ -43,6 +44,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use("/api", authRoutes);
+app.use("/api/oauth", oauthRoutes);
 app.use("/api", userRoutes);
 app.use("/api", aiRoutes);
 app.use("/api", questionRoutes);
