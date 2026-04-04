@@ -1,261 +1,12 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Zap, RotateCcw, Home, Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, Volume2, Trophy } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useStore } from "@/store/useStore";
+import { useStore } from "../store/useStore";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
 
-type Question = {
-    id: number;
-    type: "multiple-choice" | "fill-blank" | "audio" | "image-description";
-    category: string;
-    difficulty: string;
-    question: string;
-    options?: string[];
-    correctAnswer: string;
-    audioText?: string;
-    imageUrl?: string;
-    blanks?: string[];
-    explanation: string;
-};
-
-const allQuestions: Question[] = [
-    // ── Beginner ──
-    {
-        id: 1,
-        type: "multiple-choice",
-        category: "Grammar",
-        difficulty: "Beginner",
-        question: 'Choose the correct form: "She _____ to school every day."',
-        options: ["go", "goes", "going", "gone"],
-        correctAnswer: "goes",
-        explanation: "Third-person singular present tense requires 'goes'.",
-    },
-    {
-        id: 2,
-        type: "fill-blank",
-        category: "Vocabulary",
-        difficulty: "Beginner",
-        question: '"The opposite of hot is _____."',
-        correctAnswer: "cold",
-        blanks: ["cold", "warm", "cool"],
-        explanation: "'Cold' is the direct antonym of 'hot'.",
-    },
-    {
-        id: 3,
-        type: "multiple-choice",
-        category: "Reading",
-        difficulty: "Beginner",
-        question: 'What does the word "happy" mean?',
-        options: ["Sad", "Feeling pleasure", "Angry", "Tired"],
-        correctAnswer: "Feeling pleasure",
-        explanation: "'Happy' means feeling or showing pleasure or contentment.",
-    },
-    {
-        id: 4,
-        type: "audio",
-        category: "Listening",
-        difficulty: "Beginner",
-        question: "Listen and choose what the speaker is talking about:",
-        audioText: "I wake up at seven o'clock every morning. I eat breakfast, brush my teeth, and then I walk to school. My favorite subject is science.",
-        options: ["A weekend trip", "A daily morning routine", "A cooking recipe", "A sports event"],
-        correctAnswer: "A daily morning routine",
-        explanation: "The speaker describes waking up, eating breakfast, and going to school — a daily routine.",
-    },
-    {
-        id: 5,
-        type: "fill-blank",
-        category: "Grammar",
-        difficulty: "Beginner",
-        question: '"They _____ playing football in the park right now."',
-        correctAnswer: "are",
-        blanks: ["are", "is", "was"],
-        explanation: "'They' takes the plural auxiliary 'are' in present continuous.",
-    },
-
-    // ── Intermediate ──
-    {
-        id: 6,
-        type: "multiple-choice",
-        category: "Grammar",
-        difficulty: "Intermediate",
-        question: "Choose the correct sentence:",
-        options: [
-            "She don't like coffee in the morning.",
-            "She doesn't likes coffee in the morning.",
-            "She doesn't like coffee in the morning.",
-            "She not like coffee in the morning.",
-        ],
-        correctAnswer: "She doesn't like coffee in the morning.",
-        explanation: "With third-person singular subjects, we use 'doesn't' + base form of the verb.",
-    },
-    {
-        id: 7,
-        type: "fill-blank",
-        category: "Grammar",
-        difficulty: "Intermediate",
-        question: '"If I _____ known about the meeting, I would have attended."',
-        correctAnswer: "had",
-        blanks: ["had", "have", "has"],
-        explanation: "Third conditional (past unreal condition) requires 'had' + past participle.",
-    },
-    {
-        id: 8,
-        type: "audio",
-        category: "Listening",
-        difficulty: "Intermediate",
-        question: "Listen to the passage and select the main idea:",
-        audioText: "Climate change is one of the most pressing issues facing our planet today. Rising temperatures are causing ice caps to melt, sea levels to rise, and extreme weather events to become more frequent. Scientists agree that immediate action is needed to reduce greenhouse gas emissions.",
-        options: [
-            "Scientists disagree about climate change.",
-            "Climate change requires urgent action to address its effects.",
-            "Sea levels have always been rising naturally.",
-            "Extreme weather events are decreasing over time.",
-        ],
-        correctAnswer: "Climate change requires urgent action to address its effects.",
-        explanation: "The passage emphasizes the urgency of climate change and the need for immediate action.",
-    },
-    {
-        id: 9,
-        type: "multiple-choice",
-        category: "Vocabulary",
-        difficulty: "Intermediate",
-        question: '"The new policy was met with widespread _____." Choose the best word:',
-        options: ["Approval", "Ignorance", "Hostility", "Confusion"],
-        correctAnswer: "Approval",
-        explanation: "'Widespread approval' is a common collocation meaning general acceptance.",
-    },
-    {
-        id: 10,
-        type: "fill-blank",
-        category: "Reading",
-        difficulty: "Intermediate",
-        question: '"Despite the heavy rain, the team _____ to complete the project on time."',
-        correctAnswer: "managed",
-        blanks: ["managed", "failed", "refused"],
-        explanation: "'Managed to' indicates successfully doing something difficult.",
-    },
-
-    // ── Advanced ──
-    {
-        id: 11,
-        type: "fill-blank",
-        category: "Vocabulary",
-        difficulty: "Advanced",
-        question: '"The scientist\'s groundbreaking research had a profound _____ on the field of genetics."',
-        correctAnswer: "impact",
-        blanks: ["impact", "effect", "influence"],
-        explanation: "'Impact' collocates naturally with 'profound' and 'on the field' in academic contexts.",
-    },
-    {
-        id: 12,
-        type: "audio",
-        category: "Listening",
-        difficulty: "Advanced",
-        question: "Listen and identify the speaker's tone:",
-        audioText: "I find it absolutely remarkable that after decades of research and billions of dollars in funding, we still can't seem to agree on the most basic solutions. Perhaps it's time we reconsidered our entire approach.",
-        options: ["Enthusiastic and hopeful", "Sarcastic and frustrated", "Neutral and informative", "Cheerful and optimistic"],
-        correctAnswer: "Sarcastic and frustrated",
-        explanation: "The use of 'absolutely remarkable' paired with criticism indicates sarcasm and frustration.",
-    },
-    {
-        id: 13,
-        type: "multiple-choice",
-        category: "Reading",
-        difficulty: "Advanced",
-        question: '"The author\'s use of juxtaposition in the passage primarily serves to:"',
-        options: [
-            "Introduce a new character",
-            "Highlight contrasting ideas for emphasis",
-            "Provide comic relief",
-            "Summarize the main argument",
-        ],
-        correctAnswer: "Highlight contrasting ideas for emphasis",
-        explanation: "Juxtaposition is a literary device used to place contrasting elements side by side for emphasis.",
-    },
-    {
-        id: 14,
-        type: "fill-blank",
-        category: "Grammar",
-        difficulty: "Advanced",
-        question: '"Had the committee _____ the proposal earlier, the outcome might have been different."',
-        correctAnswer: "reviewed",
-        blanks: ["reviewed", "reviewing", "review"],
-        explanation: "Inverted third conditional: 'Had + subject + past participle' replaces 'If + had'.",
-    },
-    {
-        id: 15,
-        type: "multiple-choice",
-        category: "Vocabulary",
-        difficulty: "Advanced",
-        question: 'Which word means "to make something less severe"?',
-        options: ["Exacerbate", "Mitigate", "Proliferate", "Corroborate"],
-        correctAnswer: "Mitigate",
-        explanation: "'Mitigate' means to make less severe, serious, or painful.",
-    },
-
-    // ── Expert ──
-    {
-        id: 16,
-        type: "multiple-choice",
-        category: "Vocabulary",
-        difficulty: "Expert",
-        question: '"The politician\'s _____ remarks alienated even her closest allies."',
-        options: ["Eloquent", "Incendiary", "Mundane", "Benevolent"],
-        correctAnswer: "Incendiary",
-        explanation: "'Incendiary' means inflammatory or provocative — fitting for remarks that alienate allies.",
-    },
-    {
-        id: 17,
-        type: "fill-blank",
-        category: "Grammar",
-        difficulty: "Expert",
-        question: '"Not only _____ the exam, but she also received the highest score in her class."',
-        correctAnswer: "did she pass",
-        blanks: ["did she pass", "she passed", "she did pass"],
-        explanation: "'Not only' at the start of a sentence triggers subject-auxiliary inversion.",
-    },
-    {
-        id: 18,
-        type: "audio",
-        category: "Listening",
-        difficulty: "Expert",
-        question: "Listen carefully and determine the logical flaw in the argument:",
-        audioText: "Every successful entrepreneur I've met wakes up before five AM. Therefore, waking up early is the key to entrepreneurial success. If you want to build a great company, you must adopt this habit immediately.",
-        options: [
-            "Appeal to authority",
-            "Correlation mistaken for causation",
-            "Straw man argument",
-            "Ad hominem attack",
-        ],
-        correctAnswer: "Correlation mistaken for causation",
-        explanation: "The speaker assumes that because successful entrepreneurs wake up early, early rising causes success — a classic correlation/causation fallacy.",
-    },
-    {
-        id: 19,
-        type: "multiple-choice",
-        category: "Reading",
-        difficulty: "Expert",
-        question: '"In the context of postcolonial literature, the concept of \'hybridity\' primarily refers to:"',
-        options: [
-            "The blending of genetic traits in organisms",
-            "The mixing of cultural identities and practices",
-            "The combination of different literary genres",
-            "The merging of historical timelines in narratives",
-        ],
-        correctAnswer: "The mixing of cultural identities and practices",
-        explanation: "In postcolonial theory, 'hybridity' (Homi Bhabha) refers to the creation of new cultural forms through the mixing of colonizer and colonized cultures.",
-    },
-    {
-        id: 20,
-        type: "fill-blank",
-        category: "Vocabulary",
-        difficulty: "Expert",
-        question: '"The philosopher\'s _____ argument left even seasoned academics struggling to find counterpoints."',
-        correctAnswer: "cogent",
-        blanks: ["cogent", "specious", "tepid"],
-        explanation: "'Cogent' means clear, logical, and convincing — appropriate for an argument that is hard to counter.",
-    },
-];
+import { api } from "../services/api";
 
 const difficultyColor: Record<string, string> = {
     Beginner: "text-glow-cyan",
@@ -274,9 +25,10 @@ const levelLabels: Record<string, string> = {
 const PracticeTest = () => {
     const navigate = useNavigate();
     const { level } = useParams<{ level: string }>();
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const levelLabel = level ? levelLabels[level] || "Beginner" : "Beginner";
-    const questions = allQuestions.filter((q) => q.difficulty === levelLabel);
 
     const [currentIdx, setCurrentIdx] = useState(0);
     const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -285,6 +37,23 @@ const PracticeTest = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [timeLeft, setTimeLeft] = useState(900); // 15 minutes timer
     const synthRef = useRef(window.speechSynthesis);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.practice) {
+                    const filtered = data.practice.filter((q: any) => q.difficulty === levelLabel);
+                    setQuestions(filtered);
+                }
+            } catch (err) {
+                console.error("Failed to load practice questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, [levelLabel]);
 
     // Timer logic
     useEffect(() => {
@@ -344,16 +113,21 @@ const PracticeTest = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <Spinner />
+            </div>
+        );
+    }
+
     if (!q) {
         return (
-            <div className="min-h-screen animated-bg flex items-center justify-center text-foreground">
-                <div className="glass rounded-2xl p-10 text-center glow-border-cyan">
-                    <h2 className="font-display text-2xl font-bold mb-3">No questions available</h2>
-                    <p className="text-muted-foreground mb-6">No tasks found for this level.</p>
-                    <button onClick={() => navigate("/task")} className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground">
-                        Back to Dashboard
-                    </button>
-                </div>
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <ErrorMessage 
+                    message={`No ${levelLabel} questions found in the database.`} 
+                    onRetry={() => window.location.reload()} 
+                />
             </div>
         );
     }
@@ -616,6 +390,12 @@ const PracticeTest = () => {
                         })()}
                         <Zap className="h-10 w-10 text-primary mx-auto mb-4" />
                         <h3 className="font-display text-2xl font-bold mb-2">Test Complete!</h3>
+                        {(() => {
+                           // AWARD XP
+                           const xpAwarded = correctCount * 10;
+                           api.updateProgress(xpAwarded).catch(console.error);
+                           return null;
+                        })()}
                         <p className="text-4xl font-display font-bold text-glow mb-2">
                             {correctCount} / {questions.length}
                         </p>

@@ -1,7 +1,13 @@
-import { ReactNode } from "react";
+import { Navigate } from "react-router-dom";
 
-const AuthGuard = ({ children }: { children: ReactNode }) => {
-  return <>{children}</>;
+const AuthGuard = ({ children }: any) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
+  return children;
 };
 
 export default AuthGuard;

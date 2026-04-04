@@ -2,13 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Play, Pause, RotateCcw, Send, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
 const WAVEFORM_BARS = 32;
 
-import { exercises } from "../data/listeningExercises";
+import { api } from "../services/api";
 
 const ListeningModule = () => {
     const navigate = useNavigate();
+    const [exercises, setExercises] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [currentIdx, setCurrentIdx] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -16,6 +20,23 @@ const ListeningModule = () => {
     const [submitted, setSubmitted] = useState(false);
     const [feedback, setFeedback] = useState<{ score: number; message: string } | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.listening) {
+                    setExercises(data.listening);
+                }
+            } catch (err) {
+                console.error("Failed to load listening questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
+
     const current = exercises[currentIdx];
 
     useEffect(() => {
@@ -137,6 +158,25 @@ const ListeningModule = () => {
             navigate("/task");
         }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!current) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message="The listening material is currently unavailable." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
 
     const heights = Array.from({ length: WAVEFORM_BARS }, (_, i) => {
         const base = Math.sin(i * 0.5) * 0.4 + 0.6;

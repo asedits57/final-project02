@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Mic, MicOff, Star, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { speakingPrompts } from "@/data/speakingPrompts";
-import { useStore } from "@/store/useStore";
+import { api } from "../services/api";
+import { useStore } from "../store/useStore";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
-import { callLanguageTool } from "@/lib/languageTool";
 import { toast } from "sonner";
 
 // Type definitions for Web Speech API
@@ -65,11 +66,10 @@ interface Feedback {
 
 const SpeakingModule = () => {
     const navigate = useNavigate();
+    const [speakingPrompts, setSpeakingPrompts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [currentIndex, setCurrentIndex] = useState(() => {
-        const saved = localStorage.getItem("speaking_current_index");
-        return saved ? parseInt(saved) : 0;
-    });
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [phase, setPhase] = useState<"idle" | "prep" | "recording" | "done">("idle");
     const [prepLeft, setPrepLeft] = useState(PREP_TIME);
     const [elapsed, setElapsed] = useState(0);
@@ -79,8 +79,27 @@ const SpeakingModule = () => {
     const [isEvaluating, setIsEvaluating] = useState(false);
 
     const recognitionRef = useRef<SpeechRecognition | null>(null);
-
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.speaking) {
+                    setSpeakingPrompts(data.speaking);
+                    
+                    const saved = localStorage.getItem("speaking_current_index");
+                    if (saved) setCurrentIndex(Math.min(parseInt(saved), data.speaking.length - 1));
+                }
+            } catch (err) {
+                console.error("Failed to load speaking questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
+
     const currentPrompt = speakingPrompts[currentIndex];
     const totalPrompts = speakingPrompts.length;
 
@@ -162,21 +181,17 @@ const SpeakingModule = () => {
         setIsEvaluating(true);
 
         try {
-            const aiResponse = await callLanguageTool({
-                tool: "evaluate",
-                text: JSON.stringify({
-                    type: "speaking",
-                    prompt: currentPrompt.prompt,
-                    transcript: transcript || "No speech detected."
-                })
-            });
+            const aiResponse = await api.processAI("evaluate", JSON.stringify({
+                type: "speaking",
+                prompt: currentPrompt.prompt,
+                transcript: transcript || "No speech detected."
+            }));
 
-            const parsedFeedback = JSON.parse(aiResponse) as Feedback;
+            const parsedFeedback = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
             setFeedback(parsedFeedback);
 
-            const user = useStore.getState().user;
-            if (user?.id) {
-                // XP update logic removed
+            if (parsedFeedback?.overall) {
+                await api.updateProgress(parsedFeedback.overall);
             }
         } catch (error) {
             console.error("AI Evaluation Error:", error);
@@ -192,6 +207,7 @@ const SpeakingModule = () => {
                     "Check your internet connection and try again.",
                 ],
             });
+            await api.updateProgress(overall);
         } finally {
             setIsEvaluating(false);
         }
@@ -250,6 +266,25 @@ const SpeakingModule = () => {
             </div>
         </div>
     );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!currentPrompt) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message="The speaking prompt database appears to be empty." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
 
     if (isFinished) {
         return (

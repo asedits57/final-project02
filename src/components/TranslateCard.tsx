@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Languages, Mic, Loader2 } from "lucide-react";
-import { callLanguageTool } from "@/lib/languageTool";
+import { api } from "../services/api";
 
 const TranslateCard = () => {
   const [input, setInput] = useState("");
@@ -16,15 +16,12 @@ const TranslateCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const result = await callLanguageTool({ 
-        tool: "translate", 
-        text: input.trim(), 
-        fromLang,
-        toLang
-      });
-      setOutput(result);
+      const res = await api.askAI(
+        `Translate the following text from ${fromLang} to ${toLang}. Only return the translated text, nothing else.\n\n"${input.trim()}"`
+      );
+      setOutput(res.reply || "");
     } catch {
-      // error handled by toast in callLanguageTool
+      setOutput("Translation failed. Please try again.");
     } finally {
       setLoading(false);
     }

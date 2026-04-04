@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, PenTool, ChevronRight, Trophy, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { writingTasks } from "@/data/writingTasks";
-import { useStore } from "@/store/useStore";
+import { api } from "../services/api";
+import { useStore } from "../store/useStore";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
-import { callLanguageTool } from "@/lib/languageTool";
 import { toast } from "sonner";
 
 const TASK_TIME = 300; // 5 minutes per task
@@ -21,11 +22,10 @@ interface WritingFeedback {
 
 const WritingModule = () => {
     const navigate = useNavigate();
+    const [writingTasks, setWritingTasks] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [currentIndex, setCurrentIndex] = useState(() => {
-        const saved = localStorage.getItem("writing_current_index");
-        return saved ? parseInt(saved) : 0;
-    });
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [text, setText] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
@@ -34,6 +34,26 @@ const WritingModule = () => {
     const [isEvaluating, setIsEvaluating] = useState(false);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.writing) {
+                    setWritingTasks(data.writing);
+                    
+                    const saved = localStorage.getItem("writing_current_index");
+                    if (saved) setCurrentIndex(Math.min(parseInt(saved), data.writing.length - 1));
+                }
+            } catch (err) {
+                console.error("Failed to load writing questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
+
     const currentTask = writingTasks[currentIndex];
     const totalTasks = writingTasks.length;
 
@@ -55,23 +75,21 @@ const WritingModule = () => {
             return;
         }
 
+        if (!currentTask) return;
+
         setIsEvaluating(true);
         try {
-            const aiResponse = await callLanguageTool({
-                tool: "evaluate",
-                text: JSON.stringify({
-                    type: "writing",
-                    prompt: currentTask.prompt,
-                    studentSubmission: text
-                })
-            });
+            const aiResponse = await api.processAI("evaluate", JSON.stringify({
+                type: "writing",
+                prompt: currentTask.prompt,
+                studentSubmission: text
+            }));
 
-            const parsedFeedback = JSON.parse(aiResponse) as WritingFeedback;
+            const parsedFeedback = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
             setFeedback(parsedFeedback);
 
-            const user = useStore.getState().user;
-            if (user?.id) {
-                // XP update logic removed
+            if (parsedFeedback?.score) {
+                await api.updateProgress(parsedFeedback.score);
             }
         } catch (error) {
             console.error("AI Evaluation Error:", error);
@@ -88,10 +106,11 @@ const WritingModule = () => {
                     "Try again later for a more detailed analysis.",
                 ],
             });
+            await api.updateProgress(score);
         } finally {
             setIsEvaluating(false);
         }
-    }, [currentTask.prompt, text, wordCount]);
+    }, [currentTask?.prompt, text, wordCount]);
 
     // Persist progress
     useEffect(() => {
@@ -140,6 +159,25 @@ const WritingModule = () => {
         localStorage.removeItem("writing_current_index");
         localStorage.removeItem("writing_progress_count");
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!currentTask) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <ErrorMessage 
+                    message="The writing task database appears to be empty." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
 
     const timerPercent = Math.round((timeLeft / TASK_TIME) * 100);
     const circumference = 2 * Math.PI * 16;

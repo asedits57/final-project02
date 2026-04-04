@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Loader2 } from "lucide-react";
-import { callLanguageTool } from "@/lib/languageTool";
+import { api } from "../services/api";
 
 const SentenceCard = () => {
   const [input, setInput] = useState("");
@@ -12,8 +12,8 @@ const SentenceCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const result = await callLanguageTool({ tool: "improve", text: input.trim() });
-      setOutput(result);
+      const res = await api.askAI(`Improve the following English sentence. Return only the improved sentence, nothing else.\n\n"${input.trim()}"`);
+      setOutput(res.reply || "");
     } catch {
       // handled
     } finally {

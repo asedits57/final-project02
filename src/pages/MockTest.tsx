@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Headphones, PenTool, Mic, ChevronRight, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useStore } from "@/store/useStore";
+import { useStore } from "../store/useStore";
+import { api } from "../services/api";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
 
 const TOTAL_TIME = 1800; // 30 minutes
@@ -10,47 +13,7 @@ const TOTAL_QUESTIONS = 22;
 
 type QuestionType = "reading" | "listening" | "writing" | "speaking";
 
-interface Question {
-    id: number;
-    type: QuestionType;
-    prompt: string;
-    options?: string[];
-    answer?: string;
-}
 
-const questions: Question[] = [
-    // Grammar Section
-    { id: 1, type: "writing", prompt: "Choose the correct sentence:\nA. She go to school every day.\nB. She goes to school every day.\nC. She going to school every day.\nD. She gone to school every day.", options: ["A", "B", "C", "D"], answer: "B" },
-    { id: 2, type: "writing", prompt: "Fill in the blank: He ______ football every weekend.", options: ["play", "plays", "played", "playing"], answer: "B" },
-    { id: 3, type: "writing", prompt: "Choose the correct word: We ______ to the park yesterday.", options: ["go", "goes", "went", "going"], answer: "C" },
-    { id: 4, type: "writing", prompt: "Error detection: She don't like coffee.", options: ["She", "don't", "like", "coffee"], answer: "B" },
-    { id: 5, type: "writing", prompt: "Fill in the blank: She is interested ______ music.", options: ["on", "in", "at", "for"], answer: "B" },
-    { id: 6, type: "writing", prompt: "Choose the correct sentence:\nA. I have seen that movie yesterday.\nB. I saw that movie yesterday.\nC. I seeing that movie yesterday.\nD. I see that movie yesterday.", options: ["A", "B", "C", "D"], answer: "B" },
-    { id: 7, type: "writing", prompt: "Fill in the blank: If it rains, we ______ stay at home.", options: ["will", "would", "should", "could"], answer: "A" },
-    { id: 8, type: "writing", prompt: "Choose the correct word: She is ______ than her sister.", options: ["tall", "taller", "tallest", "more tall"], answer: "B" },
-    { id: 9, type: "writing", prompt: "Fill in the blank: I ______ my homework already.", options: ["finish", "finished", "have finished", "finishing"], answer: "C" },
-    { id: 10, type: "writing", prompt: "Choose the correct sentence:\nA. Everyone have finished the work.\nB. Everyone has finished the work.\nC. Everyone finished the work have.\nD. Everyone finishing the work.", options: ["A", "B", "C", "D"], answer: "B" },
-
-    // Reading Section
-    { id: 11, type: "reading", prompt: "Passage: Technology has changed the way people communicate. In the past, people relied on letters and telephone calls. Today, communication happens instantly through emails, messaging apps, and video calls. \n\nWhat is the main topic of the passage?", options: ["Letters", "Communication technology", "Telephones", "Internet safety"], answer: "B" },
-    { id: 12, type: "reading", prompt: "How did people communicate in the past?", options: ["Messaging apps", "Emails", "Letters and telephone calls", "Video calls"], answer: "C" },
-    { id: 13, type: "reading", prompt: "What is one benefit of modern communication?", options: ["It is slower", "It connects people instantly", "It removes technology", "It prevents communication"], answer: "B" },
-    { id: 14, type: "reading", prompt: "What does “instantly” mean?", options: ["Slowly", "Immediately", "Rarely", "Carefully"], answer: "B" },
-    { id: 15, type: "reading", prompt: "What is the author's opinion about technology?", options: ["It improves communication", "It makes life harder", "It is dangerous", "It should be avoided"], answer: "A" },
-
-    // Listening Section (Using prompt as text for now)
-    { id: 16, type: "listening", prompt: "Audio Script: Many students prefer online learning because it allows them to study from home and access materials anytime. However, some students believe classroom learning provides better interaction with teachers. \n\nWhy do students prefer online learning?", options: ["They can study from home", "It removes teachers", "It is always cheaper", "It replaces schools"], answer: "A" },
-    { id: 17, type: "listening", prompt: "What is a disadvantage of online learning mentioned?", options: ["Expensive books", "Less interaction with teachers", "No internet", "Difficult exams"], answer: "B" },
-    { id: 18, type: "listening", prompt: "What does the speaker compare?", options: ["Online learning and classroom learning", "Books and libraries", "Teachers and students", "Exams and homework"], answer: "A" },
-
-    // Writing Section (Task 1 & 2)
-    { id: 19, type: "writing", prompt: "TASK 1: Write about your favorite place to relax.\n\nInclude:\n- Where it is\n- Why you like it\n- What you do there\n\nWord limit: 100–120 words" },
-    { id: 20, type: "writing", prompt: "TASK 2: Do you think technology makes life easier or more difficult?\n\nExplain your opinion with examples.\n\nWord limit: 120–150 words" },
-
-    // Speaking Section (Task 1 & 2)
-    { id: 21, type: "speaking", prompt: "SPEAKING TASK 1: Describe a memorable event in your life.\n\nInclude:\n- What happened\n- Where it happened\n- Why it was important\n\nPreparation: 30s | Speaking: 45s" },
-    { id: 22, type: "speaking", prompt: "SPEAKING TASK 2: Do you prefer studying alone or studying with friends?\n\nExplain your answer.\n\nPreparation: 30s | Speaking: 60s" },
-];
 
 const typeIcons: Record<QuestionType, React.ReactNode> = {
     reading: <BookOpen className="w-4 h-4" />,
@@ -68,16 +31,34 @@ const typeColors: Record<QuestionType, string> = {
 
 const MockTest = () => {
     const navigate = useNavigate();
+    const [questions, setQuestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
     const [current, setCurrent] = useState(0);
     const [selected, setSelected] = useState<Record<number, string>>({});
     const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
     const [finished, setFinished] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.mock) {
+                    setQuestions(data.mock);
+                }
+            } catch (err) {
+                console.error("Failed to load mock questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
+
     const usedQuestions = questions.slice(0, Math.min(TOTAL_QUESTIONS, questions.length));
     const q = usedQuestions[current];
     const totalQ = usedQuestions.length;
-    const progressPct = ((current) / totalQ) * 100;
+    const progressPct = totalQ > 0 ? ((current) / totalQ) * 100 : 0;
 
     const formatTime = (s: number) =>
         `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
@@ -118,14 +99,30 @@ const MockTest = () => {
 
     useEffect(() => {
         if (finished) {
-            const user = useStore.getState().user;
             // Award 50 XP per correct answer in Mock Test (higher weighted)
             const xpAwarded = score * 50;
-            if (user?.id) {
-                // XP update logic removed
-            }
+            api.updateProgress(xpAwarded).catch(console.error);
         }
-    }, [finished, score, usedQuestions]);
+    }, [finished, score]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!q && !finished) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <ErrorMessage 
+                    message="The mock test database appears to be empty." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
 
     if (finished) {
         return (

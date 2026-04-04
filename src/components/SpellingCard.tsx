@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Type, Loader2 } from "lucide-react";
-import { callLanguageTool } from "@/lib/languageTool";
+import { api } from "../services/api";
 
 interface SpellingError {
   word: string;
@@ -18,8 +18,11 @@ const SpellingCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const result = await callLanguageTool({ tool: "spelling", text: input.trim() });
-      const parsed = JSON.parse(result);
+      const res = await api.askAI(
+        `Check the spelling of the following text and return a JSON array of objects with "word" (misspelled) and "suggestion" (correct) fields. Only return the JSON array, nothing else.\n\nText: "${input.trim()}"`
+      );
+      let parsed;
+      try { parsed = JSON.parse(res.reply); } catch { parsed = []; }
       setResults(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
     } catch {

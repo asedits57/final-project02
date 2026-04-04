@@ -28,6 +28,7 @@ const LearningPage = lazy(() => import("./pages/LearningPage"));
 const ExamDashboard = lazy(() => import("./exam-guardian/pages/ExamDashboard"));
 const Results = lazy(() => import("./exam-guardian/pages/Results"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/login" element={<AuthPage />} />
+              <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
               <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
               <Route path="/task" element={<AuthGuard><TaskDashboard /></AuthGuard>} />
               <Route path="/task/practice/:level" element={<AuthGuard><PracticeTest /></AuthGuard>} />

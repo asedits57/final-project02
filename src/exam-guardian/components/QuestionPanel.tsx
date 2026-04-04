@@ -1,6 +1,6 @@
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { callLanguageTool } from "@/lib/languageTool";
+import { api } from "../../services/api";
 
 export interface EvaluationResult {
   score: number;
@@ -91,11 +91,11 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
 
     setIsEvaluating(true);
     try {
-      const resp = await callLanguageTool({
-        tool: "evaluate",
-        text: transcript,
-      });
-      const data = JSON.parse(resp) as EvaluationResult;
+      const res = await api.askAI(
+        `Evaluate the following spoken English response and return a JSON object with "score" (0-100) and "feedback" (string) fields only.\n\nResponse: "${transcript}"`
+      );
+      let data: EvaluationResult;
+      try { data = JSON.parse(res.reply); } catch { data = { score: 50, feedback: res.reply || "Evaluation complete." }; }
       if (onComplete) onComplete(data);
     } catch (error) {
       console.error("Evaluation error:", error);

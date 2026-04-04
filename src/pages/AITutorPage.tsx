@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Bot, User, Sparkles, BookOpen, Mic, PenTool } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { callLanguageTool } from "@/lib/languageTool";
-import { toast } from "sonner";
+import { api } from "../services/api";
 
 type Message = {
     id: string;
@@ -56,21 +55,18 @@ const AITutorPage = () => {
         setIsTyping(true);
 
         try {
-            const conversationHistory = [...messages, userMsg].map(m => ({
-                role: m.sender === "user" ? "user" : "assistant",
-                content: m.text
-            }));
+            const context = [...messages, userMsg]
+                .map(m => `${m.sender === "user" ? "Student" : "Tutor"}: ${m.text}`)
+                .join("\n");
 
-            const aiResponse = await callLanguageTool({
-                tool: "tutor",
-                text: text.trim(),
-                messages: conversationHistory
-            });
+            const prompt = `You are a friendly English tutor. Answer clearly and helpfully.\n\n${context}\nTutor:`;
+
+            const res = await api.askAI(prompt);
 
             const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 sender: "ai",
-                text: aiResponse,
+                text: res.reply || "Sorry, I couldn't get a response. Please try again.",
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, aiMsg]);

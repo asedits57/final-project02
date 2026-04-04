@@ -2,19 +2,39 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Send, PenTool, CheckCircle2, ChevronRight, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { grammarQuestions } from "../data/grammarQuestions";
+import { api } from "../services/api";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
 const GrammarModule = () => {
     const navigate = useNavigate();
-    const [currentIndex, setCurrentIndex] = useState(() => {
-        const saved = JSON.parse(localStorage.getItem("grammar_progress") || '{"completed": 0}');
-        return Math.min(saved.completed, grammarQuestions.length - 1);
-    });
+    const [grammarQuestions, setGrammarQuestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
     const [results, setResults] = useState<{ correct: boolean; questionId: number }[]>([]);
+
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.grammar) {
+                    setGrammarQuestions(data.grammar);
+                    
+                    const saved = JSON.parse(localStorage.getItem("grammar_progress") || '{"completed": 0}');
+                    setCurrentIndex(Math.min(saved.completed, data.grammar.length - 1));
+                }
+            } catch (err) {
+                console.error("Failed to load questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
 
     const totalQuestions = grammarQuestions.length;
     const currentQuestion = grammarQuestions[currentIndex];
@@ -62,7 +82,26 @@ const GrammarModule = () => {
         setResults([]);
     };
 
-    const progressPercentage = ((currentIndex) / totalQuestions) * 100;
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!currentQuestion) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message="The grammar database appears to be empty." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
+
+    const progressPercentage = totalQuestions > 0 ? ((currentIndex) / totalQuestions) * 100 : 0;
 
     if (completed) {
         return (

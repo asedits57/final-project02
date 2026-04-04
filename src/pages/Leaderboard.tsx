@@ -24,8 +24,29 @@ const PLACEHOLDER_USERS: LeaderboardUser[] = [
     { id: '6', username: 'Loading...', xp: 4700, level: 6, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=6', weekly_xp: 4700, rank: 6, created_at: '', updated_at: '' },
 ];
 
+import { api } from "../services/api";
+
 async function fetchLeaderboardData() {
-    return PLACEHOLDER_USERS;
+    try {
+        const data = await api.getLeaderboard();
+        if (Array.isArray(data)) {
+            return data.map((u: any, idx: number) => ({
+                id: u._id || String(idx + 1),
+                username: u.email.split('@')[0],
+                xp: u.score || 0,
+                level: Math.floor((u.score || 0) / 100) + 1,
+                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`,
+                weekly_xp: u.score || 0,
+                rank: idx + 1,
+                created_at: '',
+                updated_at: ''
+            }));
+        }
+        return PLACEHOLDER_USERS;
+    } catch (err) {
+        console.error("Failed to load leaderboard:", err);
+        return PLACEHOLDER_USERS;
+    }
 }
 
 const Leaderboard = () => {

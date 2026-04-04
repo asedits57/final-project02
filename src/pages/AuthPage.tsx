@@ -12,7 +12,8 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { type UserLevel, type AuthUser } from "@/lib/auth";
-import { useStore } from "@/store/useStore";
+import { useStore } from "../store/useStore";
+import { api } from "../services/api";
 
 // Deferred: load particle canvas only after card is visible
 const AnimatedBackground = lazy(() => import("@/components/AnimatedBackground"));
@@ -61,6 +62,7 @@ const AuthPage = () => {
     const [generatedOtp, setGeneratedOtp] = useState("");
     const [contact, setContact] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     
     // Custom useResendCountdown logic since it's missing
     const [seconds, setSeconds] = useState(0);
@@ -102,27 +104,19 @@ const AuthPage = () => {
 
     const onSubmit = async (values: Record<string, unknown>) => {
         setIsLoading(true);
+        setError(null);
         try {
             // ── LOGIN ──
             if (isLogin) {
                 const userId = values.userId as string;
                 const password = values.password as string;
-                const isEmail = userId.includes("@");
                 
-                // MOCK LOGIN SUCCESS
-                setStoreUser({
-                    id: "mock_id",
-                    username: userId,
-                    fullName: "Mock User",
-                    dept: "Dept",
-                    email: isEmail ? userId : null,
-                    level: 1,
-                    xp: 0,
-                    streak: 0,
-                });
+                const data = await api.login(userId, password);
+                localStorage.setItem("token", data.token);
+                setStoreUser(data.user);
 
                 toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
-                setTimeout(() => navigate("/"), 400);
+                setTimeout(() => navigate("/dashboard"), 400);
 
                 // ── SIGNUP Step 1: Send OTP ──
             } else if (step === "credentials") {
@@ -134,12 +128,12 @@ const AuthPage = () => {
                 // ── SIGNUP Step 2: Verify OTP ──
             } else if (step === "otp") {
                 if (otpValue.length !== 4) {
-                    toast({ title: "Error", description: "Please enter all 4 digits", variant: "destructive" });
+                    setError("Please enter all 4 digits");
                     setIsLoading(false);
                     return;
                 }
                 if (otpValue !== generatedOtp) {
-                    toast({ title: "Invalid OTP", description: "The code you entered is incorrect. Please try again.", variant: "destructive" });
+                    setError("The code you entered is incorrect. Please try again.");
                     setIsLoading(false);
                     return;
                 }
@@ -149,30 +143,19 @@ const AuthPage = () => {
                 // ── SIGNUP Step 3: Create account ──
             } else if (step === "account") {
                 const username = values.username as string;
-                const fullNameVal = values.fullName as string;
-                const deptVal = values.dept as string;
-                const isEmail = contact.includes("@");
+                const passwordVal = values.password as string;
 
-                // MOCK SIGNUP SUCCESS
-                toast({ title: "🎉 Account Created!", description: "Now choose your level." });
-                
-                setStoreUser({
-                    id: "mock_id",
-                    username: username,
-                    fullName: fullNameVal,
-                    dept: deptVal,
-                    email: isEmail ? contact : null,
-                    level: 1,
-                    xp: 0,
-                    streak: 0,
-                });
-                
+                const data = await api.register(username, passwordVal);
+                localStorage.setItem("token", data.token);
+                setStoreUser(data.user);
+
+                toast({ title: "🎉 Account Created!", description: "Account setup successful." });
                 setStep("level");
             }
-        } catch (err: unknown) {
-            const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+        } catch (err: any) {
+            const errorMessage = err.message || "An unexpected error occurred";
             console.error("Auth error:", err);
-            toast({ title: "Error", description: errorMessage, variant: "destructive" });
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -484,6 +467,8 @@ const AuthPage = () => {
                                         >
                                             {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : (isLogin ? "Sign In" : "Continue")}
                                         </Button>
+
+                                        {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
 
                                         {isLogin && (
                                             <div className="relative my-6">

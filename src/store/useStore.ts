@@ -1,67 +1,45 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { api } from "../services/api";
 
-interface UserProfile {
-  id: string;
-  username: string;
-  fullName?: string | null;
-  dept?: string | null;
-  email?: string | null;
-  avatar_url?: string;
-  xp: number;
-  level: number;
-  streak: number;
-  lastActive?: string;
+interface User {
+    id: string;
+    email: string;
+    name?: string;
+    level?: number;
+    score?: number;
+    streak?: number;
+    role?: string;
+    createdAt?: string;
 }
 
 interface AppState {
-  user: UserProfile | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-
-  // Actions
-  setUser: (user: UserProfile | null) => void;
-  updateXP: (amount: number) => void;
-  setLoading: (loading: boolean) => void;
-  logout: () => void;
+    user: User | null;
+    loading: boolean;
+    error: string | null;
+    setUser: (user: User | null) => void;
+    fetchUser: () => Promise<void>;
+    clearUser: () => void;
 }
 
-export const useStore = create<AppState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
+export const useStore = create<AppState>((set) => ({
+    user: null,
+    loading: false,
+    error: null,
 
-      setUser: (user) => set({
-        user,
-        isAuthenticated: !!user,
-        isLoading: false
-      }),
+    setUser: (user) => set({ user }),
 
-      updateXP: (amount) => set((state) => {
-        if (!state.user) return state;
-        const newXP = state.user.xp + amount;
-        const newLevel = Math.floor(newXP / 1000) + 1; // Simple level logic
+    fetchUser: async () => {
+        set({ loading: true, error: null });
+        try {
+            const data = await api.getProfile();
+            set({ user: data, loading: false });
+        } catch (err: any) {
+            set({ error: err.message, loading: false });
+        }
+    },
 
-        return {
-          user: {
-            ...state.user,
-            xp: newXP,
-            level: newLevel
-          }
-        };
-      }),
-
-      setLoading: (loading) => set({ isLoading: loading }),
-
-      logout: () => set({
-        user: null,
-        isAuthenticated: false
-      }),
-    }),
-    {
-      name: 'language-intelligence-storage',
-    }
-  )
-);
+    clearUser: () => {
+        localStorage.removeItem("token");
+        set({ user: null, error: null });
+    },
+}));

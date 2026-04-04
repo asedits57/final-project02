@@ -2,42 +2,65 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle, XCircle, ChevronRight, BookOpen, Clock, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { readingPassages } from "@/data/readingPassages";
-import { useStore } from "@/store/useStore";
+import { api } from "../services/api";
+import Spinner from "@/components/ui/Spinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
 
 const ReadingModule = () => {
     const navigate = useNavigate();
+    const [readingPassages, setReadingPassages] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     // State management
-    const [currentPassageIndex, setCurrentPassageIndex] = useState(() => {
-        const saved = localStorage.getItem("reading_passage_index");
-        return saved ? parseInt(saved) : 0;
-    });
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
-        const saved = localStorage.getItem("reading_question_index");
-        return saved ? parseInt(saved) : 0;
-    });
+    const [currentPassageIndex, setCurrentPassageIndex] = useState(0);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
 
+    useEffect(() => {
+        const loadQuestions = async () => {
+            try {
+                const data = await api.fetchQuestions();
+                if (data && data.reading) {
+                    setReadingPassages(data.reading);
+                    
+                    const savedPassage = localStorage.getItem("reading_passage_index");
+                    const savedQuestion = localStorage.getItem("reading_question_index");
+                    if (savedPassage) setCurrentPassageIndex(Math.min(parseInt(savedPassage), data.reading.length - 1));
+                    if (savedQuestion) {
+                        const passIdx = savedPassage ? parseInt(savedPassage) : 0;
+                        setCurrentQuestionIndex(Math.min(parseInt(savedQuestion), data.reading[passIdx].questions.length - 1));
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load reading questions:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadQuestions();
+    }, []);
+
     const currentPassage = readingPassages[currentPassageIndex];
-    const currentQuestion = currentPassage.questions[currentQuestionIndex];
+    const currentQuestion = currentPassage?.questions[currentQuestionIndex];
     const totalQuestions = readingPassages.reduce((acc, p) => acc + p.questions.length, 0);
     const overallProgress = readingPassages.slice(0, currentPassageIndex).reduce((acc, p) => acc + p.questions.length, 0) + currentQuestionIndex;
 
     // Persist progress
     useEffect(() => {
-        localStorage.setItem("reading_passage_index", currentPassageIndex.toString());
-        localStorage.setItem("reading_question_index", currentQuestionIndex.toString());
-        localStorage.setItem("reading_progress_count", overallProgress.toString());
-    }, [currentPassageIndex, currentQuestionIndex, overallProgress]);
+        if (!loading && readingPassages.length > 0) {
+            localStorage.setItem("reading_passage_index", currentPassageIndex.toString());
+            localStorage.setItem("reading_question_index", currentQuestionIndex.toString());
+            localStorage.setItem("reading_progress_count", overallProgress.toString());
+        }
+    }, [currentPassageIndex, currentQuestionIndex, overallProgress, loading, readingPassages]);
 
     const handleCheck = () => {
-        if (!selectedAnswer) return;
+        if (!selectedAnswer || !currentQuestion) return;
         setShowFeedback(true);
         if (selectedAnswer === currentQuestion.answer) {
             setScore(prev => prev + 1);
@@ -55,11 +78,6 @@ const ReadingModule = () => {
             setCurrentQuestionIndex(0);
         } else {
             setIsFinished(true);
-            // Award XP based on score
-            const user = useStore.getState().user;
-            if (user?.id) {
-                // XP update logic removed
-            }
         }
     };
 
@@ -74,6 +92,25 @@ const ReadingModule = () => {
         localStorage.removeItem("reading_question_index");
         localStorage.removeItem("reading_progress_count");
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <Spinner />
+            </div>
+        );
+    }
+
+    if (!currentPassage) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message="The reading database appears to be empty." 
+                    onRetry={() => window.location.reload()} 
+                />
+            </div>
+        );
+    }
 
     if (isFinished) {
         return (

@@ -1,11 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Activity, ShieldAlert, Trophy, Search, ChevronRight, CheckCircle2, AlertTriangle, XCircle, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import { useStore } from "../store/useStore";
+import { api } from "../services/api";
+
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<"overview" | "users" | "proctoring">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "users" | "proctoring" | "questions">("overview");
+    const [questionsData, setQuestionsData] = useState<Record<string, any[]> | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<string>("grammar");
+
+    useEffect(() => {
+        const load = async () => {
+            const data = await api.fetchQuestions();
+            setQuestionsData(data as Record<string, any[]>);
+        };
+        load();
+    }, []);
 
     const stats = [
         { label: "Total Users", value: "1,248", change: "+12% this week", icon: Users, color: "text-blue-400" },
@@ -58,7 +71,7 @@ const AdminDashboard = () => {
                 </div>
                 
                 <div className="flex bg-white/5 border border-white/10 rounded-full p-1">
-                    {(["overview", "users", "proctoring"] as const).map((tab) => (
+                    {(["overview", "users", "proctoring", "questions"] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -187,12 +200,11 @@ const AdminDashboard = () => {
                             </motion.div>
                         )}
 
-                        {/* Proctoring Event Logs */}
-                        {(activeTab === "overview" || activeTab === "proctoring") && (
+                        {/* Questions Management */}
+                        {activeTab === "questions" && (
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
                                 className="rounded-2xl p-6"
                                 style={{
                                     background: "hsla(270, 20%, 8%, 0.7)",
@@ -200,32 +212,40 @@ const AdminDashboard = () => {
                                     border: "1px solid hsla(270, 60%, 55%, 0.15)",
                                 }}
                             >
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="font-poppins font-bold text-lg text-white flex items-center gap-2">
-                                        <ShieldAlert className="w-5 h-5 text-red-400" />
-                                        Recent Proctoring Alerts
-                                    </h2>
-                                    <button className="text-xs font-poppins text-fuchsia-400 hover:text-fuchsia-300 transition-colors">View All</button>
+                                <div className="flex items-center justify-between mb-8">
+                                    <h2 className="font-poppins font-bold text-lg text-white">Manage Questions</h2>
+                                    <button className="px-4 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg hover:scale-105">
+                                        Add New Question
+                                    </button>
                                 </div>
                                 
-                                <div className="space-y-3">
-                                    {proctoringAlerts.map((alert) => (
-                                        <div key={alert.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 hover:border-white/10 rounded-xl transition-colors">
-                                            <div className="flex items-start gap-4">
-                                                <div className={`p-2 rounded-lg ${alert.severity === 'High' ? 'bg-red-500/20 text-red-400' : alert.severity === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                                                    <AlertTriangle className="w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-poppins font-medium text-white text-sm">{alert.user}</h4>
-                                                    <p className="font-poppins text-xs text-muted-foreground mt-0.5">{alert.issue}</p>
+                                <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+                                    {questionsData && Object.keys(questionsData).map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setSelectedCategory(cat)}
+                                            className={`px-4 py-2 rounded-xl text-xs font-poppins capitalize border transition-all ${
+                                                selectedCategory === cat 
+                                                ? "bg-fuchsia-500/20 border-fuchsia-500/50 text-fuchsia-300" 
+                                                : "bg-white/5 border-white/10 text-muted-foreground"
+                                            }`}
+                                        >
+                                            {cat} ({questionsData[cat].length})
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {questionsData && questionsData[selectedCategory]?.map((item: any, idx: number) => (
+                                        <div key={idx} className="p-4 bg-white/5 border border-white/5 rounded-xl hover:border-white/10 transition-colors">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-xs font-bold text-violet-400 font-poppins">ID: {item.id || idx + 1}</span>
+                                                <div className="flex gap-2">
+                                                    <button className="text-[10px] text-muted-foreground hover:text-white underline">Edit</button>
+                                                    <button className="text-[10px] text-red-400 hover:text-red-300 underline">Delete</button>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <span className="text-xs text-muted-foreground block mb-2">{alert.time}</span>
-                                                <button className="text-xs font-poppins bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded transition-colors">
-                                                    Review
-                                                </button>
-                                            </div>
+                                            <p className="text-sm text-foreground line-clamp-2">{item.question || item.prompt || item.title || "No text content"}</p>
                                         </div>
                                     ))}
                                 </div>

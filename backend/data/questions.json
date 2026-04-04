@@ -1,0 +1,3787 @@
+{
+  "grammar": [
+    {
+      "id": 1,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. She go to school every day.",
+        "B. She goes to school every day.",
+        "C. She going to school every day.",
+        "D. She gone to school every day."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 2,
+      "question": "Fill in the blank.\nHe ______ football every weekend.",
+      "options": [
+        "A. play",
+        "B. plays",
+        "C. played",
+        "D. playing"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 3,
+      "question": "Error detection.\nThey **was** late for the meeting.",
+      "options": [
+        "A. They",
+        "B. was",
+        "C. late",
+        "D. meeting"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 4,
+      "question": "Choose the correct word.\nShe is ______ than her brother.",
+      "options": [
+        "A. tall",
+        "B. taller",
+        "C. tallest",
+        "D. more tall"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 5,
+      "question": "Fill in the blank.\nIf it rains, we ______ stay at home.",
+      "options": [
+        "A. will",
+        "B. would",
+        "C. should",
+        "D. could"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 6,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. I have seen that movie yesterday.",
+        "B. I saw that movie yesterday.",
+        "C. I seeing that movie yesterday.",
+        "D. I see that movie yesterday."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 7,
+      "question": "Fill in the blank.\nShe ______ English for three years.",
+      "options": [
+        "A. study",
+        "B. studied",
+        "C. has studied",
+        "D. studying"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 8,
+      "question": "Error detection.\nHe don't like coffee.",
+      "options": [
+        "A. He",
+        "B. don't",
+        "C. like",
+        "D. coffee"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 9,
+      "question": "Choose the correct word.\nWe ______ to the park yesterday.",
+      "options": [
+        "A. go",
+        "B. goes",
+        "C. went",
+        "D. going"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 10,
+      "question": "Fill in the blank.\nShe is interested ______ music.",
+      "options": [
+        "A. on",
+        "B. in",
+        "C. at",
+        "D. for"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 11,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. There is many books on the table.",
+        "B. There are many books on the table.",
+        "C. There many books on the table.",
+        "D. There are much books on the table."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 12,
+      "question": "Fill in the blank.\nBy next year, I ______ completed my course.",
+      "options": [
+        "A. will have",
+        "B. have",
+        "C. had",
+        "D. having"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 13,
+      "question": "Error detection.\nShe can **to** drive very well.",
+      "options": [
+        "A. She",
+        "B. can",
+        "C. to",
+        "D. drive"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 14,
+      "question": "Choose the correct word.\nI ______ never visited Japan.",
+      "options": [
+        "A. have",
+        "B. has",
+        "C. had",
+        "D. having"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 15,
+      "question": "Fill in the blank.\nNeither the teacher nor the students ______ ready.",
+      "options": [
+        "A. was",
+        "B. were",
+        "C. is",
+        "D. be"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 16,
+      "question": "Fill in the blank.\nShe ______ watching TV when I arrived.",
+      "options": [
+        "A. is",
+        "B. was",
+        "C. were",
+        "D. be"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 17,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. He don't know the answer.",
+        "B. He doesn't know the answer.",
+        "C. He not know the answer.",
+        "D. He didn't knows the answer."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 18,
+      "question": "Fill in the blank.\nThey ______ dinner when the phone rang.",
+      "options": [
+        "A. have",
+        "B. had",
+        "C. were having",
+        "D. are having"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 19,
+      "question": "Error detection.\nShe **eat** breakfast at 7 a.m.",
+      "options": [
+        "A. She",
+        "B. eat",
+        "C. breakfast",
+        "D. 7 a.m."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 20,
+      "question": "Choose the correct word.\nHe runs ______ than me.",
+      "options": [
+        "A. fast",
+        "B. faster",
+        "C. fastest",
+        "D. more fast"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 21,
+      "question": "Fill in the blank.\nI ______ my homework already.",
+      "options": [
+        "A. finish",
+        "B. finished",
+        "C. have finished",
+        "D. finishing"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 22,
+      "question": "Fill in the blank.\nShe ______ a beautiful dress yesterday.",
+      "options": [
+        "A. wear",
+        "B. wore",
+        "C. wearing",
+        "D. wears"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 23,
+      "question": "Fill in the blank.\nIf I ______ rich, I would travel the world.",
+      "options": [
+        "A. am",
+        "B. was",
+        "C. were",
+        "D. be"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 24,
+      "question": "Fill in the blank.\nHe has been working here ______ 2019.",
+      "options": [
+        "A. for",
+        "B. since",
+        "C. from",
+        "D. by"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 25,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. I am agree with you.",
+        "B. I agree with you.",
+        "C. I agreeing with you.",
+        "D. I agreed with you now."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 26,
+      "question": "Fill in the blank.\nThey ______ finished their work before the deadline.",
+      "options": [
+        "A. has",
+        "B. have",
+        "C. had",
+        "D. having"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 27,
+      "question": "Fill in the blank.\nShe asked me ______ I was busy.",
+      "options": [
+        "A. if",
+        "B. that",
+        "C. what",
+        "D. which"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 28,
+      "question": "Fill in the blank.\nHe ______ in this city for ten years.",
+      "options": [
+        "A. lives",
+        "B. lived",
+        "C. has lived",
+        "D. living"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 29,
+      "question": "Error detection.\nShe **don't** understand the question.",
+      "options": [
+        "A. She",
+        "B. don't",
+        "C. understand",
+        "D. the question"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 30,
+      "question": "Fill in the blank.\nThe book ______ on the table is mine.",
+      "options": [
+        "A. who",
+        "B. which",
+        "C. where",
+        "D. when"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 31,
+      "question": "Fill in the blank.\nWe ______ to the cinema tonight.",
+      "options": [
+        "A. go",
+        "B. going",
+        "C. are going",
+        "D. goes"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 32,
+      "question": "Fill in the blank.\nShe is the ______ student in the class.",
+      "options": [
+        "A. smart",
+        "B. smarter",
+        "C. smartest",
+        "D. more smart"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 33,
+      "question": "Fill in the blank.\nI look forward ______ meeting you.",
+      "options": [
+        "A. to",
+        "B. for",
+        "C. on",
+        "D. at"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 34,
+      "question": "Fill in the blank.\nHe ______ his car yesterday.",
+      "options": [
+        "A. wash",
+        "B. washed",
+        "C. washing",
+        "D. washes"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 35,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. She is more intelligent than him.",
+        "B. She is more intelligent than he.",
+        "C. She more intelligent than he is.",
+        "D. She intelligent more than him."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 36,
+      "question": "Fill in the blank.\nI will call you when I ______ home.",
+      "options": [
+        "A. reach",
+        "B. reached",
+        "C. reaching",
+        "D. reaches"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 37,
+      "question": "Fill in the blank.\nHe ______ playing football when it started raining.",
+      "options": [
+        "A. was",
+        "B. were",
+        "C. is",
+        "D. be"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 38,
+      "question": "Fill in the blank.\nThey ______ studying for the exam all night.",
+      "options": [
+        "A. was",
+        "B. were",
+        "C. is",
+        "D. be"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 39,
+      "question": "Fill in the blank.\nShe ______ already left the office.",
+      "options": [
+        "A. has",
+        "B. have",
+        "C. had",
+        "D. having"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 40,
+      "question": "Choose the correct word.\nHe is good ______ mathematics.",
+      "options": [
+        "A. at",
+        "B. in",
+        "C. on",
+        "D. for"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 41,
+      "question": "Fill in the blank.\nThe teacher asked us ______ quiet.",
+      "options": [
+        "A. be",
+        "B. to be",
+        "C. being",
+        "D. been"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 42,
+      "question": "Fill in the blank.\nShe prefers tea ______ coffee.",
+      "options": [
+        "A. than",
+        "B. to",
+        "C. from",
+        "D. with"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 43,
+      "question": "Fill in the blank.\nHe ______ his phone at home.",
+      "options": [
+        "A. forget",
+        "B. forgot",
+        "C. forgetting",
+        "D. forgets"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 44,
+      "question": "Fill in the blank.\nWe have lived here ______ five years.",
+      "options": [
+        "A. since",
+        "B. for",
+        "C. from",
+        "D. during"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 45,
+      "question": "Choose the correct sentence.",
+      "options": [
+        "A. Everyone have finished the work.",
+        "B. Everyone has finished the work.",
+        "C. Everyone finished the work have.",
+        "D. Everyone finishing the work."
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 46,
+      "question": "Fill in the blank.\nShe ______ to the gym every morning.",
+      "options": [
+        "A. go",
+        "B. goes",
+        "C. going",
+        "D. gone"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 47,
+      "question": "Fill in the blank.\nIf you study hard, you ______ pass the exam.",
+      "options": [
+        "A. will",
+        "B. would",
+        "C. could",
+        "D. might"
+      ],
+      "correctAnswer": 0
+    },
+    {
+      "id": 48,
+      "question": "Fill in the blank.\nThe movie was ______ interesting than the book.",
+      "options": [
+        "A. most",
+        "B. more",
+        "C. many",
+        "D. much"
+      ],
+      "correctAnswer": 1
+    },
+    {
+      "id": 49,
+      "question": "Fill in the blank.\nI ______ dinner when my friend arrived.",
+      "options": [
+        "A. cook",
+        "B. cooked",
+        "C. was cooking",
+        "D. cooking"
+      ],
+      "correctAnswer": 2
+    },
+    {
+      "id": 50,
+      "question": "Fill in the blank.\nShe ______ her homework before going out.",
+      "options": [
+        "A. finish",
+        "B. finished",
+        "C. had finished",
+        "D. finishing"
+      ],
+      "correctAnswer": 2
+    }
+  ],
+  "reading": [
+    {
+      "id": 1,
+      "title": "Technology and Communication",
+      "content": "Technology has transformed the way people communicate. In the past, people relied on letters and telephone calls. Today, communication happens instantly through emails, messaging apps, and video calls. This has made it easier for people to stay connected regardless of distance.",
+      "questions": [
+        {
+          "id": 1,
+          "question": "What is the main topic of the passage?",
+          "options": [
+            "Writing letters",
+            "Modern communication technology",
+            "Telephone history",
+            "Internet safety"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 2,
+          "question": "How did people communicate in the past?",
+          "options": [
+            "Emails",
+            "Letters and telephone calls",
+            "Messaging apps",
+            "Social media"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 3,
+          "question": "What is one benefit of modern communication?",
+          "options": [
+            "It is slower",
+            "It is more expensive",
+            "People can connect instantly",
+            "People write more letters"
+          ],
+          "answer": "C"
+        },
+        {
+          "id": 4,
+          "question": "What does “instantly” mean in the passage?",
+          "options": [
+            "Slowly",
+            "Immediately",
+            "Rarely",
+            "Secretly"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 5,
+          "question": "What is the author's opinion about technology?",
+          "options": [
+            "It makes communication easier",
+            "It is dangerous",
+            "It is confusing",
+            "It is unnecessary"
+          ],
+          "answer": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Healthy Lifestyle",
+      "content": "Maintaining a healthy lifestyle is important for overall well-being. Regular exercise, balanced nutrition, and enough sleep help people stay physically and mentally healthy. Doctors also recommend reducing stress through activities such as meditation or hobbies.",
+      "questions": [
+        {
+          "id": 6,
+          "question": "What is the main idea of the passage?",
+          "options": [
+            "Doctors’ salaries",
+            "Healthy living habits",
+            "Sleeping problems",
+            "Sports competitions"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 7,
+          "question": "Which of the following helps maintain health?",
+          "options": [
+            "Junk food",
+            "Lack of sleep",
+            "Regular exercise",
+            "Skipping meals"
+          ],
+          "answer": "C"
+        },
+        {
+          "id": 8,
+          "question": "What do doctors recommend for reducing stress?",
+          "options": [
+            "Watching TV",
+            "Meditation or hobbies",
+            "Eating more sugar",
+            "Working longer hours"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 9,
+          "question": "What does “balanced nutrition” mean?",
+          "options": [
+            "Eating only vegetables",
+            "Eating a variety of healthy foods",
+            "Eating fast food",
+            "Eating once a day"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 10,
+          "question": "According to the passage, sleep is important because it helps maintain",
+          "options": [
+            "fashion",
+            "wealth",
+            "health",
+            "popularity"
+          ],
+          "answer": "C"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Online Learning",
+      "content": "Online learning has become popular in recent years. Many students prefer it because they can study from home and access learning materials anytime. However, some students feel that traditional classroom learning provides better interaction with teachers.",
+      "questions": [
+        {
+          "id": 11,
+          "question": "Why do many students prefer online learning?",
+          "options": [
+            "It is cheaper",
+            "They can study from home",
+            "It has fewer subjects",
+            "It replaces teachers"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 12,
+          "question": "What is one disadvantage of online learning mentioned?",
+          "options": [
+            "Lack of interaction with teachers",
+            "Expensive books",
+            "Slow internet everywhere",
+            "Difficult exams"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 13,
+          "question": "What does “access learning materials anytime” mean?",
+          "options": [
+            "Only during class",
+            "Only in the morning",
+            "At any time",
+            "Once a week"
+          ],
+          "answer": "C"
+        },
+        {
+          "id": 14,
+          "question": "Traditional classrooms provide better",
+          "options": [
+            "internet speed",
+            "interaction with teachers",
+            "homework",
+            "computers"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 15,
+          "question": "What is the main topic?",
+          "options": [
+            "Advantages of sports",
+            "Online learning",
+            "School uniforms",
+            "Library rules"
+          ],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Environmental Protection",
+      "content": "Environmental protection is necessary to preserve the planet. Pollution from factories, vehicles, and plastic waste damages ecosystems. Governments and individuals must work together to reduce pollution and protect natural resources.",
+      "questions": [
+        {
+          "id": 16,
+          "question": "Why is environmental protection important?",
+          "options": [
+            "To protect animals and nature",
+            "To increase pollution",
+            "To build more factories",
+            "To reduce education"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 17,
+          "question": "What causes pollution according to the passage?",
+          "options": [
+            "Trees",
+            "Vehicles and factories",
+            "Rain",
+            "Mountains"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 18,
+          "question": "Who should help protect the environment?",
+          "options": [
+            "Only governments",
+            "Only students",
+            "Everyone",
+            "Only scientists"
+          ],
+          "answer": "C"
+        },
+        {
+          "id": 19,
+          "question": "What does “ecosystems” refer to?",
+          "options": [
+            "Living organisms and their environment",
+            "Cities",
+            "Computers",
+            "Books"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 20,
+          "question": "Plastic waste can",
+          "options": [
+            "protect nature",
+            "damage ecosystems",
+            "improve air quality",
+            "help plants grow"
+          ],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Importance of Reading",
+      "content": "Reading books is one of the best ways to improve knowledge and vocabulary. It allows people to explore new ideas and cultures. Many successful people develop a habit of reading daily.",
+      "questions": [
+        {
+          "id": 21,
+          "question": "What is one benefit of reading?",
+          "options": [
+            "Improves vocabulary",
+            "Reduces knowledge",
+            "Makes people lazy",
+            "Stops learning"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 22,
+          "question": "Reading helps people explore",
+          "options": [
+            "new cities",
+            "new ideas and cultures",
+            "sports events",
+            "shopping malls"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 23,
+          "question": "Successful people often",
+          "options": [
+            "avoid reading",
+            "read daily",
+            "sleep all day",
+            "watch TV all day"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 24,
+          "question": "What is the main topic?",
+          "options": [
+            "Importance of reading",
+            "Importance of sports",
+            "Importance of money",
+            "Importance of travel"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 25,
+          "question": "Reading improves",
+          "options": [
+            "vocabulary",
+            "driving skills",
+            "cooking",
+            "dancing"
+          ],
+          "answer": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Travel and Culture",
+      "content": "Traveling allows people to experience different cultures, foods, and traditions. Visiting new places helps individuals understand the world better and develop open-minded perspectives.",
+      "questions": [
+        {
+          "id": 26,
+          "question": "Why do people travel?",
+          "options": [
+            "To experience different cultures",
+            "To avoid learning",
+            "To stay at home",
+            "To forget traditions"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 27,
+          "question": "Traveling helps people understand",
+          "options": [
+            "the weather",
+            "the world better",
+            "only languages",
+            "only food"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 28,
+          "question": "What does “open-minded” mean?",
+          "options": [
+            "Willing to accept new ideas",
+            "Angry",
+            "Confused",
+            "Lazy"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 29,
+          "question": "Travel introduces people to",
+          "options": [
+            "traditions and foods",
+            "only sports",
+            "only movies",
+            "only music"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 30,
+          "question": "The passage mainly discusses",
+          "options": [
+            "travel benefits",
+            "driving rules",
+            "airplane safety",
+            "hotel prices"
+          ],
+          "answer": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Importance of Time Management",
+      "content": "Time management helps people complete tasks efficiently. Students who plan their schedules often perform better academically and experience less stress.",
+      "questions": [
+        {
+          "id": 31,
+          "question": "What does time management help people do?",
+          "options": [
+            "Waste time",
+            "Complete tasks efficiently",
+            "Avoid studying",
+            "Skip work"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 32,
+          "question": "Students who plan schedules often",
+          "options": [
+            "perform better",
+            "fail exams",
+            "sleep less",
+            "forget tasks"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 33,
+          "question": "Good time management reduces",
+          "options": [
+            "happiness",
+            "stress",
+            "success",
+            "learning"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 34,
+          "question": "What is the main idea?",
+          "options": [
+            "Importance of planning time",
+            "Importance of money",
+            "Importance of sports",
+            "Importance of food"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 35,
+          "question": "Time management helps students",
+          "options": [
+            "become lazy",
+            "organize tasks",
+            "avoid homework",
+            "forget deadlines"
+          ],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Role of Technology in Education",
+      "content": "Technology has changed modern education by introducing digital classrooms, online resources, and interactive learning tools.",
+      "questions": [
+        {
+          "id": 36,
+          "question": "Technology introduced",
+          "options": [
+            "digital classrooms",
+            "fewer teachers",
+            "fewer books",
+            "no learning"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 37,
+          "question": "Online resources help students",
+          "options": [
+            "learn anytime",
+            "stop learning",
+            "avoid teachers",
+            "remove exams"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 38,
+          "question": "Interactive tools make learning",
+          "options": [
+            "boring",
+            "difficult",
+            "engaging",
+            "impossible"
+          ],
+          "answer": "C"
+        },
+        {
+          "id": 39,
+          "question": "The passage mainly discusses",
+          "options": [
+            "technology in education",
+            "farming",
+            "cooking",
+            "sports"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 40,
+          "question": "Digital classrooms are an example of",
+          "options": [
+            "traditional learning",
+            "modern technology in education",
+            "farming technology",
+            "travel technology"
+          ],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Importance of Teamwork",
+      "content": "Teamwork allows individuals to combine their skills and achieve common goals effectively.",
+      "questions": [
+        {
+          "id": 41,
+          "question": "Teamwork helps people",
+          "options": [
+            "work alone",
+            "combine skills",
+            "avoid tasks",
+            "compete always"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 42,
+          "question": "A team works toward",
+          "options": [
+            "individual success only",
+            "common goals",
+            "no goals",
+            "competition only"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 43,
+          "question": "Teamwork improves",
+          "options": [
+            "cooperation",
+            "isolation",
+            "loneliness",
+            "confusion"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 44,
+          "question": "The main topic is",
+          "options": [
+            "teamwork benefits",
+            "sports rules",
+            "cooking recipes",
+            "travel planning"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 45,
+          "question": "Teams succeed when members",
+          "options": [
+            "refuse to cooperate",
+            "collaborate",
+            "avoid communication",
+            "work alone"
+          ],
+          "answer": "B"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Importance of Education",
+      "content": "Education helps people gain knowledge and develop skills needed for future careers.",
+      "questions": [
+        {
+          "id": 46,
+          "question": "Education helps people",
+          "options": [
+            "gain knowledge",
+            "lose skills",
+            "avoid work",
+            "forget learning"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 47,
+          "question": "Education prepares people for",
+          "options": [
+            "sports only",
+            "careers",
+            "holidays",
+            "entertainment"
+          ],
+          "answer": "B"
+        },
+        {
+          "id": 48,
+          "question": "Learning develops",
+          "options": [
+            "skills",
+            "weakness",
+            "laziness",
+            "boredom"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 49,
+          "question": "The passage mainly discusses",
+          "options": [
+            "importance of education",
+            "importance of food",
+            "importance of games",
+            "importance of travel"
+          ],
+          "answer": "A"
+        },
+        {
+          "id": 50,
+          "question": "Education helps build a better",
+          "options": [
+            "future",
+            "past",
+            "problem",
+            "mistake"
+          ],
+          "answer": "A"
+        }
+      ]
+    }
+  ],
+  "listening": [
+    {
+      "id": 1,
+      "title": "Extended Listening Passage – Technology in the Modern World",
+      "description": "Listen to the extended passage about technology and answer the multiple-choice questions.",
+      "text": "In the modern world, technology has become an essential part of our daily lives. From the moment we wake up in the morning until we go to sleep at night, we are surrounded by digital devices. Many people begin their day by checking their mobile phones to read messages, respond to emails, scroll through social media, or catch up on the latest news. Smart alarms, fitness trackers, and digital assistants have changed the way we organize our routines and manage our time. In the field of education, technology has completely transformed the learning experience. Students now use online platforms to attend virtual classes, submit assignments, watch educational videos, and communicate with teachers. Digital libraries give learners access to thousands of books and research materials within seconds. This has made education more flexible and accessible, especially for students living in remote areas. However, online learning also requires self-discipline, strong internet connectivity, and technical knowledge, which not everyone may have. One major advantage of technology is improved communication. In the past, people had to wait many days or even weeks to receive a letter from someone living far away. Today, we can send messages instantly through messaging applications and participate in video calls in real time. Families who live in different cities or countries can see and speak to each other face-to-face through screens. Businesses can conduct international meetings without the need for travel. As a result, the world feels smaller and more connected than ever before. Technology has also contributed significantly to the healthcare sector. Doctors use advanced machines to detect diseases early and provide better treatment. Online consultations allow patients to speak with medical professionals without visiting hospitals physically. Health apps help individuals monitor their heart rate, sleep patterns, and physical activity. These innovations have improved life expectancy and overall well-being in many countries. Despite its many benefits, technology also has disadvantages. Many people spend excessive amounts of time on their phones, computers, and televisions. Too much screen time can negatively affect physical health by causing eye strain, headaches, poor posture, lack of exercise, and sleep problems. Mental health can also be influenced, as constant exposure to social media may create pressure and unrealistic expectations. Young people, in particular, may compare their lives to carefully edited images online and feel stressed, anxious, or dissatisfied. Another serious concern is privacy and data security. When individuals share personal information online, it can sometimes be misused. Companies collect user data to understand consumer behavior, and cybercriminals may attempt to steal sensitive information such as passwords, banking details, or identity documents. Therefore, it is extremely important to create strong passwords, enable security features, avoid suspicious links, and think carefully before posting private details on the internet. Technology also impacts employment and the economy. Automation and artificial intelligence are changing the nature of work. Some traditional jobs are disappearing, while new careers in digital marketing, software development, and data analysis are growing rapidly. Workers must continuously update their skills to remain competitive in the job market. Lifelong learning has become more important than ever. Environmental impact is another topic related to technology. The production of electronic devices requires natural resources, and electronic waste can harm the environment if not recycled properly. At the same time, technology also provides solutions for environmental problems, such as renewable energy systems, smart transportation, and digital systems that reduce paper usage. In conclusion, technology is neither completely good nor completely bad. Its impact depends largely on how individuals and societies choose to use it. When used wisely and responsibly, technology can improve education, healthcare, communication, and productivity. However, when used without limits or awareness, it may create physical, emotional, social, and security problems. Finding a healthy balance between the digital world and real life is the key to living a successful and meaningful life in the modern digital age.",
+      "duration": 180,
+      "mcqs": [
+        {
+          "id": 1,
+          "part": "Part A: Listening Comprehension (MCQ)",
+          "question": "What is the main idea of the passage?",
+          "options": [
+            "A) Technology is dangerous",
+            "B) Technology affects daily life in many ways",
+            "C) Only students use technology",
+            "D) Technology should be stopped"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 2,
+          "part": "Part A: Listening Comprehension (MCQ)",
+          "question": "What is one advantage of technology mentioned in the passage?",
+          "options": [
+            "A) It reduces homework",
+            "B) It improves communication",
+            "C) It removes schools",
+            "D) It increases travel time"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 3,
+          "part": "Part A: Listening Comprehension (MCQ)",
+          "question": "Why do families feel more connected today?",
+          "options": [
+            "A) Because they travel more",
+            "B) Because they write letters",
+            "C) Because they can video call instantly",
+            "D) Because they live together"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "id": 4,
+          "part": "Part A: Listening Comprehension (MCQ)",
+          "question": "What health problem is caused by excessive screen time?",
+          "options": [
+            "A) Strong muscles",
+            "B) Better eyesight",
+            "C) Eye strain",
+            "D) Faster growth"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "id": 5,
+          "part": "Part A: Listening Comprehension (MCQ)",
+          "question": "What is the key message of the passage?",
+          "options": [
+            "A) Avoid all technology",
+            "B) Use technology without limits",
+            "C) Use technology responsibly and find balance",
+            "D) Only adults should use technology"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "id": 6,
+          "part": "Part B: Grammar MCQs",
+          "question": "Technology _____ changed the way people communicate.",
+          "options": [
+            "A) have",
+            "B) has",
+            "C) had",
+            "D) having"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 7,
+          "part": "Part B: Grammar MCQs",
+          "question": "Many students _____ online classes every day.",
+          "options": [
+            "A) attends",
+            "B) attend",
+            "C) attending",
+            "D) attended"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 8,
+          "part": "Part B: Grammar MCQs",
+          "question": "If people use technology wisely, it _____ help them succeed.",
+          "options": [
+            "A) can",
+            "B) should",
+            "C) must",
+            "D) has"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "id": 9,
+          "part": "Part B: Grammar MCQs",
+          "question": "Excessive use of phones can lead _____ health problems.",
+          "options": [
+            "A) for",
+            "B) in",
+            "C) to",
+            "D) with"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "id": 10,
+          "part": "Part B: Grammar MCQs",
+          "question": "It is important _____ personal information safe.",
+          "options": [
+            "A) keep",
+            "B) to keep",
+            "C) keeping",
+            "D) kept"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 11,
+          "part": "Part B: Grammar MCQs",
+          "question": "Companies collect data about _____ customers.",
+          "options": [
+            "A) they",
+            "B) their",
+            "C) them",
+            "D) theirs"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 12,
+          "part": "Part B: Grammar MCQs",
+          "question": "Social media can make people feel stressed _____ they compare themselves to others.",
+          "options": [
+            "A) because",
+            "B) but",
+            "C) so",
+            "D) although"
+          ],
+          "correctAnswer": 0
+        },
+        {
+          "id": 13,
+          "part": "Part B: Grammar MCQs",
+          "question": "Technology is useful, _____ it also has disadvantages.",
+          "options": [
+            "A) and",
+            "B) but",
+            "C) so",
+            "D) or"
+          ],
+          "correctAnswer": 1
+        },
+        {
+          "id": 14,
+          "part": "Part B: Grammar MCQs",
+          "question": "People should avoid _____ too much time online.",
+          "options": [
+            "A) spend",
+            "B) spent",
+            "C) spending",
+            "D) spends"
+          ],
+          "correctAnswer": 2
+        },
+        {
+          "id": 15,
+          "part": "Part B: Grammar MCQs",
+          "question": "The internet makes communication _____ than before.",
+          "options": [
+            "A) easy",
+            "B) easier",
+            "C) easiest",
+            "D) more easy"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Short Audio 1 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Paris is arriving at Platform 7. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 16,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 7",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Short Audio 2 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Sydney is arriving at Platform 2. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 17,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 2",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Short Audio 3 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large macchiato and a cheese sandwich, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 18,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large macchiato and a cheese sandwich",
+            "C) A juice",
+            "D) Just a cheese sandwich"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Short Audio 4 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 18 degrees. heavy rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 19,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Heavy rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Short Audio 5 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large americano and a bagel, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 20,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large americano and a bagel",
+            "C) A juice",
+            "D) Just a bagel"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Short Audio 6 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 25 degrees. strong wind is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 21,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Strong wind",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Short Audio 7 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large hot chocolate and a cheese sandwich, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 22,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large hot chocolate and a cheese sandwich",
+            "C) A juice",
+            "D) Just a cheese sandwich"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Short Audio 8 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 22 degrees. light rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 23,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Light rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Short Audio 9 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Toronto is arriving at Platform 4. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 24,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 4",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Short Audio 10 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 7X to Paris. Your flight has been delayed by three hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 25,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Short Audio 11 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Toronto is arriving at Platform 3. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 26,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 3",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Short Audio 12 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 18 degrees. heavy rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 27,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Heavy rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Short Audio 13 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large macchiato and a bagel, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 28,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large macchiato and a bagel",
+            "C) A juice",
+            "D) Just a bagel"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Short Audio 14 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Williams for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 29,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Short Audio 15 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Berlin is arriving at Platform 3. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 30,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 3",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Short Audio 16 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Tokyo is arriving at Platform 3. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 31,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 3",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "Short Audio 17 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Berlin is arriving at Platform 9. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 32,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 9",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Short Audio 18 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Paris is arriving at Platform 4. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 33,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 4",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Short Audio 19 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large americano and a chocolate croissant, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 34,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large americano and a chocolate croissant",
+            "C) A juice",
+            "D) Just a chocolate croissant"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Short Audio 20 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 30 degrees. heavy rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 35,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Heavy rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Short Audio 21 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 30 degrees. light rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 36,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Light rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Short Audio 22 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 28 degrees. strong wind is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 37,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Strong wind",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "Short Audio 23 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 30 degrees. light rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 38,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Light rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "title": "Short Audio 24 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Miller for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 39,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "title": "Short Audio 25 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 9C to Tokyo. Your flight has been delayed by five hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 40,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "title": "Short Audio 26 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 18 degrees. heavy rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 41,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Heavy rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "title": "Short Audio 27 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Singapore is arriving at Platform 3. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 42,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 3",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "title": "Short Audio 28 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Singapore is arriving at Platform 2. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 43,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 2",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "title": "Short Audio 29 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 101D to Toronto. Your flight has been delayed by five hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 44,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "title": "Short Audio 30 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Smith for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 45,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "title": "Short Audio 31 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 12A to New York. Your flight has been delayed by four hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 46,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "title": "Short Audio 32 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 28 degrees. thunderstorms is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 47,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Thunderstorms",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "title": "Short Audio 33 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Davis for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 48,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "title": "Short Audio 34 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 25 degrees. heavy rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 49,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Heavy rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "title": "Short Audio 35 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 22 degrees. light rain is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 50,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Light rain",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "title": "Short Audio 36 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 28 degrees. strong wind is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 51,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Strong wind",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "title": "Short Audio 37 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Rome is arriving at Platform 2. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 52,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 2",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "title": "Short Audio 38 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Brown for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 53,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "title": "Short Audio 39 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Smith for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 54,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "title": "Short Audio 40 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large cappuccino and a cookie, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 55,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large cappuccino and a cookie",
+            "C) A juice",
+            "D) Just a cookie"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "title": "Short Audio 41 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 30 degrees. thunderstorms is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 56,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Thunderstorms",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "title": "Short Audio 42 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 22 degrees. strong wind is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 57,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Strong wind",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "title": "Short Audio 43 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large americano and a cookie, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 58,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large americano and a cookie",
+            "C) A juice",
+            "D) Just a cookie"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "title": "Short Audio 44 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 7X to Sydney. Your flight has been delayed by five hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 59,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "title": "Short Audio 45 - Weather Forecast",
+      "description": "Listen to the short weather forecast and answer the question.",
+      "text": "Good morning. Today will be mostly sunny with a high of 30 degrees. strong wind is expected in the evening, so remember to take your umbrella if you go out.",
+      "duration": 15,
+      "mcqs": [
+        {
+          "id": 60,
+          "part": "Listening Comprehension",
+          "question": "What is the expected weather in the evening?",
+          "options": [
+            "A) Sunny",
+            "B) Snowy",
+            "C) Strong wind",
+            "D) Cloudy"
+          ],
+          "correctAnswer": 2
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "title": "Short Audio 46 - Medical Appointment",
+      "description": "Listen to the phone call.",
+      "text": "Hi, I need to cancel my appointment with Dr. Williams for tomorrow afternoon. I have a fever.",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 61,
+          "part": "Listening Comprehension",
+          "question": "Why is the patient canceling the appointment?",
+          "options": [
+            "A) They forgot",
+            "B) They feel better",
+            "C) They are traveling",
+            "D) They have a fever"
+          ],
+          "correctAnswer": 3
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "title": "Short Audio 47 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Paris is arriving at Platform 9. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 62,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 9",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "title": "Short Audio 48 - Train Station",
+      "description": "Listen to the train station announcement.",
+      "text": "The express train to Tokyo is arriving at Platform 9. Please stand back from the yellow line.",
+      "duration": 13,
+      "mcqs": [
+        {
+          "id": 63,
+          "part": "Listening Comprehension",
+          "question": "Which platform is the train arriving at?",
+          "options": [
+            "A) Platform 1",
+            "B) Platform 9",
+            "C) Platform 5",
+            "D) Platform 6"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 50,
+      "title": "Short Audio 49 - Airport Announcement",
+      "description": "Listen to the airport announcement.",
+      "text": "Attention passengers on flight 101D to Tokyo. Your flight has been delayed by five hours due to bad weather.",
+      "duration": 14,
+      "mcqs": [
+        {
+          "id": 64,
+          "part": "Listening Comprehension",
+          "question": "Why is the flight delayed?",
+          "options": [
+            "A) Mechanical issues",
+            "B) Bad weather",
+            "C) Security check",
+            "D) Missing pilot"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "title": "Short Audio 50 - Cafe Order",
+      "description": "Listen to the dialogue at the cafe.",
+      "text": "Hello, I'd like a large latte and a cookie, please. Can I pay with credit card?",
+      "duration": 12,
+      "mcqs": [
+        {
+          "id": 65,
+          "part": "Listening Comprehension",
+          "question": "What did the customer order?",
+          "options": [
+            "A) A small tea",
+            "B) A large latte and a cookie",
+            "C) A juice",
+            "D) Just a cookie"
+          ],
+          "correctAnswer": 1
+        }
+      ]
+    }
+  ],
+  "speaking": [
+    {
+      "id": 1,
+      "category": "Personal Experience",
+      "prompt": "Describe your favorite place to relax.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🌿"
+    },
+    {
+      "id": 2,
+      "category": "Personal Experience",
+      "prompt": "Talk about a memorable event in your life.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🎉"
+    },
+    {
+      "id": 3,
+      "category": "Personal Experience",
+      "prompt": "Describe your best friend.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "👫"
+    },
+    {
+      "id": 4,
+      "category": "Personal Experience",
+      "prompt": "Describe a teacher who helped you learn something important.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🏫"
+    },
+    {
+      "id": 5,
+      "category": "Personal Experience",
+      "prompt": "Talk about a time when you helped someone.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🤲"
+    },
+    {
+      "id": 6,
+      "category": "Personal Experience",
+      "prompt": "Describe your favorite holiday or festival.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🎊"
+    },
+    {
+      "id": 7,
+      "category": "Personal Experience",
+      "prompt": "Talk about a challenge you faced and how you overcame it.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "💪"
+    },
+    {
+      "id": 8,
+      "category": "Personal Experience",
+      "prompt": "Describe your favorite childhood memory.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🧒"
+    },
+    {
+      "id": 9,
+      "category": "Personal Experience",
+      "prompt": "Describe a person who inspires you.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "⭐"
+    },
+    {
+      "id": 10,
+      "category": "Personal Experience",
+      "prompt": "Talk about a skill you learned recently.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🎯"
+    },
+    {
+      "id": 11,
+      "category": "Opinion",
+      "prompt": "Do you prefer studying alone or with friends? Why?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📚"
+    },
+    {
+      "id": 12,
+      "category": "Opinion",
+      "prompt": "Do you think technology improves education? Explain.",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "💻"
+    },
+    {
+      "id": 13,
+      "category": "Opinion",
+      "prompt": "Should students use mobile phones in school? Why or why not?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📱"
+    },
+    {
+      "id": 14,
+      "category": "Opinion",
+      "prompt": "Do you prefer online learning or classroom learning?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🖥️"
+    },
+    {
+      "id": 15,
+      "category": "Opinion",
+      "prompt": "Is teamwork important in school and work?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🤝"
+    },
+    {
+      "id": 16,
+      "category": "Opinion",
+      "prompt": "Do you think social media has a positive or negative effect?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📲"
+    },
+    {
+      "id": 17,
+      "category": "Opinion",
+      "prompt": "Should people exercise every day? Why?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🏋️"
+    },
+    {
+      "id": 18,
+      "category": "Opinion",
+      "prompt": "Is traveling important for learning about other cultures?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "✈️"
+    },
+    {
+      "id": 19,
+      "category": "Opinion",
+      "prompt": "Do you think reading books is important?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📖"
+    },
+    {
+      "id": 20,
+      "category": "Opinion",
+      "prompt": "Should students have homework every day?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📝"
+    },
+    {
+      "id": 21,
+      "category": "Description",
+      "prompt": "Describe your hometown or city.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🏙️"
+    },
+    {
+      "id": 22,
+      "category": "Description",
+      "prompt": "Describe your favorite food.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🍽️"
+    },
+    {
+      "id": 23,
+      "category": "Description",
+      "prompt": "Describe your favorite movie or TV show.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🎬"
+    },
+    {
+      "id": 24,
+      "category": "Description",
+      "prompt": "Describe your favorite book.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "📕"
+    },
+    {
+      "id": 25,
+      "category": "Description",
+      "prompt": "Describe your favorite sport.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "⚽"
+    },
+    {
+      "id": 26,
+      "category": "Description",
+      "prompt": "Describe a place you want to visit.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🗺️"
+    },
+    {
+      "id": 27,
+      "category": "Description",
+      "prompt": "Describe your favorite subject in school.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🎓"
+    },
+    {
+      "id": 28,
+      "category": "Description",
+      "prompt": "Describe your ideal job.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "💼"
+    },
+    {
+      "id": 29,
+      "category": "Description",
+      "prompt": "Describe your favorite season of the year.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "🍂"
+    },
+    {
+      "id": 30,
+      "category": "Description",
+      "prompt": "Describe your daily routine.",
+      "prepTime": "10 seconds",
+      "speakingTime": "45 seconds",
+      "emoji": "⏰"
+    },
+    {
+      "id": 31,
+      "category": "Future & Goals",
+      "prompt": "What are your goals for the future?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🚀"
+    },
+    {
+      "id": 32,
+      "category": "Future & Goals",
+      "prompt": "What job would you like to have in the future?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "👔"
+    },
+    {
+      "id": 33,
+      "category": "Future & Goals",
+      "prompt": "What skill would you like to learn?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🧠"
+    },
+    {
+      "id": 34,
+      "category": "Future & Goals",
+      "prompt": "Where would you like to travel in the future?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🌍"
+    },
+    {
+      "id": 35,
+      "category": "Future & Goals",
+      "prompt": "What do you want to achieve in the next five years?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🏆"
+    },
+    {
+      "id": 36,
+      "category": "Future & Goals",
+      "prompt": "How do you plan to improve your English?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📈"
+    },
+    {
+      "id": 37,
+      "category": "Future & Goals",
+      "prompt": "What career do you dream about?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "💭"
+    },
+    {
+      "id": 38,
+      "category": "Future & Goals",
+      "prompt": "What new technology do you want to learn?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🤖"
+    },
+    {
+      "id": 39,
+      "category": "Future & Goals",
+      "prompt": "What is your biggest goal in life?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🎯"
+    },
+    {
+      "id": 40,
+      "category": "Future & Goals",
+      "prompt": "What do you want to learn this year?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📅"
+    },
+    {
+      "id": 41,
+      "category": "Problem Solving",
+      "prompt": "What should people do to protect the environment?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🌱"
+    },
+    {
+      "id": 42,
+      "category": "Problem Solving",
+      "prompt": "How can students manage their time better?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🕐"
+    },
+    {
+      "id": 43,
+      "category": "Problem Solving",
+      "prompt": "How can people reduce stress in daily life?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🧘"
+    },
+    {
+      "id": 44,
+      "category": "Problem Solving",
+      "prompt": "What can schools do to improve education?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🏫"
+    },
+    {
+      "id": 45,
+      "category": "Problem Solving",
+      "prompt": "How can communities become safer places?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🛡️"
+    },
+    {
+      "id": 46,
+      "category": "Problem Solving",
+      "prompt": "How can technology help students learn better?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "💡"
+    },
+    {
+      "id": 47,
+      "category": "Problem Solving",
+      "prompt": "What should people do to stay healthy?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "❤️"
+    },
+    {
+      "id": 48,
+      "category": "Problem Solving",
+      "prompt": "How can we reduce pollution?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "♻️"
+    },
+    {
+      "id": 49,
+      "category": "Problem Solving",
+      "prompt": "What can people do to help others in their community?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🤲"
+    },
+    {
+      "id": 50,
+      "category": "Problem Solving",
+      "prompt": "How can teamwork help solve problems?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "👥"
+    },
+    {
+      "id": 51,
+      "category": "Comparison",
+      "prompt": "Do you prefer city life or countryside life?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🌆"
+    },
+    {
+      "id": 52,
+      "category": "Comparison",
+      "prompt": "Is it better to travel alone or with friends?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "✈️"
+    },
+    {
+      "id": 53,
+      "category": "Comparison",
+      "prompt": "Is online shopping better than shopping in stores?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🛒"
+    },
+    {
+      "id": 54,
+      "category": "Comparison",
+      "prompt": "Is watching movies better than reading books?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🎬"
+    },
+    {
+      "id": 55,
+      "category": "Comparison",
+      "prompt": "Is working from home better than working in an office?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🏠"
+    },
+    {
+      "id": 56,
+      "category": "Comparison",
+      "prompt": "Is technology making people more connected or less connected?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🔗"
+    },
+    {
+      "id": 57,
+      "category": "Comparison",
+      "prompt": "Are schools better today than in the past?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🏫"
+    },
+    {
+      "id": 58,
+      "category": "Comparison",
+      "prompt": "Is it better to learn by doing or by reading?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "📖"
+    },
+    {
+      "id": 59,
+      "category": "Comparison",
+      "prompt": "Is studying abroad better than studying in your home country?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "🌍"
+    },
+    {
+      "id": 60,
+      "category": "Comparison",
+      "prompt": "Are modern lifestyles healthier than past lifestyles?",
+      "prepTime": "10 seconds",
+      "speakingTime": "60 seconds",
+      "emoji": "⚖️"
+    }
+  ],
+  "writing": [
+    {
+      "id": 1,
+      "prompt": "Describe your favorite place to relax and explain why you like it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌿"
+    },
+    {
+      "id": 2,
+      "prompt": "Do you prefer studying alone or with friends? Explain your answer.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "📚"
+    },
+    {
+      "id": 3,
+      "prompt": "Describe a memorable event in your life and why it was important.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎉"
+    },
+    {
+      "id": 4,
+      "prompt": "What are the benefits of learning English?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌍"
+    },
+    {
+      "id": 5,
+      "prompt": "Describe your favorite hobby and explain why you enjoy it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎨"
+    },
+    {
+      "id": 6,
+      "prompt": "Do you think technology makes life easier or more difficult? Explain.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "💻"
+    },
+    {
+      "id": 7,
+      "prompt": "Describe a teacher who helped you learn something important.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🏫"
+    },
+    {
+      "id": 8,
+      "prompt": "What are the advantages of online learning?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🖥️"
+    },
+    {
+      "id": 9,
+      "prompt": "Describe your daily routine.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "⏰"
+    },
+    {
+      "id": 10,
+      "prompt": "Explain why teamwork is important in school or work.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🤝"
+    },
+    {
+      "id": 11,
+      "prompt": "Describe a challenge you faced and how you solved it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "💪"
+    },
+    {
+      "id": 12,
+      "prompt": "What are the benefits of traveling to new places?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "✈️"
+    },
+    {
+      "id": 13,
+      "prompt": "Describe your ideal job and explain why you want it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "💼"
+    },
+    {
+      "id": 14,
+      "prompt": "Do you think social media has a positive or negative effect on society?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "📱"
+    },
+    {
+      "id": 15,
+      "prompt": "Describe a person who has influenced your life.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "⭐"
+    },
+    {
+      "id": 16,
+      "prompt": "What are the advantages of reading books?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "📖"
+    },
+    {
+      "id": 17,
+      "prompt": "Describe your favorite holiday or festival.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎊"
+    },
+    {
+      "id": 18,
+      "prompt": "Do you think students should wear school uniforms? Why or why not?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "👔"
+    },
+    {
+      "id": 19,
+      "prompt": "Describe a skill you would like to learn in the future.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎯"
+    },
+    {
+      "id": 20,
+      "prompt": "Explain why exercise is important for health.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🏋️"
+    },
+    {
+      "id": 21,
+      "prompt": "Describe your favorite food and why you like it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🍽️"
+    },
+    {
+      "id": 22,
+      "prompt": "What are the benefits of having good time management?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🕐"
+    },
+    {
+      "id": 23,
+      "prompt": "Describe your hometown or city.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🏙️"
+    },
+    {
+      "id": 24,
+      "prompt": "Do you think students should have homework every day?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "📝"
+    },
+    {
+      "id": 25,
+      "prompt": "Describe a movie or book that you enjoyed.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎬"
+    },
+    {
+      "id": 26,
+      "prompt": "What are the benefits of using technology in education?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🔬"
+    },
+    {
+      "id": 27,
+      "prompt": "Describe your favorite teacher.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "👩‍🏫"
+    },
+    {
+      "id": 28,
+      "prompt": "Do you prefer living in a city or countryside? Explain.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌄"
+    },
+    {
+      "id": 29,
+      "prompt": "Describe an important lesson you learned in life.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "💡"
+    },
+    {
+      "id": 30,
+      "prompt": "Explain the importance of protecting the environment.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌱"
+    },
+    {
+      "id": 31,
+      "prompt": "Describe your favorite sport.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "⚽"
+    },
+    {
+      "id": 32,
+      "prompt": "What are the advantages of working in a team?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "👥"
+    },
+    {
+      "id": 33,
+      "prompt": "Describe your favorite season of the year.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🍂"
+    },
+    {
+      "id": 34,
+      "prompt": "Do you think traveling helps people learn about different cultures?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🗺️"
+    },
+    {
+      "id": 35,
+      "prompt": "Describe a goal you want to achieve in the future.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🚀"
+    },
+    {
+      "id": 36,
+      "prompt": "What are the benefits of learning new skills?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🧠"
+    },
+    {
+      "id": 37,
+      "prompt": "Describe your favorite subject in school and why you like it.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎓"
+    },
+    {
+      "id": 38,
+      "prompt": "Do you think technology will replace teachers in the future?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🤖"
+    },
+    {
+      "id": 39,
+      "prompt": "Describe an experience that made you happy.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "😊"
+    },
+    {
+      "id": 40,
+      "prompt": "Explain why communication skills are important.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "💬"
+    },
+    {
+      "id": 41,
+      "prompt": "Describe a place you want to visit in the future.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🗼"
+    },
+    {
+      "id": 42,
+      "prompt": "Do you think students should use mobile phones in school?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "📲"
+    },
+    {
+      "id": 43,
+      "prompt": "Describe your best friend.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "👫"
+    },
+    {
+      "id": 44,
+      "prompt": "What are the benefits of volunteering?",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "❤️"
+    },
+    {
+      "id": 45,
+      "prompt": "Describe a problem in your community and how it can be solved.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🔧"
+    },
+    {
+      "id": 46,
+      "prompt": "Explain why learning foreign languages is useful.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌐"
+    },
+    {
+      "id": 47,
+      "prompt": "Describe a famous person you admire.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🌟"
+    },
+    {
+      "id": 48,
+      "prompt": "Do you think education is the key to success? Explain.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🔑"
+    },
+    {
+      "id": 49,
+      "prompt": "Describe a time when you helped someone.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🤲"
+    },
+    {
+      "id": 50,
+      "prompt": "Explain why setting goals is important.",
+      "wordLimit": "100–150 words",
+      "timeLimit": "5 minutes",
+      "emoji": "🎯"
+    }
+  ],
+  "practice": [
+    {
+      "id": 1,
+      "type": "multiple-choice",
+      "category": "Grammar",
+      "difficulty": "Beginner",
+      "question": "Choose the correct form: \"She _____ to school every day.\"",
+      "options": [
+        "go",
+        "goes",
+        "going",
+        "gone"
+      ],
+      "correctAnswer": "goes",
+      "explanation": "Third-person singular present tense requires 'goes'."
+    },
+    {
+      "id": 2,
+      "type": "fill-blank",
+      "category": "Vocabulary",
+      "difficulty": "Beginner",
+      "question": "\"The opposite of hot is _____.\"",
+      "correctAnswer": "cold",
+      "blanks": [
+        "cold",
+        "warm",
+        "cool"
+      ],
+      "explanation": "'Cold' is the direct antonym of 'hot'."
+    },
+    {
+      "id": 3,
+      "type": "multiple-choice",
+      "category": "Reading",
+      "difficulty": "Beginner",
+      "question": "What does the word \"happy\" mean?",
+      "options": [
+        "Sad",
+        "Feeling pleasure",
+        "Angry",
+        "Tired"
+      ],
+      "correctAnswer": "Feeling pleasure",
+      "explanation": "'Happy' means feeling or showing pleasure or contentment."
+    },
+    {
+      "id": 4,
+      "type": "audio",
+      "category": "Listening",
+      "difficulty": "Beginner",
+      "question": "Listen and choose what the speaker is talking about:",
+      "audioText": "I wake up at seven o'clock every morning. I eat breakfast, brush my teeth, and then I walk to school. My favorite subject is science.",
+      "options": [
+        "A weekend trip",
+        "A daily morning routine",
+        "A cooking recipe",
+        "A sports event"
+      ],
+      "correctAnswer": "A daily morning routine",
+      "explanation": "The speaker describes waking up, eating breakfast, and going to school — a daily routine."
+    },
+    {
+      "id": 5,
+      "type": "fill-blank",
+      "category": "Grammar",
+      "difficulty": "Beginner",
+      "question": "\"They _____ playing football in the park right now.\"",
+      "correctAnswer": "are",
+      "blanks": [
+        "are",
+        "is",
+        "was"
+      ],
+      "explanation": "'They' takes the plural auxiliary 'are' in present continuous."
+    },
+    {
+      "id": 6,
+      "type": "multiple-choice",
+      "category": "Grammar",
+      "difficulty": "Intermediate",
+      "question": "Choose the correct sentence:",
+      "options": [
+        "She don't like coffee in the morning.",
+        "She doesn't likes coffee in the morning.",
+        "She doesn't like coffee in the morning.",
+        "She not like coffee in the morning."
+      ],
+      "correctAnswer": "She doesn't like coffee in the morning.",
+      "explanation": "With third-person singular subjects, we use 'doesn't' + base form of the verb."
+    },
+    {
+      "id": 7,
+      "type": "fill-blank",
+      "category": "Grammar",
+      "difficulty": "Intermediate",
+      "question": "\"If I _____ known about the meeting, I would have attended.\"",
+      "correctAnswer": "had",
+      "blanks": [
+        "had",
+        "have",
+        "has"
+      ],
+      "explanation": "Third conditional (past unreal condition) requires 'had' + past participle."
+    },
+    {
+      "id": 8,
+      "type": "audio",
+      "category": "Listening",
+      "difficulty": "Intermediate",
+      "question": "Listen to the passage and select the main idea:",
+      "audioText": "Climate change is one of the most pressing issues facing our planet today. Rising temperatures are causing ice caps to melt, sea levels to rise, and extreme weather events to become more frequent. Scientists agree that immediate action is needed to reduce greenhouse gas emissions.",
+      "options": [
+        "Scientists disagree about climate change.",
+        "Climate change requires urgent action to address its effects.",
+        "Sea levels have always been rising naturally.",
+        "Extreme weather events are decreasing over time."
+      ],
+      "correctAnswer": "Climate change requires urgent action to address its effects.",
+      "explanation": "The passage emphasizes the urgency of climate change and the need for immediate action."
+    },
+    {
+      "id": 9,
+      "type": "multiple-choice",
+      "category": "Vocabulary",
+      "difficulty": "Intermediate",
+      "question": "\"The new policy was met with widespread _____.\" Choose the best word:",
+      "options": [
+        "Approval",
+        "Ignorance",
+        "Hostility",
+        "Confusion"
+      ],
+      "correctAnswer": "Approval",
+      "explanation": "'Widespread approval' is a common collocation meaning general acceptance."
+    },
+    {
+      "id": 10,
+      "type": "fill-blank",
+      "category": "Reading",
+      "difficulty": "Intermediate",
+      "question": "\"Despite the heavy rain, the team _____ to complete the project on time.\"",
+      "correctAnswer": "managed",
+      "blanks": [
+        "managed",
+        "failed",
+        "refused"
+      ],
+      "explanation": "'Managed to' indicates successfully doing something difficult."
+    },
+    {
+      "id": 11,
+      "type": "fill-blank",
+      "category": "Vocabulary",
+      "difficulty": "Advanced",
+      "question": "\"The scientist's groundbreaking research had a profound _____ on the field of genetics.\"",
+      "correctAnswer": "impact",
+      "blanks": [
+        "impact",
+        "effect",
+        "influence"
+      ],
+      "explanation": "'Impact' collocates naturally with 'profound' and 'on the field' in academic contexts."
+    },
+    {
+      "id": 12,
+      "type": "audio",
+      "category": "Listening",
+      "difficulty": "Advanced",
+      "question": "Listen and identify the speaker's tone:",
+      "audioText": "I find it absolutely remarkable that after decades of research and billions of dollars in funding, we still can't seem to agree on the most basic solutions. Perhaps it's time we reconsidered our entire approach.",
+      "options": [
+        "Enthusiastic and hopeful",
+        "Sarcastic and frustrated",
+        "Neutral and informative",
+        "Cheerful and optimistic"
+      ],
+      "correctAnswer": "Sarcastic and frustrated",
+      "explanation": "The use of 'absolutely remarkable' paired with criticism indicates sarcasm and frustration."
+    },
+    {
+      "id": 13,
+      "type": "multiple-choice",
+      "category": "Reading",
+      "difficulty": "Advanced",
+      "question": "\"The author's use of juxtaposition in the passage primarily serves to:\"",
+      "options": [
+        "Introduce a new character",
+        "Highlight contrasting ideas for emphasis",
+        "Provide comic relief",
+        "Summarize the main argument"
+      ],
+      "correctAnswer": "Highlight contrasting ideas for emphasis",
+      "explanation": "Juxtaposition is a literary device used to place contrasting elements side by side for emphasis."
+    },
+    {
+      "id": 14,
+      "type": "fill-blank",
+      "category": "Grammar",
+      "difficulty": "Advanced",
+      "question": "\"Had the committee _____ the proposal earlier, the outcome might have been different.\"",
+      "correctAnswer": "reviewed",
+      "blanks": [
+        "reviewed",
+        "reviewing",
+        "review"
+      ],
+      "explanation": "Inverted third conditional: 'Had + subject + past participle' replaces 'If + had'."
+    },
+    {
+      "id": 15,
+      "type": "multiple-choice",
+      "category": "Vocabulary",
+      "difficulty": "Advanced",
+      "question": "Which word means \"to make something less severe\"?",
+      "options": [
+        "Exacerbate",
+        "Mitigate",
+        "Proliferate",
+        "Corroborate"
+      ],
+      "correctAnswer": "Mitigate",
+      "explanation": "'Mitigate' means to make less severe, serious, or painful."
+    },
+    {
+      "id": 16,
+      "type": "multiple-choice",
+      "category": "Vocabulary",
+      "difficulty": "Expert",
+      "question": "\"The politician's _____ remarks alienated even her closest allies.\"",
+      "options": [
+        "Eloquent",
+        "Incendiary",
+        "Mundane",
+        "Benevolent"
+      ],
+      "correctAnswer": "Incendiary",
+      "explanation": "'Incendiary' means inflammatory or provocative — fitting for remarks that alienate allies."
+    },
+    {
+      "id": 17,
+      "type": "fill-blank",
+      "category": "Grammar",
+      "difficulty": "Expert",
+      "question": "\"Not only _____ the exam, but she also received the highest score in her class.\"",
+      "correctAnswer": "did she pass",
+      "blanks": [
+        "did she pass",
+        "she passed",
+        "she did pass"
+      ],
+      "explanation": "'Not only' at the start of a sentence triggers subject-auxiliary inversion."
+    },
+    {
+      "id": 18,
+      "type": "audio",
+      "category": "Listening",
+      "difficulty": "Expert",
+      "question": "Listen carefully and determine the logical flaw in the argument:",
+      "audioText": "Every successful entrepreneur I've met wakes up before five AM. Therefore, waking up early is the key to entrepreneurial success. If you want to build a great company, you must adopt this habit immediately.",
+      "options": [
+        "Appeal to authority",
+        "Correlation mistaken for causation",
+        "Straw man argument",
+        "Ad hominem attack"
+      ],
+      "correctAnswer": "Correlation mistaken for causation",
+      "explanation": "The speaker assumes that because successful entrepreneurs wake up early, early rising causes success — a classic correlation/causation fallacy."
+    },
+    {
+      "id": 19,
+      "type": "multiple-choice",
+      "category": "Reading",
+      "difficulty": "Expert",
+      "question": "\"In the context of postcolonial literature, the concept of 'hybridity' primarily refers to:\"",
+      "options": [
+        "The blending of genetic traits in organisms",
+        "The mixing of cultural identities and practices",
+        "The combination of different literary genres",
+        "The merging of historical timelines in narratives"
+      ],
+      "correctAnswer": "The mixing of cultural identities and practices",
+      "explanation": "In postcolonial theory, 'hybridity' (Homi Bhabha) refers to the creation of new cultural forms through the mixing of colonizer and colonized cultures."
+    },
+    {
+      "id": 20,
+      "type": "fill-blank",
+      "category": "Vocabulary",
+      "difficulty": "Expert",
+      "question": "\"The philosopher's _____ argument left even seasoned academics struggling to find counterpoints.\"",
+      "correctAnswer": "cogent",
+      "blanks": [
+        "cogent",
+        "specious",
+        "tepid"
+      ],
+      "explanation": "'Cogent' means clear, logical, and convincing — appropriate for an argument that is hard to counter."
+    }
+  ],
+  "mock": [
+    {
+      "id": 1,
+      "type": "writing",
+      "prompt": "Choose the correct sentence:\nA. She go to school every day.\nB. She goes to school every day.\nC. She going to school every day.\nD. She gone to school every day.",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 2,
+      "type": "writing",
+      "prompt": "Fill in the blank: He ______ football every weekend.",
+      "options": [
+        "play",
+        "plays",
+        "played",
+        "playing"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 3,
+      "type": "writing",
+      "prompt": "Choose the correct word: We ______ to the park yesterday.",
+      "options": [
+        "go",
+        "goes",
+        "went",
+        "going"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 4,
+      "type": "writing",
+      "prompt": "Error detection: She don't like coffee.",
+      "options": [
+        "She",
+        "don't",
+        "like",
+        "coffee"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 5,
+      "type": "writing",
+      "prompt": "Fill in the blank: She is interested ______ music.",
+      "options": [
+        "on",
+        "in",
+        "at",
+        "for"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 6,
+      "type": "writing",
+      "prompt": "Choose the correct sentence:\nA. I have seen that movie yesterday.\nB. I saw that movie yesterday.\nC. I seeing that movie yesterday.\nD. I see that movie yesterday.",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 7,
+      "type": "writing",
+      "prompt": "Fill in the blank: If it rains, we ______ stay at home.",
+      "options": [
+        "will",
+        "would",
+        "should",
+        "could"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 8,
+      "type": "writing",
+      "prompt": "Choose the correct word: She is ______ than her sister.",
+      "options": [
+        "tall",
+        "taller",
+        "tallest",
+        "more tall"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 9,
+      "type": "writing",
+      "prompt": "Fill in the blank: I ______ my homework already.",
+      "options": [
+        "finish",
+        "finished",
+        "have finished",
+        "finishing"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 10,
+      "type": "writing",
+      "prompt": "Choose the correct sentence:\nA. Everyone have finished the work.\nB. Everyone has finished the work.\nC. Everyone finished the work have.\nD. Everyone finishing the work.",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 11,
+      "type": "reading",
+      "prompt": "Passage: Technology has changed the way people communicate. In the past, people relied on letters and telephone calls. Today, communication happens instantly through emails, messaging apps, and video calls. \n\nWhat is the main topic of the passage?",
+      "options": [
+        "Letters",
+        "Communication technology",
+        "Telephones",
+        "Internet safety"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 12,
+      "type": "reading",
+      "prompt": "How did people communicate in the past?",
+      "options": [
+        "Messaging apps",
+        "Emails",
+        "Letters and telephone calls",
+        "Video calls"
+      ],
+      "answer": "C"
+    },
+    {
+      "id": 13,
+      "type": "reading",
+      "prompt": "What is one benefit of modern communication?",
+      "options": [
+        "It is slower",
+        "It connects people instantly",
+        "It removes technology",
+        "It prevents communication"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 14,
+      "type": "reading",
+      "prompt": "What does “instantly” mean?",
+      "options": [
+        "Slowly",
+        "Immediately",
+        "Rarely",
+        "Carefully"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 15,
+      "type": "reading",
+      "prompt": "What is the author's opinion about technology?",
+      "options": [
+        "It improves communication",
+        "It makes life harder",
+        "It is dangerous",
+        "It should be avoided"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 16,
+      "type": "listening",
+      "prompt": "Audio Script: Many students prefer online learning because it allows them to study from home and access materials anytime. However, some students believe classroom learning provides better interaction with teachers. \n\nWhy do students prefer online learning?",
+      "options": [
+        "They can study from home",
+        "It removes teachers",
+        "It is always cheaper",
+        "It replaces schools"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 17,
+      "type": "listening",
+      "prompt": "What is a disadvantage of online learning mentioned?",
+      "options": [
+        "Expensive books",
+        "Less interaction with teachers",
+        "No internet",
+        "Difficult exams"
+      ],
+      "answer": "B"
+    },
+    {
+      "id": 18,
+      "type": "listening",
+      "prompt": "What does the speaker compare?",
+      "options": [
+        "Online learning and classroom learning",
+        "Books and libraries",
+        "Teachers and students",
+        "Exams and homework"
+      ],
+      "answer": "A"
+    },
+    {
+      "id": 19,
+      "type": "writing",
+      "prompt": "TASK 1: Write about your favorite place to relax.\n\nInclude:\n- Where it is\n- Why you like it\n- What you do there\n\nWord limit: 100–120 words"
+    },
+    {
+      "id": 20,
+      "type": "writing",
+      "prompt": "TASK 2: Do you think technology makes life easier or more difficult?\n\nExplain your opinion with examples.\n\nWord limit: 120–150 words"
+    },
+    {
+      "id": 21,
+      "type": "speaking",
+      "prompt": "SPEAKING TASK 1: Describe a memorable event in your life.\n\nInclude:\n- What happened\n- Where it happened\n- Why it was important\n\nPreparation: 30s | Speaking: 45s"
+    },
+    {
+      "id": 22,
+      "type": "speaking",
+      "prompt": "SPEAKING TASK 2: Do you prefer studying alone or studying with friends?\n\nExplain your answer.\n\nPreparation: 30s | Speaking: 60s"
+    }
+  ]
+}

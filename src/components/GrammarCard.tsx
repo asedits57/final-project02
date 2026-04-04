@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { callLanguageTool } from "@/lib/languageTool";
+import { api } from "../services/api";
 
 interface GrammarIssue {
   issue: string;
@@ -18,17 +18,14 @@ const GrammarCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const result = await callLanguageTool({ tool: "grammar", text: input.trim() });
+      const res = await api.askAI(
+        `Check the grammar of the following text and return a JSON array of objects with "issue" and "suggestion" fields. Only return the JSON array, nothing else.\n\nText: "${input.trim()}"`
+      );
       let parsed;
-      if (typeof result === "string") {
-        try {
-          parsed = JSON.parse(result);
-        } catch (e) {
-          console.error("Failed to parse grammar result:", e);
-          parsed = [];
-        }
-      } else {
-        parsed = result;
+      try {
+        parsed = JSON.parse(res.reply);
+      } catch (e) {
+        parsed = [];
       }
       setIssues(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
