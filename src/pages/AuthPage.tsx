@@ -82,6 +82,14 @@ const AuthPage = () => {
     stepRef.current = step;
     isLoginRef.current = isLogin;
 
+    // ── REDIRECT IF ALREADY LOGGED IN ──
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token && isLogin) {
+            navigate("/");
+        }
+    }, [navigate, isLogin]);
+
     const form = useForm<z.infer<typeof loginSchema> | z.infer<typeof step1Schema> | z.infer<typeof step3Schema>>({
         resolver: (values, context, options) => {
             const schema = isLoginRef.current
