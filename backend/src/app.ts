@@ -5,6 +5,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import aiRoutes from "./routes/aiRoutes";
@@ -22,6 +23,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan("dev"));
 
 // ✅ DIAGNOSTIC ROUTES (FOR VERIFICATION)
@@ -65,5 +67,11 @@ if (fs.existsSync(distPath)) {
     res.sendFile(path.join(distPath, "index.html"));
   });
 }
+
+// ✅ GLOBAL ERROR HANDLER
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Unhandled Error:", err);
+  res.status(500).json({ success: false, message: "Something went wrong" });
+});
 
 export default app;

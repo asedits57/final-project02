@@ -5,6 +5,9 @@ interface User {
     id: string;
     email: string;
     name?: string;
+    fullName?: string;
+    username?: string;
+    dept?: string;
     level?: number;
     score?: number;
     streak?: number;

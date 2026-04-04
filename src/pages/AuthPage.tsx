@@ -37,10 +37,11 @@ const loginSchema = z.object({
 });
 
 const step1Schema = z.object({
-    contact: z.string().min(1, "Contact details are required"),
+    email: z.string().email("Invalid email address"),
 });
 
 const step3Schema = z.object({
+    email: z.string().email("Invalid email address"),
     fullName: z.string().min(2, "Full Name is required"),
     username: z.string().min(3, "Username must be at least 3 characters"),
     dept: z.string().min(2, "Dept name is required"),
@@ -61,6 +62,7 @@ const AuthPage = () => {
     const [otpValue, setOtpValue] = useState("");
     const [generatedOtp, setGeneratedOtp] = useState("");
     const [contact, setContact] = useState("");
+    const [email, setEmail] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     
@@ -87,17 +89,17 @@ const AuthPage = () => {
                 : stepRef.current === "account" ? step3Schema : step1Schema;
             return zodResolver(schema)(values, context, options) as never;
         },
-        defaultValues: { fullName: "", contact: "", username: "", password: "" },
+        defaultValues: { fullName: "", email: "", username: "", password: "" },
     });
 
-    const sendOtp = useCallback((contactVal: string) => {
+    const sendOtp = useCallback((emailVal: string) => {
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         setGeneratedOtp(otp);
-        setContact(contactVal);
-        console.log(`[AUTH] Sent OTP ${otp} to ${contactVal}`);
+        setEmail(emailVal);
+        console.log(`[AUTH] Sent OTP ${otp} to ${emailVal}`);
         toast({
             title: "OTP Sent",
-            description: `Verification code sent to ${contactVal}. (Development: ${otp})`,
+            description: `Verification code sent to ${emailVal}. (Development: ${otp})`,
         });
         startCountdown();
     }, [toast]);
@@ -111,18 +113,23 @@ const AuthPage = () => {
                 const userId = values.userId as string;
                 const password = values.password as string;
                 
-                const data = await api.login(userId, password);
-                localStorage.setItem("token", data.token);
-                setStoreUser(data.user);
+                const res = await api.login(userId, password);
+                if (res.success) {
+                    const data = res;
+                    localStorage.setItem("token", data.token);
+                    setStoreUser(data.user);
 
-                toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
-                setTimeout(() => navigate("/dashboard"), 400);
+                    toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
+                    setTimeout(() => navigate("/dashboard"), 400);
+                } else {
+                    throw new Error(res.message || "Invalid credentials");
+                }
 
                 // ── SIGNUP Step 1: Send OTP ──
             } else if (step === "credentials") {
-                const contactVal = (values.contact as string).trim();
-                setContact(contactVal);
-                sendOtp(contactVal);
+                const emailVal = (values.email as string).trim();
+                setEmail(emailVal);
+                sendOtp(emailVal);
                 setStep("otp");
 
                 // ── SIGNUP Step 2: Verify OTP ──
@@ -139,18 +146,29 @@ const AuthPage = () => {
                 }
                 setStep("account");
                 setOtpValue("");
+                
+                // Prefill form for Step 3 (account)
+                form.setValue("email", email);
 
                 // ── SIGNUP Step 3: Create account ──
             } else if (step === "account") {
-                const username = values.username as string;
+                const emailVal = values.email as string;
                 const passwordVal = values.password as string;
+                const fullNameVal = values.fullName as string;
+                const usernameVal = values.username as string;
+                const deptVal = values.dept as string;
 
-                const data = await api.register(username, passwordVal);
-                localStorage.setItem("token", data.token);
-                setStoreUser(data.user);
+                const res = await api.register(emailVal, passwordVal, fullNameVal, usernameVal, deptVal);
+                if (res.success) {
+                    const data = res;
+                    localStorage.setItem("token", data.token);
+                    setStoreUser(data.user);
 
-                toast({ title: "🎉 Account Created!", description: "Account setup successful." });
-                setStep("level");
+                    toast({ title: "🎉 Account Created!", description: "Account setup successful." });
+                    setStep("level");
+                } else {
+                    throw new Error(res.message || "Registration failed");
+                }
             }
         } catch (err: any) {
             const errorMessage = err.message || "An unexpected error occurred";
@@ -167,6 +185,10 @@ const AuthPage = () => {
 
         try {
             const levelNum = level === "beginner" ? 1 : level === "intermediate" ? 2 : level === "advanced" ? 3 : 4;
+            
+            // Persist to backend
+            await api.updateProfile({ level: levelNum });
+            
             setStoreUser({ ...storeUser, level: levelNum });
             
             toast({ title: "Level Set", description: `You're now at ${level} level.` });
@@ -187,7 +209,7 @@ const AuthPage = () => {
 
     const resendOtp = () => {
         if (canResend) {
-            sendOtp(contact);
+            sendOtp(email);
         }
     };
 
@@ -249,13 +271,15 @@ const AuthPage = () => {
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     {["beginner", "intermediate", "advanced", "expert"].map((lvl) => (
-                                        <button
+                                        <motion.button
                                             key={lvl}
                                             onClick={() => handleLevelPick(lvl)}
-                                            className="p-4 rounded-2xl border border-white/5 bg-white/5 hover:bg-violet-600/20 hover:border-violet-600/50 transition-all font-poppins text-sm capitalize"
+                                            whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="p-4 rounded-2xl border border-white/5 bg-white/5 hover:border-violet-600/50 transition-colors font-poppins text-sm capitalize"
                                         >
                                             {lvl}
-                                        </button>
+                                        </motion.button>
                                     ))}
                                 </div>
                             </motion.div>
@@ -269,7 +293,7 @@ const AuthPage = () => {
                             >
                                 <div className="text-center">
                                     <h2 className="text-xl font-bold font-poppins mb-2">Verify Contact</h2>
-                                    <p className="text-sm text-muted-foreground font-poppins">Enter the 4-digit code sent to {contact}</p>
+                                    <p className="text-sm text-muted-foreground font-poppins">Enter the 4-digit code sent to {email}</p>
                                 </div>
                                 <div className="flex justify-center gap-3">
                                     {[0, 1, 2, 3].map((i) => (
@@ -379,15 +403,16 @@ const AuthPage = () => {
                                                 {step === "credentials" && (
                                                     <FormField
                                                         control={form.control}
-                                                        name="contact"
+                                                        name="email"
                                                         render={({ field }) => (
                                                             <FormItem>
-                                                                <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Email or Phone</FormLabel>
+                                                                <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Email Address</FormLabel>
                                                                 <FormControl>
                                                                     <div className="relative group">
-                                                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400/50 group-focus-within:text-violet-400 transition-colors" />
+                                                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-400/50 group-focus-within:text-violet-400 transition-colors" />
                                                                         <Input
-                                                                            placeholder="For verification code"
+                                                                            type="email"
+                                                                            placeholder="Your email for verification"
                                                                             className="h-12 pl-12 rounded-2xl border-white/5 bg-white/5 focus:bg-white/10 transition-all font-poppins"
                                                                             {...field}
                                                                             value={field.value as string || ""}
@@ -401,6 +426,19 @@ const AuthPage = () => {
                                                 )}
                                                 {step === "account" && (
                                                     <>
+                                                        <FormField
+                                                            control={form.control}
+                                                            name="email"
+                                                            render={({ field }) => (
+                                                                <FormItem>
+                                                                    <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Email</FormLabel>
+                                                                    <FormControl>
+                                                                        <Input {...field} value={field.value as string || ""} className="h-12 rounded-2xl border-white/5 bg-white/5 font-poppins" readOnly />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
                                                         <FormField
                                                             control={form.control}
                                                             name="fullName"
@@ -462,10 +500,16 @@ const AuthPage = () => {
 
                                         <Button
                                             type="submit"
-                                            className="w-full h-12 rounded-2xl font-poppins font-semibold bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-600/20 mt-4"
+                                            className="w-full h-12 rounded-2xl font-poppins font-semibold bg-violet-600 hover:bg-violet-700 shadow-lg shadow-violet-600/20 mt-4 transition-all"
                                             disabled={isLoading}
+                                            asChild
                                         >
-                                            {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : (isLogin ? "Sign In" : "Continue")}
+                                            <motion.button
+                                                whileHover={{ scale: 1.02 }}
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                {isLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : (isLogin ? "Sign In" : "Continue")}
+                                            </motion.button>
                                         </Button>
 
                                         {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}

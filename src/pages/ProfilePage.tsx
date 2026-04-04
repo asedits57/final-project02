@@ -50,13 +50,14 @@ const glassBtn = {
 export default function ProfilePage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const logoutStore = useStore(s => s.logout);
+    const clearUser = useStore(s => s.clearUser);
     const storeUser = useStore(s => s.user);
 
     /* ── profile state ── */
-    const [avatarSrc, setAvatarSrc] = useState<string | null>(storeUser?.avatar_url || null);
-    const [name, setName] = useState(storeUser?.fullName || storeUser?.username || "Guest User");
-    const [dept, setDept] = useState(storeUser?.dept || "Department not set");
+    const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+    const [name, setName] = useState(storeUser?.fullName || storeUser?.email?.split('@')[0] || "Guest User");
+    const [dept, setDept] = useState(storeUser?.dept || "Language Student");
+    const [mecId, setMecId] = useState(storeUser?.username || "0000");
     
     const levelMap = ["Beginner", "Intermediate", "Advanced", "Expert"];
     const levelStr = storeUser?.level ? levelMap[storeUser.level - 1] : "Beginner";
@@ -104,7 +105,7 @@ export default function ProfilePage() {
     };
 
     const handleLogout = () => {
-        logoutStore();
+        clearUser();
         navigate("/login");
     };
 
@@ -200,7 +201,7 @@ export default function ProfilePage() {
                                             style={{ filter: "drop-shadow(0 0 6px rgba(234,179,8,0.6))" }} />
                                     </div>
                                     <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mb-3 opacity-60">
-                                        {dept}
+                                        {dept} • MEC ID: {mecId}
                                     </p>
                                     <div className="flex flex-wrap gap-2 mb-4">
                                         <span className="text-[11px] px-3.5 py-1 rounded-full font-bold text-white"
@@ -209,7 +210,7 @@ export default function ProfilePage() {
                                         </span>
                                         <span className="text-[11px] px-3.5 py-1 rounded-full font-bold"
                                             style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.25)", color: "hsl(270,80%,75%)" }}>
-                                            {storeUser?.xp || 0} XP
+                                            {storeUser?.score || 0} XP
                                         </span>
                                     </div>
                                     <button
@@ -560,13 +561,19 @@ export default function ProfilePage() {
                 {navItems.map(({ label, icon: Icon, path }) => {
                     const active = location.pathname === path;
                     return (
-                        <button key={label} onClick={() => navigate(path)}
-                            className="flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-[1.5rem] transition-all duration-300"
+                        <motion.button 
+                            key={label} 
+                            onClick={() => navigate(path)}
+                            whileHover={{ scale: 1.1, y: -2 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Go to ${label}`}
+                            className="flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-[1.5rem] transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-violet-500"
                             style={{
                                 background: active ? "rgba(139,92,246,0.22)" : "transparent",
                                 border: active ? "1px solid rgba(139,92,246,0.4)" : "1px solid transparent",
-                                transform: active ? "translateY(-2px)" : "none",
-                            }}>
+                            }}
+                            onKeyDown={(e) => e.key === "Enter" && navigate(path)}
+                        >
                             <Icon className="w-5 h-5 transition-all duration-300"
                                 style={{
                                     color: active ? "hsl(270, 80%, 75%)" : "rgba(160, 140, 200, 0.5)",
@@ -579,7 +586,7 @@ export default function ProfilePage() {
                                 }}>
                                 {label}
                             </span>
-                        </button>
+                        </motion.button>
                     );
                 })}
             </motion.nav>

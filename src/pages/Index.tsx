@@ -42,13 +42,27 @@ const Index = () => {
           </p>
         </motion.div>
 
-        {/* 2×2 Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <TranslateCard />
-          <GrammarCard />
-          <SentenceCard />
-          <SpellingCard />
-        </div>
+        {/* 2×2 Grid with staggered entrance */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.3,
+              }
+            }
+          }}
+        >
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}><TranslateCard /></motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}><GrammarCard /></motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}><SentenceCard /></motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}><SpellingCard /></motion.div>
+        </motion.div>
 
         {/* Footer */}
         <motion.p
@@ -78,14 +92,18 @@ const Index = () => {
         {navItems.map(({ label, icon: Icon, path }) => {
           const active = location.pathname === path;
           return (
-            <button
+            <motion.button
               key={label}
               onClick={() => navigate(path)}
-              className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 group"
+              whileHover={{ scale: 1.1, y: -2 }}
+              whileTap={{ scale: 0.9 }}
+              aria-label={`Go to ${label}`}
+              className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
               style={{
                 background: active ? "rgba(139, 92, 246, 0.18)" : "transparent",
                 border: active ? "1px solid rgba(139, 92, 246, 0.35)" : "1px solid transparent",
               }}
+              onKeyDown={(e) => e.key === "Enter" && navigate(path)}
             >
               <Icon
                 className="w-5 h-5 transition-all duration-200"
@@ -103,7 +121,7 @@ const Index = () => {
               >
                 {label}
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </motion.nav>

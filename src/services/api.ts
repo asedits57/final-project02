@@ -2,28 +2,40 @@ const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export const api = {
   async request(endpoint: string, method = "GET", body?: any) {
-    const token = localStorage.getItem("token");
-
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       method,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
       },
       ...(body && { body: JSON.stringify(body) }),
     });
 
     const data = await res.json();
 
+    let errorMessage = data.message || data.error || "Something went wrong";
+    
+    // Try to parse Zod-style array errors if they arrive as strings
+    if (typeof errorMessage === "string" && errorMessage.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(errorMessage);
+        if (Array.isArray(parsed)) {
+          errorMessage = parsed.map((e: any) => e.message).join(", ");
+        }
+      } catch (e) {
+        // Fallback to original message
+      }
+    }
+
     if (!res.ok) {
-      throw new Error(data.message || data.error || "Something went wrong");
+      throw new Error(errorMessage);
     }
 
     return data;
   },
 
-  register(email: string, password: string) {
-    return this.request("/register", "POST", { email, password });
+  register(email: string, password: string, fullName?: string, username?: string, dept?: string) {
+    return this.request("/register", "POST", { email, password, fullName, username, dept });
   },
 
   login(email: string, password: string) {
@@ -32,6 +44,10 @@ export const api = {
 
   getProfile() {
     return this.request("/profile");
+  },
+
+  updateProfile(data: any) {
+    return this.request("/profile", "PUT", data);
   },
 
   updateProgress(score: number) {

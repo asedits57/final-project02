@@ -150,14 +150,18 @@ const LearningPage = () => {
                 {navItems.map(({ label, icon: Icon, path }) => {
                     const active = location.pathname === path;
                     return (
-                        <button
+                        <motion.button
                             key={label}
                             onClick={() => navigate(path)}
-                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 group"
+                            whileHover={{ scale: 1.1, y: -2 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Go to ${label}`}
+                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-violet-500"
                             style={{
                                 background: active ? "rgba(127, 90, 240, 0.18)" : "transparent",
                                 border: active ? "1px solid rgba(127, 90, 240, 0.35)" : "1px solid transparent",
                             }}
+                            onKeyDown={(e) => e.key === "Enter" && navigate(path)}
                         >
                             <Icon
                                 className="w-5 h-5 transition-all duration-200"
@@ -172,7 +176,7 @@ const LearningPage = () => {
                             >
                                 {label}
                             </span>
-                        </button>
+                        </motion.button>
                     );
                 })}
             </motion.nav>

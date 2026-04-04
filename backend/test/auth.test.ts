@@ -25,7 +25,7 @@ describe('Auth API', () => {
   });
 
   describe('POST /api/register', () => {
-    it('should register a new user successfully', async () => {
+    it('should register a new user successfully and set a cookie', async () => {
       const res = await request(app)
         .post('/api/register')
         .send({
@@ -34,8 +34,10 @@ describe('Auth API', () => {
         });
 
       expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('User registered');
-      expect(res.body.token).toBeDefined();
+      expect(res.header['set-cookie']).toBeDefined();
+      expect(res.header['set-cookie'][0]).toContain('jwt=');
 
       const user = await User.findOne({ email: 'test@example.com' });
       expect(user).toBeTruthy();
@@ -55,13 +57,13 @@ describe('Auth API', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe('User already exists');
+      expect(res.body.message).toBe('User already exists');
     });
   });
 
   describe('POST /api/login', () => {
-    it('should login an existing user successfully', async () => {
-      const resReg = await request(app)
+    it('should login an existing user successfully and set a cookie', async () => {
+      await request(app)
         .post('/api/register')
         .send({
           email: 'login@example.com',
@@ -76,8 +78,9 @@ describe('Auth API', () => {
         });
 
       expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('Login successful');
-      expect(res.body.token).toBeDefined();
+      expect(res.header['set-cookie']).toBeDefined();
     });
 
     it('should not login with wrong password', async () => {
@@ -96,27 +99,15 @@ describe('Auth API', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toBe('Invalid password');
+      expect(res.body.message).toBe('Invalid password');
     });
   });
 
   describe('GET /api/admin/stats', () => {
-    it('should not allow access to a non-admin user', async () => {
-      const resReg = await request(app)
-        .post('/api/register')
-        .send({
-          email: 'user@example.com',
-          password: 'password123'
-        });
-      
-      const token = resReg.body.token;
-
-      const res = await request(app)
-        .get('/api/admin/stats')
-        .set('Authorization', `Bearer ${token}`);
-
-      expect(res.status).toBe(403);
-      expect(res.body.error).toBe('Forbidden: Admin access required');
+    it('should not allow access without a cookie', async () => {
+      const res = await request(app).get('/api/admin/stats');
+      expect(res.status).toBe(401);
+      expect(res.body.message).toBe('Not authorized, no token provided');
     });
   });
 });

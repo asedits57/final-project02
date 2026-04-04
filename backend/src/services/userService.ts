@@ -1,6 +1,6 @@
 import User from "../models/User";
 import Leaderboard from "../models/Leaderboard";
-import redisClient from "../config/redis";
+import { safeGet, safeSet, safeDel } from "../config/redis";
 
 export const getUserById = async (userId: string) => {
   const user = await User.findById(userId).select("-password");
@@ -31,7 +31,7 @@ export const updateUserProgress = async (userId: string, score: number) => {
     // same day
   } else if (
     lastActiveDate &&
-    new Date(lastActiveDate || 0).getDate() === new Date().getDate() - 1
+    new Date(lastActiveDate).getDate() === new Date().getDate() - 1
   ) {
     user.streak += 1;
   } else {
@@ -51,16 +51,24 @@ export const updateUserProgress = async (userId: string, score: number) => {
   );
 
   // Invalidate leaderboard cache when score is updated
-  await redisClient.del("leaderboard:top10");
+  await safeDel("leaderboard:top10");
+
+  // Broadcast real-time update
+  try {
+    const { getIO } = await import("../socket");
+    getIO().emit("leaderboard_update", { userId, score: user.score });
+  } catch (err) {
+    console.warn("Socket broadcast failed:", err);
+  }
 
   return user;
 };
 
 export const getLeaderboardCached = async () => {
-  const cacheKey = "leaderboard";
+  const cacheKey = "leaderboard:top10";
 
   // Check Redis
-  const cachedData = await redisClient.get(cacheKey);
+  const cachedData = await safeGet(cacheKey);
   if (cachedData) {
     console.log("Serving Leaderboard from Cache 🚀");
     return JSON.parse(cachedData);
@@ -82,7 +90,7 @@ export const getLeaderboardCached = async () => {
   }));
 
   // Cache in Redis (60 seconds)
-  await redisClient.set(cacheKey, JSON.stringify(users), {
+  await safeSet(cacheKey, JSON.stringify(users), {
     EX: 60,
   });
   console.log("Serving Leaderboard from DB and Caching 💾");

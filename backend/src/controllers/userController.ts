@@ -12,6 +12,19 @@ export const getProfile = async (req: Request, res: Response) => {
   }
 };
 
+// UPDATE PROFILE
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    const { fullName, username, dept, level } = req.body;
+    const User = (await import("../models/User")).default;
+    const user = await User.findByIdAndUpdate(userId, { fullName, username, dept, level }, { new: true });
+    res.json(user);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || "Server error updating profile" });
+  }
+};
+
 // GET DASHBOARD ANALYTICS
 export const getDashboard = async (req: Request, res: Response) => {
   try {

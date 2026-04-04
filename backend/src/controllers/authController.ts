@@ -12,9 +12,18 @@ export const registerUser: RequestHandler = async (req, res) => {
   }
 
   try {
-    const { email, password } = req.body;
-    const result = await authService.registerUser(email, password);
-    res.json(result);
+    const { email, password, fullName, username, dept } = req.body;
+    const { message, token, user } = await authService.registerUser(email, password, fullName, username, dept);
+    
+    // Set HttpOnly cookie
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, 
+    });
+
+    res.json({ success: true, message, token, user });
   } catch (err: any) {
     res.status(400).json({ success: false, message: err.message });
   }
@@ -24,8 +33,17 @@ export const registerUser: RequestHandler = async (req, res) => {
 export const loginUser: RequestHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const result = await authService.loginUser(email, password);
-    res.json(result);
+    const { message, token, user } = await authService.loginUser(email, password);
+    
+    // Set HttpOnly cookie
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, 
+    });
+
+    res.json({ success: true, message, token, user });
   } catch (err: any) {
     res.status(400).json({ success: false, message: err.message });
   }

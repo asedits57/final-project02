@@ -14,15 +14,24 @@ const navItems = [
     { label: 'Profile', icon: User, path: '/profile' },
 ];
 
-// Instant placeholder data — shown immediately while real data loads
-const PLACEHOLDER_USERS: LeaderboardUser[] = [
-    { id: '1', username: 'Loading...', xp: 9800, level: 12, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1', weekly_xp: 9800, rank: 1, created_at: '', updated_at: '' },
-    { id: '2', username: 'Loading...', xp: 8400, level: 10, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2', weekly_xp: 8400, rank: 2, created_at: '', updated_at: '' },
-    { id: '3', username: 'Loading...', xp: 7200, level: 9, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3', weekly_xp: 7200, rank: 3, created_at: '', updated_at: '' },
-    { id: '4', username: 'Loading...', xp: 6100, level: 8, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4', weekly_xp: 6100, rank: 4, created_at: '', updated_at: '' },
-    { id: '5', username: 'Loading...', xp: 5300, level: 7, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=5', weekly_xp: 5300, rank: 5, created_at: '', updated_at: '' },
-    { id: '6', username: 'Loading...', xp: 4700, level: 6, avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=6', weekly_xp: 4700, rank: 6, created_at: '', updated_at: '' },
-];
+import { SkeletonPodiumItem, SkeletonListRow } from "@/components/ui/SkeletonLoader";
+
+function LeaderboardSkeleton() {
+    return (
+        <div className="space-y-12 animate-in fade-in duration-500">
+            <div className="flex items-end justify-center gap-4 max-w-4xl mx-auto px-4 py-8">
+                <SkeletonPodiumItem className="flex-1" />
+                <SkeletonPodiumItem className="flex-1" high />
+                <SkeletonPodiumItem className="flex-1" />
+            </div>
+            <div className="max-w-4xl mx-auto px-4 space-y-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                    <SkeletonListRow key={i} className="bg-white/5 rounded-2xl border border-white/10" />
+                ))}
+            </div>
+        </div>
+    );
+}
 
 import { api } from "../services/api";
 
@@ -42,10 +51,10 @@ async function fetchLeaderboardData() {
                 updated_at: ''
             }));
         }
-        return PLACEHOLDER_USERS;
+        return [];
     } catch (err) {
         console.error("Failed to load leaderboard:", err);
-        return PLACEHOLDER_USERS;
+        return [];
     }
 }
 
@@ -53,17 +62,16 @@ const Leaderboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { data: users = PLACEHOLDER_USERS, isFetching } = useQuery<LeaderboardUser[]>({
+    const { data: users, isLoading, isFetching } = useQuery<LeaderboardUser[]>({
         queryKey: ['leaderboard'],
         queryFn: fetchLeaderboardData,
-        initialData: PLACEHOLDER_USERS, // Use initialData to ensure type match
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
         refetchOnWindowFocus: false,
     });
 
-    const topThree = users.slice(0, 3);
-    const remaining = users.slice(3);
+    const topThree = (users || []).slice(0, 3);
+    const remaining = (users || []).slice(3);
 
     return (
         <div className="min-h-screen animated-bg text-foreground">
@@ -73,26 +81,35 @@ const Leaderboard = () => {
                 {/* Header */}
                 <header className="relative pt-8 pb-4 px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 mb-3">
+                        <motion.div 
+                            className="inline-flex items-center gap-2 mb-3"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                        >
                             <Sparkles className="w-6 h-6 text-violet-400 animate-sparkle" />
                             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-violet-400 via-purple-500 to-violet-600 bg-clip-text text-transparent">
                                 Leaderboard
                             </h1>
                             <Sparkles className="w-6 h-6 text-violet-400 animate-sparkle" style={{ animationDelay: '1s' }} />
-                        </div>
+                        </motion.div>
                         <p className="text-gray-400 text-lg">Top Language Learners This Week</p>
-                        {/* Subtle refresh indicator — only visible while fetching fresh data */}
-                        {isFetching && (
-                            <p className="text-xs text-violet-400/50 mt-1 animate-pulse">Refreshing…</p>
-                        )}
                     </div>
                 </header>
 
-                {/* Always renders immediately — no loading gate */}
-                <Podium topThree={topThree} />
-                <div className="mt-8">
-                    <RankingsList users={remaining} />
-                </div>
+                {isLoading ? (
+                    <LeaderboardSkeleton />
+                ) : (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <Podium topThree={topThree} />
+                        <div className="mt-8">
+                            <RankingsList users={remaining} />
+                        </div>
+                    </motion.div>
+                )}
             </div>
 
             {/* Bottom Navigation Bar */}
@@ -112,14 +129,18 @@ const Leaderboard = () => {
                 {navItems.map(({ label, icon: Icon, path }) => {
                     const active = location.pathname === path;
                     return (
-                        <button
+                        <motion.button
                             key={label}
                             onClick={() => navigate(path)}
-                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200"
+                            whileHover={{ scale: 1.1, y: -2 }}
+                            whileTap={{ scale: 0.9 }}
+                            aria-label={`Go to ${label}`}
+                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
                             style={{
                                 background: active ? 'rgba(139, 92, 246, 0.18)' : 'transparent',
                                 border: active ? '1px solid rgba(139, 92, 246, 0.35)' : '1px solid transparent',
                             }}
+                            onKeyDown={(e) => e.key === 'Enter' && navigate(path)}
                         >
                             <Icon
                                 className="w-5 h-5 transition-all duration-200"
@@ -137,7 +158,7 @@ const Leaderboard = () => {
                             >
                                 {label}
                             </span>
-                        </button>
+                        </motion.button>
                     );
                 })}
             </motion.nav>
