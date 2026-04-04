@@ -1,16 +1,14 @@
 import { Request, Response } from "express";
-import User from "../models/User";
-import { updateUserProgress, getLeaderboardCached } from "../services/userService";
+import { updateUserProgress, getLeaderboardCached, getUserById, getUserDashboard } from "../services/userService";
 
 // GET PROFILE
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
-    const user = await User.findById(userId).select("-password");
-    if (!user) return res.status(404).json({ error: "User not found" });
+    const user = await getUserById(userId);
     res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || "Server error fetching profile" });
   }
 };
 
@@ -18,16 +16,10 @@ export const getProfile = async (req: Request, res: Response) => {
 export const getDashboard = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    
-    res.json({
-      score: user.score,
-      streak: user.streak,
-      level: user.level || 1
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Server error fetching dashboard" });
+    const dashboard = await getUserDashboard(userId);
+    res.json(dashboard);
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || "Server error fetching dashboard" });
   }
 };
 
@@ -37,7 +29,7 @@ export const updateProgress = async (req: Request, res: Response) => {
     const user = await updateUserProgress((req as any).user.id, req.body.score);
     res.json(user);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -46,8 +38,7 @@ export const getLeaderboard = async (req: Request, res: Response) => {
   try {
     const users = await getLeaderboardCached();
     res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message || "Server error fetching leaderboard" });
   }
 };
-

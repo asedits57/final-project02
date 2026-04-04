@@ -9,6 +9,6 @@ export const askAI = async (req: Request, res: Response) => {
     res.json(result);
   } catch (error: any) {
     console.error("AI Error:", error);
-    res.status(500).json({ error: error.message || "AI failed" });
+    res.status(500).json({ success: false, message: error.message || "AI failed" });
   }
 };

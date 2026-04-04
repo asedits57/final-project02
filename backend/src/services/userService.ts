@@ -2,6 +2,22 @@ import User from "../models/User";
 import Leaderboard from "../models/Leaderboard";
 import redisClient from "../config/redis";
 
+export const getUserById = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  if (!user) throw new Error("User not found");
+  return user;
+};
+
+export const getUserDashboard = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+  return {
+    score: user.score,
+    streak: user.streak,
+    level: user.level || 1,
+  };
+};
+
 export const updateUserProgress = async (userId: string, score: number) => {
   const user = await User.findById(userId);
 

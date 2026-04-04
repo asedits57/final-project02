@@ -16,7 +16,7 @@ export const api = {
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || "Something went wrong");
+      throw new Error(data.message || data.error || "Something went wrong");
     }
 
     return data;
