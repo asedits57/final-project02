@@ -1,4 +1,14 @@
 import "dotenv/config";
+
+// ✅ VALIDATE ENVIRONMENT VARIABLES
+const REQUIRED_ENV = ["JWT_SECRET", "MONGO_URI"];
+REQUIRED_ENV.forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ Error: Environment variable ${key} is missing!`);
+    process.exit(1);
+  }
+});
+
 import { createServer } from "http";
 import app from "./app";
 import { connectDB } from "./config/db";

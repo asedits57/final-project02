@@ -65,7 +65,7 @@ export const updateUserProgress = async (userId: string, score: number) => {
 };
 
 export const getLeaderboardCached = async () => {
-  const cacheKey = "leaderboard:top10";
+  const cacheKey = "leaderboard";
 
   // Check Redis
   const cachedData = await safeGet(cacheKey);

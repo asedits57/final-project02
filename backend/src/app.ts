@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
@@ -12,19 +13,30 @@ import aiRoutes from "./routes/aiRoutes";
 import questionRoutes from "./routes/questionRoutes";
 import { protect } from "./middleware/authMiddleware";
 import { isAdmin } from "./middleware/adminMiddleware";
+import { sanitizationMiddleware } from "./middleware/sanitizationMiddleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      "img-src": ["'self'", "data:", "https://api.dicebear.com"],
+    },
+  },
+}));
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:8080"],
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(",") : ["http://localhost:5173", "http://localhost:8080"],
   credentials: true
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use(sanitizationMiddleware); // Global XSS sanitization
 
 // ✅ DIAGNOSTIC ROUTES (FOR VERIFICATION)
 app.get("/", (req, res) => {
@@ -42,10 +54,10 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.use("/api", authRoutes);
-app.use("/api", userRoutes);
-app.use("/api", aiRoutes);
-app.use("/api", questionRoutes);
+app.use("/api/v1", authRoutes);
+app.use("/api/v1", userRoutes);
+app.use("/api/v1", aiRoutes);
+app.use("/api/v1", questionRoutes);
 
 // ✅ ADMIN ONLY
 app.get("/api/admin/stats", protect, isAdmin, (req, res) => {
@@ -70,8 +82,11 @@ if (fs.existsSync(distPath)) {
 
 // ✅ GLOBAL ERROR HANDLER
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Unhandled Error:", err);
-  res.status(500).json({ success: false, message: "Something went wrong" });
+  console.error("Error: ", err.message || err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error"
+  });
 });
 
 export default app;

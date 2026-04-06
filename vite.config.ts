@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -18,38 +21,25 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react()],
+  build: {
+    target: "esnext",
+    minify: false,
+    sourcemap: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@core": path.resolve(__dirname, "./src/core"),
+      "@modules": path.resolve(__dirname, "./src/modules"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
+      "@components": path.resolve(__dirname, "./src/shared/components"),
+      "@hooks": path.resolve(__dirname, "./src/shared/hooks"),
     },
-  },
-  build: {
-    target: "esnext",
-    minify: "esbuild",
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-motion": ["framer-motion"],
-          "vendor-query": ["@tanstack/react-query"],
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-          ],
-        },
-      },
-    },
-  },
-  optimizeDeps: {
-    include: ["react", "react-dom", "framer-motion", "lucide-react"],
   },
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: "./src/test/setup.ts",
+    setupFiles: "./src/test/setup.tsx",
   },
 }));

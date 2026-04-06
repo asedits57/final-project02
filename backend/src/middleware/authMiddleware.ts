@@ -2,10 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies?.jwt || (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.split(" ")[1] : null);
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Not authorized, no token provided" });
+    return res.status(401).json({ success: false, message: "No access token provided" });
   }
 
   try {

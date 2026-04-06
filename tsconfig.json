@@ -4,7 +4,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/core/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@components/*": ["./src/shared/components/*"],
+      "@hooks/*": ["./src/shared/hooks/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,

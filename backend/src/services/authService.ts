@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import User from "../models/User";
-import { generateToken } from "../utils/generateToken";
+import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
 
 export const registerUser = async (email: string, password: string, fullName?: string, username?: string, dept?: string) => {
   const userExists = await User.findOne({ email });
@@ -20,7 +20,8 @@ export const registerUser = async (email: string, password: string, fullName?: s
 
   return {
     message: "User registered",
-    token: generateToken(user._id.toString()),
+    accessToken: generateAccessToken(user._id.toString()),
+    refreshToken: generateRefreshToken(user._id.toString()),
     user,
   };
 };
@@ -38,7 +39,8 @@ export const loginUser = async (email: string, password: string) => {
 
   return {
     message: "Login successful",
-    token: generateToken(user._id.toString()),
+    accessToken: generateAccessToken(user._id.toString()),
+    refreshToken: generateRefreshToken(user._id.toString()),
     user,
   };
 };

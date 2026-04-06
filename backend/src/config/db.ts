@@ -27,7 +27,7 @@ export const connectDB = async () => {
         const count = await Question.countDocuments();
         if (count === 0) {
           const rawData = JSON.parse(fs.readFileSync(questionsPath, "utf-8"));
-          const flattened = [];
+          const flattened: any[] = [];
           
           for (const [moduleName, items] of Object.entries(rawData)) {
             if (Array.isArray(items)) {

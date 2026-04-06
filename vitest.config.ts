@@ -7,10 +7,17 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./src/test/setup.ts"],
+    setupFiles: ["./src/test/setup.tsx"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@core": path.resolve(__dirname, "./src/core"),
+      "@modules": path.resolve(__dirname, "./src/modules"),
+      "@shared": path.resolve(__dirname, "./src/shared"),
+      "@components": path.resolve(__dirname, "./src/shared/components"),
+      "@hooks": path.resolve(__dirname, "./src/shared/hooks"),
+    },
   },
 });
