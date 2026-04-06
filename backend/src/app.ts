@@ -55,18 +55,11 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-<<<<<<< HEAD
 app.use("/api/v1", authRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", aiRoutes);
 app.use("/api/v1", questionRoutes);
-=======
-app.use("/api", authRoutes);
 app.use("/api/oauth", oauthRoutes);
-app.use("/api", userRoutes);
-app.use("/api", aiRoutes);
-app.use("/api", questionRoutes);
->>>>>>> 281a3d42ae587c21bb64ca07d5c45aeb7c8b7153
 
 // ✅ ADMIN ONLY
 app.get("/api/admin/stats", protect, isAdmin, (req, res) => {
