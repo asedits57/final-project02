@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
-import { useUser } from "../hooks/useUser";
-import Spinner from "./ui/Spinner";
+import { useUser } from "@hooks/useUser";
+import Spinner from "@components/ui/Spinner";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading, isError } = useUser();
