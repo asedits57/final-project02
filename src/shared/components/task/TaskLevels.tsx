@@ -1,6 +1,6 @@
 import { Star, Lock, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useStore } from "@/store/useStore";
+import { useStore } from "@/core/useAuthStore";
 
 const levelOrder = ["beginner", "intermediate", "advanced", "expert"] as const;
 

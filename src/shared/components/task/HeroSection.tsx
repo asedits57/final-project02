@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpen, Headphones, Mic, PenTool, Zap, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useStore } from "@/store/useStore";
+import { useStore } from "@/core/useAuthStore";
 
 const features = [
     { icon: BookOpen, label: "Reading", desc: "Passage comprehension & fill-in-the-blank", color: "#7f5af0" },

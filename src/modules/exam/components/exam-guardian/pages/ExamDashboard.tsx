@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
-import NavBar from "@/exam-guardian/components/NavBar";
-import QuestionPanel from "@/exam-guardian/components/QuestionPanel";
-import CameraPanel from "@/exam-guardian/components/CameraPanel";
-import VoicePanel from "@/exam-guardian/components/VoicePanel";
-import AlertsPanel from "@/exam-guardian/components/AlertsPanel";
-import Timeline from "@/exam-guardian/components/Timeline";
-import RiskScore from "@/exam-guardian/components/RiskScore";
-import ScreenPanel from "@/exam-guardian/components/ScreenPanel";
-import { ProctoringProvider } from "@/exam-guardian/components/ProctoringContext";
+import NavBar from "../components/NavBar";
+import QuestionPanel from "../components/QuestionPanel";
+import CameraPanel from "../components/CameraPanel";
+import VoicePanel from "../components/VoicePanel";
+import AlertsPanel from "../components/AlertsPanel";
+import Timeline from "../components/Timeline";
+import RiskScore from "../components/RiskScore";
+import ScreenPanel from "../components/ScreenPanel";
+import { ProctoringProvider } from "../components/ProctoringContext";
 import { useNavigate } from "react-router-dom";
 import { EvaluationResult } from "../components/QuestionPanel";
 

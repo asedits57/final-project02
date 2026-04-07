@@ -1,6 +1,6 @@
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { apiService as api } from "../@shared/api";
+import { apiService as api } from "@shared/api";
 
 export interface EvaluationResult {
   score: number;
