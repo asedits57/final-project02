@@ -3,11 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, PenTool, ChevronRight, Trophy, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiService as api } from "@shared/api";
-import { useAuthStore as useStore } from "@core/useAuthStore";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 
-import { toast } from "sonner";
+
 
 const TASK_TIME = 300; // 5 minutes per task
 const MIN_WORD_COUNT = 10;
@@ -20,7 +19,7 @@ interface WritingFeedback {
     suggestions: string[];
 }
 
-import { useQuestions } from "../hooks/useQuestions";
+import { useQuestions } from "@hooks/useQuestions";
 
 const WritingModule = () => {
     const navigate = useNavigate();
@@ -153,7 +152,7 @@ const WritingModule = () => {
         localStorage.removeItem("writing_progress_count");
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
                 <Spinner />

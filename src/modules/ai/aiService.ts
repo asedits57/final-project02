@@ -1,15 +1,15 @@
 import { apiClient } from "@shared/apiClient";
 
 export const aiService = {
-  processAI(tool: string, text: string) {
-    return apiClient("/ai/generate", { 
+  processAI(tool: string, text: string): Promise<any> {
+    return apiClient<any>("/ai/generate", { 
       method: "POST", 
       body: JSON.stringify({ prompt: `${tool}: ${text}` }) 
     });
   },
 
-  askAI(prompt: string) {
-    return apiClient("/ai/generate", { 
+  askAI(prompt: string): Promise<any> {
+    return apiClient<any>("/ai/generate", { 
       method: "POST", 
       body: JSON.stringify({ prompt }) 
     });

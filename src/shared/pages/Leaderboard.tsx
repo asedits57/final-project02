@@ -39,7 +39,7 @@ const Leaderboard = () => {
     const { data, isLoading } = useLeaderboard();
 
     // Map to frontend expected format if needed
-    const users: LeaderboardUser[] = (data || []).map((u: any, idx: number) => ({
+    const users: LeaderboardUser[] = (data || []).map((u: { id?: string; _id?: string; email: string; score?: number }, idx: number) => ({
         id: u.id || u._id || String(idx + 1),
         username: u.email.split('@')[0],
         xp: u.score || 0,

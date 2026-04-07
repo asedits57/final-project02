@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, CheckCircle, XCircle, ChevronRight, BookOpen, Clock, Trophy } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { apiService as api } from "@shared/api";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 
 
-import { useQuestions } from "../hooks/useQuestions";
+import { useQuestions } from "@hooks/useQuestions";
+
+import { ReadingPassage } from "@shared/questionService";
 
 const ReadingModule = () => {
     const navigate = useNavigate();

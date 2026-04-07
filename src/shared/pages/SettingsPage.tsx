@@ -4,7 +4,7 @@ import {
     Shield, HelpCircle, LogOut, ChevronRight,
     Home, CheckSquare, Trophy, User, BookOpen
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AnimatedBackground from "@components/AnimatedBackground";
 

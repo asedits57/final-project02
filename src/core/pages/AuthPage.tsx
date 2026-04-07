@@ -48,7 +48,7 @@ const step3Schema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type AuthStep = "credentials" | "otp" | "account" | "level";
+type AuthStep = "credentials" | "otp" | "account";
 
 const AuthPage = () => {
     const navigate = useNavigate();
@@ -85,7 +85,8 @@ const AuthPage = () => {
     // ── REDIRECT IF ALREADY LOGGED IN ──
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token && isLogin) {
+        // Only redirect if we have a real token (not the string "undefined")
+        if (token && token !== "undefined" && isLogin) {
             navigate("/");
         }
     }, [navigate, isLogin]);
@@ -124,11 +125,11 @@ const AuthPage = () => {
                 const res = await api.login(userId, password);
                 if (res.success) {
                     const data = res;
-                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("token", data.accessToken);
                     setStoreUser(data.user);
 
                     toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
-                    setTimeout(() => navigate("/dashboard"), 400);
+                    setTimeout(() => navigate("/"), 400);
                 } else {
                     throw new Error(res.message || "Invalid credentials");
                 }
@@ -169,11 +170,11 @@ const AuthPage = () => {
                 const res = await api.register(emailVal, passwordVal, fullNameVal, usernameVal, deptVal);
                 if (res.success) {
                     const data = res;
-                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("token", data.accessToken);
                     setStoreUser(data.user);
 
                     toast({ title: "🎉 Account Created!", description: "Account setup successful." });
-                    setStep("level");
+                    setTimeout(() => navigate("/"), 400);
                 } else {
                     throw new Error(res.message || "Registration failed");
                 }
@@ -182,28 +183,6 @@ const AuthPage = () => {
             const errorMessage = err.message || "An unexpected error occurred";
             console.error("Auth error:", err);
             setError(errorMessage);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleLevelPick = async (level: string) => {
-        setIsLoading(true);
-        if (!storeUser) return;
-
-        try {
-            const levelNum = level === "beginner" ? 1 : level === "intermediate" ? 2 : level === "advanced" ? 3 : 4;
-            
-            // Persist to backend
-            await api.updateProfile({ level: levelNum });
-            
-            setStoreUser({ ...storeUser, level: levelNum });
-            
-            toast({ title: "Level Set", description: `You're now at ${level} level.` });
-            setTimeout(() => navigate("/"), 400);
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
-            toast({ title: "Error", description: errorMessage, variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
@@ -318,33 +297,7 @@ const AuthPage = () => {
                     style={{ background: "rgba(13, 15, 23, 0.8)", backdropFilter: "blur(20px)" }}
                 >
                     <AnimatePresence mode="wait">
-                        {step === "level" ? (
-                            <motion.div
-                                key="level"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                className="space-y-6"
-                            >
-                                <div className="text-center">
-                                    <h2 className="text-xl font-bold font-poppins mb-2">Select Your Level</h2>
-                                    <p className="text-sm text-muted-foreground font-poppins">We'll tailor your experience accordingly</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {["beginner", "intermediate", "advanced", "expert"].map((lvl) => (
-                                        <motion.button
-                                            key={lvl}
-                                            onClick={() => handleLevelPick(lvl)}
-                                            whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
-                                            whileTap={{ scale: 0.95 }}
-                                            className="p-4 rounded-2xl border border-white/5 bg-white/5 hover:border-violet-600/50 transition-colors font-poppins text-sm capitalize"
-                                        >
-                                            {lvl}
-                                        </motion.button>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        ) : step === "otp" ? (
+                        {step === "otp" ? (
                             <motion.div
                                 key="otp"
                                 initial={{ opacity: 0, x: 20 }}

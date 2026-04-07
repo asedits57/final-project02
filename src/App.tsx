@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Toaster } from "@components/ui/toaster";
 import { Toaster as Sonner } from "@components/ui/sonner";
 import { TooltipProvider } from "@components/ui/tooltip";
@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AuthGuard from "./core/components/AuthGuard";
 import ErrorBoundary from "./shared/components/shared/ErrorBoundary";
 
-<<<<<<< HEAD
 const Index = lazy(() => import("./shared/pages/Index"));
 const TaskDashboard = lazy(() => import("./shared/pages/TaskDashboard"));
 const PracticeTest = lazy(() => import("./modules/exam/pages/PracticeTest"));
@@ -30,31 +29,7 @@ const ExamDashboard = lazy(() => import("./modules/exam/components/exam-guardian
 const Results = lazy(() => import("./modules/exam/components/exam-guardian/pages/Results"));
 const AdminDashboard = lazy(() => import("./shared/pages/AdminDashboard"));
 const Dashboard = lazy(() => import("./shared/pages/Dashboard"));
-=======
-const Index = lazy(() => import("./pages/Index"));
-const TaskDashboard = lazy(() => import("./pages/TaskDashboard"));
-const PracticeTest = lazy(() => import("./pages/PracticeTest"));
-const Leaderboard = lazy(() => import("./pages/Leaderboard"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const HelpSupportPage = lazy(() => import("./pages/HelpSupportPage"));
-const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
-const AuthPage = lazy(() => import("./pages/AuthPage"));
-const GrammarModule = lazy(() => import("./pages/GrammarModule"));
-const ReadingModule = lazy(() => import("./pages/ReadingModule"));
-const ListeningModule = lazy(() => import("./pages/ListeningModule"));
-const SpeakingModule = lazy(() => import("./pages/SpeakingModule"));
-const WritingModule = lazy(() => import("./pages/WritingModule"));
-const MockTest = lazy(() => import("./pages/MockTest"));
-const AITutorPage = lazy(() => import("./pages/AITutorPage"));
-const LearningPage = lazy(() => import("./pages/LearningPage"));
-const ExamDashboard = lazy(() => import("./exam-guardian/pages/ExamDashboard"));
-const Results = lazy(() => import("./exam-guardian/pages/Results"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const OAuthCallback = lazy(() => import("./pages/OAuthCallback"));
->>>>>>> 281a3d42ae587c21bb64ca07d5c45aeb7c8b7153
+const OAuthCallback = lazy(() => import("./shared/pages/OAuthCallback"));
 
 const queryClient = new QueryClient();
 

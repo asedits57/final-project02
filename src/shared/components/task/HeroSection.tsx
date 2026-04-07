@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles, BookOpen, Headphones, Mic, PenTool, Zap, Brain } from "lucide-react";
+import { ArrowRight, BookOpen, Headphones, Mic, PenTool, Zap, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useStore } from "@/store/useStore";
@@ -13,8 +13,6 @@ const features = [
 const HeroSection = () => {
     const navigate = useNavigate();
     const user = useStore(s => s.user);
-    const levelMap = ["beginner", "intermediate", "advanced", "expert"];
-    const currentLevel = user?.level ? levelMap[user.level - 1] : "beginner";
 
     return (
         <section className="relative py-20 md:py-28 overflow-hidden">

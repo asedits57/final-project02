@@ -64,7 +64,7 @@ interface Feedback {
     tips: string[];
 }
 
-import { useQuestions } from "../hooks/useQuestions";
+import { useQuestions } from "@hooks/useQuestions";
 
 const SpeakingModule = () => {
     const navigate = useNavigate();

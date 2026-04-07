@@ -14,14 +14,13 @@ const COOKIE_OPTIONS = {
 // REGISTER
 export const registerUser: RequestHandler = async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
-
   if (!parsed.success) {
-    res.status(400).json({ success: false, message: parsed.error.message });
+    res.status(400).json({ success: false, message: parsed.error.errors[0].message });
     return;
   }
 
   try {
-    const { email, password, fullName, username, dept } = req.body;
+    const { email, password, fullName, username, dept } = parsed.data;
     const { message, accessToken, refreshToken, user } = await authService.registerUser(email, password, fullName, username, dept);
     
     res.cookie("jwt_refresh", refreshToken, COOKIE_OPTIONS);

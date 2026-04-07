@@ -7,9 +7,7 @@ import ErrorMessage from "@components/ui/ErrorMessage";
 
 const WAVEFORM_BARS = 32;
 
-import { apiService as api } from "@shared/api";
-
-import { useQuestions } from "../hooks/useQuestions";
+import { useQuestions } from "@hooks/useQuestions";
 
 const ListeningModule = () => {
     const navigate = useNavigate();

@@ -2,25 +2,25 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Send, PenTool, CheckCircle2, ChevronRight, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { apiService as api } from "@shared/api";
+
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
+import { GrammarQuestion, QuestionData } from "@shared/questionService";
 
 const GrammarModule = () => {
     const navigate = useNavigate();
-    const [grammarQuestions, setGrammarQuestions] = useState<any[]>([]);
+    const [grammarQuestions, setGrammarQuestions] = useState<GrammarQuestion[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
-    const [results, setResults] = useState<{ correct: boolean; questionId: number }[]>([]);
 
     useEffect(() => {
         const loadQuestions = async () => {
             try {
-                const data = await api.fetchQuestions();
+                const data = await api.getQuestions();
                 if (data && data.grammar) {
                     setGrammarQuestions(data.grammar);
                     
@@ -53,7 +53,6 @@ const GrammarModule = () => {
         const isCorrect = selectedOption === currentQuestion.correctAnswer;
         if (isCorrect) setScore(s => s + 1);
         
-        setResults(prev => [...prev, { correct: isCorrect, questionId: currentQuestion.id }]);
         setIsAnswered(true);
 
         // Update global progress in localStorage for the dashboard card
@@ -79,7 +78,6 @@ const GrammarModule = () => {
         setIsAnswered(false);
         setScore(0);
         setCompleted(false);
-        setResults([]);
     };
 
     if (loading) {

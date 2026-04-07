@@ -9,9 +9,8 @@ export const apiService = {
   ...questionService,
   ...userService,
   ...aiService,
-  // Adding explicit fetch for endpoints that might not be in the services yet
-  fetch: (endpoint: string, options?: RequestInit) => {
-    return apiClient(endpoint, options);
+  fetch: <T>(endpoint: string, options?: RequestInit): Promise<T> => {
+    return apiClient<T>(endpoint, options);
   }
 };
 

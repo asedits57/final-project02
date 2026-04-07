@@ -1,0 +1,141 @@
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\app.ts[24m[0m
+[0m  [2m86:15[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\config\db.ts[24m[0m
+[0m  [2m30:28[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m34:36[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\config\redis.ts[24m[0m
+[0m  [2m33:69[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\controllers\aiController.ts[24m[0m
+[0m  [2m15:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\controllers\authController.ts[24m[0m
+[0m  [2m30:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m44:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m59:20[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\controllers\oauthController.ts[24m[0m
+[0m   [2m82:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m135:62[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m168:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\controllers\questionController.ts[24m[0m
+[0m  [2m8:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\controllers\userController.ts[24m[0m
+[0m   [2m9:28[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m12:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m20:28[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m30:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m41:28[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m44:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m52:51[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m54:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m64:17[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\middleware\adminMiddleware.ts[24m[0m
+[0m  [2m4:24[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\middleware\authMiddleware.ts[24m[0m
+[0m  [2m14:13[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\middleware\validateMiddleware.ts[24m[0m
+[0m  [2m4:44[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m9:21[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\services\userService.ts[24m[0m
+[0m  [2m84:35[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\backend\src\utils\sanitization.ts[24m[0m
+[0m  [2m13:37[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m13:43[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m19:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\__tests__\ai.integration.test.tsx[24m[0m
+[0m  [2m20:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m44:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\__tests__\auth.integration.test.tsx[24m[0m
+[0m  [2m10:44[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m34:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m59:19[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\__tests__\leaderboard.integration.test.tsx[24m[0m
+[0m  [2m20:36[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m40:36[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\core\pages\AuthPage.tsx[24m[0m
+[0m  [2m181:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m222:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m248:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\core\pages\Login.tsx[24m[0m
+[0m  [2m22:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m37:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\core\userService.ts[24m[0m
+[0m  [2m8:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\exam\components\exam-guardian\components\AuthGuard.tsx[24m[0m
+[0m  [2m8:29[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\exam\pages\MockTest.tsx[24m[0m
+[0m  [2m34:48[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\exam\pages\PracticeTest.tsx[24m[0m
+[0m  [2m28:48[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m46:63[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\learning\pages\GrammarModule.tsx[24m[0m
+[0m  [2m11:62[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\learning\pages\ListeningModule.tsx[24m[0m
+[0m  [2m17:11[22m  [33mwarning[39m  The 'exercises' logical expression could make the dependencies of useEffect Hook (at line 32) change on every render. To fix this, wrap the initialization of 'exercises' in its own useMemo() Hook  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\learning\pages\ReadingModule.tsx[24m[0m
+[0m  [2m15:11[22m  [33mwarning[39m  The 'readingPassages' logical expression could make the dependencies of useEffect Hook (at line 38) change on every render. To fix this, wrap the initialization of 'readingPassages' in its own useMemo() Hook  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m15:11[22m  [33mwarning[39m  The 'readingPassages' logical expression could make the dependencies of useEffect Hook (at line 52) change on every render. To fix this, wrap the initialization of 'readingPassages' in its own useMemo() Hook  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\learning\pages\SpeakingModule.tsx[24m[0m
+[0m  [2m72:11[22m  [33mwarning[39m  The 'speakingPrompts' logical expression could make the dependencies of useEffect Hook (at line 91) change on every render. To fix this, wrap the initialization of 'speakingPrompts' in its own useMemo() Hook  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\modules\learning\pages\WritingModule.tsx[24m[0m
+[0m   [2m28:11[22m  [33mwarning[39m  The 'writingTasks' logical expression could make the dependencies of useEffect Hook (at line 48) change on every render. To fix this, wrap the initialization of 'writingTasks' in its own useMemo() Hook  [2mreact-hooks/exhaustive-deps[22m[0m
+[0m  [2m106:8[22m   [33mwarning[39m  React Hook useCallback has a missing dependency: 'currentTask'. Either include it or remove the dependency array                                                                                           [2mreact-hooks/exhaustive-deps[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\services\api.ts[24m[0m
+[0m   [2m4:58[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m23:41[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m49:23[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\shared\apiClient.ts[24m[0m
+[0m  [2m16:37[22m  [31merror[39m  Unexpected any. Specify a different type             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m31:7[22m   [31merror[39m  'response' is never reassigned. Use 'const' instead  [2mprefer-const[22m[0m
+[0m  [2m84:41[22m  [31merror[39m  Unexpected any. Specify a different type             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\shared\pages\AdminDashboard.tsx[24m[0m
+[0m   [2m12:71[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m18:53[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m239:99[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\shared\pages\Leaderboard.tsx[24m[0m
+[0m  [2m42:59[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\shared\pages\OAuthCallback.tsx[24m[0m
+[0m  [2m50:21[22m  [31merror[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\acer\OneDrive\Desktop\final-project02\src\test\setup.tsx[24m[0m
+[0m  [2m26:1[22m   [31merror[39m  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  [2m@typescript-eslint/ban-ts-comment[22m[0m
+[0m  [2m34:46[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m39:37[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m40:40[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m41:38[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m42:37[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m44:37[22m  [31merror[39m  Unexpected any. Specify a different type                                                                             [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[31m[1m✖ 71 problems (65 errors, 6 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  1 error and 0 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m

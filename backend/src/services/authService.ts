@@ -27,12 +27,13 @@ export const registerUser = async (email: string, password: string, fullName?: s
 };
 
 export const loginUser = async (email: string, password: string) => {
-  const user = await User.findOne({ email });
+  // Support login by email OR username (MEC ID)
+  const user = await User.findOne({ $or: [{ email }, { username: email }] });
   if (!user) {
-    throw new Error("Invalid email");
+    throw new Error("Invalid email or username");
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password || "");
   if (!isMatch) {
     throw new Error("Invalid password");
   }

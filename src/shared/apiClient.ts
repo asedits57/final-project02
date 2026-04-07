@@ -11,9 +11,9 @@ const onTokenRefreshed = (token: string) => {
   refreshSubscribers = [];
 };
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://your-production-api.com/api/v1";
+const BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
-export const apiClient = async <T = any>(endpoint: string, options?: RequestInit): Promise<T> => {
+export const apiClient = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
   const url = `${BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
   
   const makeRequest = async (token: string | null) => {
@@ -28,7 +28,7 @@ export const apiClient = async <T = any>(endpoint: string, options?: RequestInit
     });
   };
 
-  let response = await makeRequest(accessToken);
+  const response = await makeRequest(accessToken);
 
   // If 401, attempt to refresh token
   if (response.status === 401 && !endpoint.includes("/refresh-token") && !endpoint.includes("/login")) {
@@ -43,17 +43,25 @@ export const apiClient = async <T = any>(endpoint: string, options?: RequestInit
         if (refreshRes.ok) {
           const data = await refreshRes.json();
           accessToken = data.accessToken;
-          onTokenRefreshed(accessToken!);
           isRefreshing = false;
+          onTokenRefreshed(accessToken!);
+
+          // Re-attempt original request as the initiator
+          const retryRes = await makeRequest(accessToken);
+          const retryData = await retryRes.json().catch(() => ({}));
+          if (!retryRes.ok) throw new Error(retryData.message || retryData.error || "Retry failed");
+          return retryData;
         } else {
           isRefreshing = false;
           accessToken = null;
+          localStorage.removeItem("token");
           // Redirect to login or handle session expiry
           window.dispatchEvent(new CustomEvent("session-expired"));
           throw new Error("Session expired. Please log in again.");
         }
       } catch (err) {
         isRefreshing = false;
+        localStorage.removeItem("token");
         throw err;
       }
     }
@@ -81,7 +89,7 @@ export const apiClient = async <T = any>(endpoint: string, options?: RequestInit
       try {
         const parsed = JSON.parse(errorMessage);
         if (Array.isArray(parsed)) {
-          errorMessage = parsed.map((e: any) => e.message).join(", ");
+          errorMessage = parsed.map((e: { message: string }) => e.message).join(", ");
         }
       } catch (e) { /* ignore */ }
     }

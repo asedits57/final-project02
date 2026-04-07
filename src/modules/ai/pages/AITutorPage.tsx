@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Bot, User, Sparkles, BookOpen, Mic, PenTool } from "lucide-react";
+import { ArrowLeft, Send, Bot, User, Sparkles, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiService as api } from "@shared/api";
 
@@ -13,9 +13,7 @@ type Message = {
 
 const presetPrompts = [
     { icon: BookOpen, text: "Explain Present Perfect Tense" },
-    { icon: PenTool, text: "Review my essay structure" },
     { icon: Sparkles, text: "How to improve vocabulary?" },
-    { icon: Mic, text: "Tips for speaking fluently" },
 ];
 
 const AITutorPage = () => {
@@ -32,13 +30,13 @@ const AITutorPage = () => {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isTyping]);
+    }, [messages, isTyping, scrollToBottom]);
 
     const handleSend = async (text: string) => {
         if (!text.trim()) return;

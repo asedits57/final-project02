@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { api } from "../services/api";
-import { useStore } from "../store/useStore";
+import { api } from "@shared/api";
+import { useAuthStore as useStore } from "@core/useAuthStore";
 import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 

@@ -3,7 +3,7 @@ import { useUser } from "@hooks/useUser";
 import Spinner from "@components/ui/Spinner";
 
 const AuthGuard = ({ children }: { children: React.ReactNode }) => {
-  const { user, isLoading, isError } = useUser();
+  const { user, isLoading } = useUser();
 
   if (isLoading) {
     return (
@@ -13,7 +13,8 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (isError || !user) {
+  // Only redirect when there is truly no user (query done, store empty)
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 

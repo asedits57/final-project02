@@ -9,7 +9,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
 import AnimatedBackground from "@components/AnimatedBackground";
 import TaskLevels from "@components/task/TaskLevels";
-import { useStore } from "@/store/useStore";
+import { useStore } from "@core/useAuthStore";
 
 /* ─── Nav ─── */
 const navItems = [
@@ -56,8 +56,8 @@ export default function ProfilePage() {
     /* ── profile state ── */
     const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
     const [name, setName] = useState(storeUser?.fullName || storeUser?.email?.split('@')[0] || "Guest User");
-    const [dept, setDept] = useState(storeUser?.dept || "Language Student");
-    const [mecId, setMecId] = useState(storeUser?.username || "0000");
+    const dept = storeUser?.dept || "Language Student";
+    const mecId = storeUser?.username || "0000";
     
     const levelMap = ["Beginner", "Intermediate", "Advanced", "Expert"];
     const levelStr = storeUser?.level ? levelMap[storeUser.level - 1] : "Beginner";

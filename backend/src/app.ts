@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import authRoutes from "./routes/authRoutes";
 import oauthRoutes from "./routes/oauthRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -21,6 +22,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+app.use(compression());
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {

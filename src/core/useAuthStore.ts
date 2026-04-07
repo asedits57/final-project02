@@ -34,8 +34,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true });
         try {
             await authService.logout();
+            localStorage.removeItem("token");
         } catch (err) {
             console.warn("Logout failed:", err);
+            localStorage.removeItem("token"); // clear it anyway
         }
         set({ user: null, loading: false, error: null });
     },

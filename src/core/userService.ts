@@ -1,19 +1,26 @@
 import { apiClient } from "@shared/apiClient";
+import { User } from "./authService";
 
 export const userService = {
-  getProfile() {
-    return apiClient("/profile");
+  getProfile(): Promise<User> {
+    return apiClient<User>("/profile");
   },
 
-  updateProfile(data: any) {
-    return apiClient("/profile", { method: "PUT", body: JSON.stringify(data) });
+  updateProfile(data: Partial<User>): Promise<User> {
+    return apiClient<User>("/profile", { 
+      method: "PUT", 
+      body: JSON.stringify(data) 
+    });
   },
 
-  updateProgress(score: number) {
-    return apiClient("/progress", { method: "POST", body: JSON.stringify({ score }) });
+  updateProgress(score: number): Promise<User> {
+    return apiClient<User>("/progress", { 
+      method: "POST", 
+      body: JSON.stringify({ score }) 
+    });
   },
 
-  getLeaderboard() {
-    return apiClient("/leaderboard");
+  getLeaderboard(): Promise<User[]> {
+    return apiClient<User[]>("/leaderboard");
   }
 };

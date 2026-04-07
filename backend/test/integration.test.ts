@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import User from '../src/models/User';
 import * as userService from '../src/services/userService';
+import { vi } from 'vitest';
 
 let mongoServer: MongoMemoryServer;
 

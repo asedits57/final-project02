@@ -27,7 +27,7 @@ describe('Auth API', () => {
   describe('POST /api/register', () => {
     it('should register a new user successfully and set a cookie', async () => {
       const res = await request(app)
-        .post('/api/register')
+        .post('/api/v1/register')
         .send({
           email: 'test@example.com',
           password: 'password123'
@@ -37,7 +37,7 @@ describe('Auth API', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('User registered');
       expect(res.header['set-cookie']).toBeDefined();
-      expect(res.header['set-cookie'][0]).toContain('jwt=');
+      expect(res.header['set-cookie'][0]).toContain('jwt_refresh=');
 
       const user = await User.findOne({ email: 'test@example.com' });
       expect(user).toBeTruthy();
@@ -50,7 +50,7 @@ describe('Auth API', () => {
       });
 
       const res = await request(app)
-        .post('/api/register')
+        .post('/api/v1/register')
         .send({
           email: 'test@example.com',
           password: 'password123'
@@ -64,14 +64,14 @@ describe('Auth API', () => {
   describe('POST /api/login', () => {
     it('should login an existing user successfully and set a cookie', async () => {
       await request(app)
-        .post('/api/register')
+        .post('/api/v1/register')
         .send({
           email: 'login@example.com',
           password: 'password123'
         });
 
       const res = await request(app)
-        .post('/api/login')
+        .post('/api/v1/login')
         .send({
           email: 'login@example.com',
           password: 'password123'
@@ -85,14 +85,14 @@ describe('Auth API', () => {
 
     it('should not login with wrong password', async () => {
       await request(app)
-        .post('/api/register')
+        .post('/api/v1/register')
         .send({
           email: 'wrongpass@example.com',
           password: 'password123'
         });
 
       const res = await request(app)
-        .post('/api/login')
+        .post('/api/v1/login')
         .send({
           email: 'wrongpass@example.com',
           password: 'wrongpassword'
