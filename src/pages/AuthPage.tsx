@@ -1,16 +1,16 @@
-import { lazy, Suspense, useState, useRef, useCallback, useEffect, useReducer } from "react";
+import { lazy, Suspense, useRef, useCallback, useEffect, useReducer } from "react";
 import { FloatingWord } from "@components/shared/FloatingWord";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { Eye, EyeOff, User, Mail, Phone, Github, RefreshCw, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Github, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { useToast } from "@hooks/use-toast";
-import { type UserLevel, type AuthUser } from "@lib/auth";
+
 import { useAuthStore as useStore } from "@store/useAuthStore";
 import { apiService as api } from "@services/apiService";
 
@@ -50,6 +50,7 @@ const step3Schema = z.object({
 // ------------------------------------------------------------------
 // State Types & Reducer
 // ------------------------------------------------------------------
+type AuthStep = "credentials" | "otp" | "account";
 interface AuthPageState {
     isLogin: boolean;
     step: AuthStep;
@@ -285,15 +286,15 @@ const AuthPage = () => {
             const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=select_account&state=${encodeURIComponent(state)}`;
             window.location.href = googleAuthUrl;
         } catch (err: any) {
-            setError(err.message || "Google login failed");
+            dispatch({ type: "SET_ERROR", payload: err.message || "Google login failed" });
         } finally {
-            setIsLoading(false);
+            dispatch({ type: "SET_LOADING", payload: false });
         }
     };
 
     const handleGithubLogin = async () => {
         try {
-            setIsLoading(true);
+            dispatch({ type: "SET_LOADING", payload: true });
             const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || "";
             const redirectUri = `${window.location.origin}/auth/github/callback`;
             const scope = "user:email";

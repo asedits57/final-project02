@@ -22,7 +22,7 @@ export interface AuthResponse {
 
 export const authService = {
   async register(email: string, password: string, fullName?: string, username?: string, dept?: string): Promise<AuthResponse> {
-    const data = await apiClient<AuthResponse>("/register", { 
+    const data = await apiClient<AuthResponse>("/auth/register", { 
       method: "POST", 
       body: JSON.stringify({ email, password, fullName, username, dept }) 
     });
@@ -31,7 +31,7 @@ export const authService = {
   },
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    const data = await apiClient<AuthResponse>("/login", { 
+    const data = await apiClient<AuthResponse>("/auth/login", { 
       method: "POST", 
       body: JSON.stringify({ email, password }) 
     });
@@ -40,7 +40,7 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    await apiClient<void>("/logout", { method: "POST" });
+    await apiClient<void>("/auth/logout", { method: "POST" });
     setAccessToken(null);
   }
 };

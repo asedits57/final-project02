@@ -31,11 +31,11 @@ export const apiClient = async <T>(endpoint: string, options?: RequestInit): Pro
   const response = await makeRequest(accessToken);
 
   // If 401, attempt to refresh token
-  if (response.status === 401 && !endpoint.includes("/refresh-token") && !endpoint.includes("/login")) {
+  if (response.status === 401 && !endpoint.includes("/auth/refresh-token") && !endpoint.includes("/auth/login")) {
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const refreshRes = await fetch(`${BASE_URL}/refresh-token`, { 
+        const refreshRes = await fetch(`${BASE_URL}/auth/refresh-token`, { 
           method: "POST", 
           credentials: "include" 
         });

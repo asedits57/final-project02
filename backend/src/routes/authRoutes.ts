@@ -6,7 +6,7 @@ const router = express.Router();
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 requests per window for auth routes
+  max: process.env.NODE_ENV === "production" ? 10 : 1000, // relax in dev/test for k6
   message: { error: "Too many login attempts, please try again after 15 minutes" }
 });
 
