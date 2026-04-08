@@ -18,7 +18,7 @@ export class OpenAIProvider implements IAIProvider {
         { role: "user", content: payload.userPrompt },
       ],
       temperature: payload.temperature ?? 0.7,
-    });
+    }, { timeout: 8000 }); // Abort request after 8 seconds of hanging
 
     return response.choices[0].message?.content || "No response generated.";
   }

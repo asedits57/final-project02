@@ -2,9 +2,9 @@ import { safeGet, safeSet } from "../config/redis";
 import crypto from "crypto";
 import { OpenAIProvider } from "../providers/openai.provider";
 import { IAIProvider } from "../providers/aiProvider.interface";
+import { logger } from "../utils/logger";
 
 // 1. Initialize the Provider Engine. 
-// Standardized so we can easily swap to `new GeminiProvider()` here later without touching logic!
 const aiEngine: IAIProvider = new OpenAIProvider();
 
 const SYSTEM_PROMPT = `
@@ -17,24 +17,29 @@ If the user asks an irrelevant question, gently guide them back to learning Engl
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const askAI = async (prompt: string, retries = 3) => {
+  const startTime = performance.now();
   const hash = crypto.createHash("md5").update(prompt).digest("hex");
   const cacheKey = `ai_response:${hash}`;
 
   const cached = await safeGet(cacheKey);
   if (cached) {
-    console.log("Serving AI response from Cache 🤖");
+    const elapsed = Math.round(performance.now() - startTime);
+    logger.info("AI Cache Hit ✅", { ms: elapsed, hash });
     return JSON.parse(cached);
   }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      // 2. We no longer care IF this is OpenAI or Gemini. 
-      // We just pass the strict IAIPayload down to the engine layer!
+      logger.info(`Sending Request to AI Engine ⏳`, { attempt, hash });
+      
       const replyText = await aiEngine.generateText({
         systemPrompt: SYSTEM_PROMPT,
         userPrompt: prompt,
         temperature: 0.7
       });
+
+      const elapsed = Math.round(performance.now() - startTime);
+      logger.info("AI Engine Success 🤖", { ms: elapsed, attempt, cacheKey });
 
       const result = { reply: replyText };
       
@@ -42,9 +47,10 @@ export const askAI = async (prompt: string, retries = 3) => {
       return result;
 
     } catch (error: any) {
-      console.error(`AI Engine Error (Attempt ${attempt}/${retries}):`, error.message);
+      logger.error(`AI Engine Error ❌`, { message: error.message, attempt, maxRetries: retries });
       
       if (attempt === retries) {
+        logger.error("AI Engine exhausted all retries. Falling back.");
         return {
           reply: "I'm having a little trouble thinking of an answer right now. Could you please check your internet connection or try asking again in a few moments?",
         };
