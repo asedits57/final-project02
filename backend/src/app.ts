@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
+import { globalLimiter } from "./middleware/rateLimiter";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import authRoutes from "./routes/authRoutes";
@@ -46,12 +46,7 @@ app.use(sanitizationMiddleware); // Global XSS sanitization
 // ✅ MOVED DIAGNOSTICS TO rootRoutes
 app.use("/", rootRoutes);
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "production" ? 100 : 10000, // relax for dev/k6
-});
-
-app.use(limiter);
+app.use(globalLimiter);
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1", userRoutes);
