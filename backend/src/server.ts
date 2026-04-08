@@ -12,7 +12,7 @@ REQUIRED_ENV.forEach((key) => {
 import { createServer } from "http";
 import app from "./app";
 import { connectDB } from "./config/db";
-import { initSocket } from "./socket";
+import { initSocket } from "./services/socketService";
 
 const httpServer = createServer(app);
 initSocket(httpServer);

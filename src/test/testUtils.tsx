@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-import { TooltipProvider } from "@/shared/components/ui/tooltip";
+import { TooltipProvider } from "@components/ui/tooltip";
 
 const createTestQueryClient = () =>
   new QueryClient({

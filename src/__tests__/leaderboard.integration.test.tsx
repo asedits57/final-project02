@@ -2,12 +2,12 @@ import React from "react";
 import { render, screen, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import Leaderboard from "../shared/pages/Leaderboard";
-import { userService } from "@core/userService";
+import { userService } from "@services/userService";
 
 // Mock userService
-vi.mock("@core/userService", () => ({
+vi.mock("@services/userService", () => ({
   userService: {
-    getLeaderboard: vi.fn(),
+    fetchLeaderboard: vi.fn(),
   },
 }));
 
@@ -17,7 +17,7 @@ describe("Leaderboard Integration", () => {
   });
 
   it("should render mock users after loading", async () => {
-    (userService.getLeaderboard as any).mockResolvedValue([
+    (userService.fetchLeaderboard as any).mockResolvedValue([
       { id: "1", email: "alice@example.com", score: 1500 },
       { id: "2", email: "bob@example.com", score: 1200 },
       { id: "3", email: "charlie@example.com", score: 900 },
@@ -37,7 +37,7 @@ describe("Leaderboard Integration", () => {
   });
 
   it("should handle error state gracefully", async () => {
-    (userService.getLeaderboard as any).mockRejectedValue(new Error("Failed to load"));
+    (userService.fetchLeaderboard as any).mockRejectedValue(new Error("Failed to load"));
 
     render(<Leaderboard />);
 

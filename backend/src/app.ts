@@ -9,13 +9,15 @@ import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import authRoutes from "./routes/authRoutes";
-import oauthRoutes from "./routes/oauthRoutes";
 import userRoutes from "./routes/userRoutes";
 import aiRoutes from "./routes/aiRoutes";
 import questionRoutes from "./routes/questionRoutes";
+import rootRoutes from "./routes/rootRoutes";
 import { protect } from "./middleware/authMiddleware";
+import ApiError from "./utils/ApiError";
 import { isAdmin } from "./middleware/adminMiddleware";
 import { sanitizationMiddleware } from "./middleware/sanitizationMiddleware";
+import { errorConverter, errorHandler } from "./middleware/errorMiddleware";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,14 +43,8 @@ app.use(cookieParser());
 app.use(morgan("dev"));
 app.use(sanitizationMiddleware); // Global XSS sanitization
 
-// ✅ DIAGNOSTIC ROUTES (FOR VERIFICATION)
-app.get("/", (req, res) => {
-  res.send("API Running 🚀");
-});
-
-app.get("/api", (req, res) => {
-  res.json({ status: "API Working", version: "1.0.0" });
-});
+// ✅ MOVED DIAGNOSTICS TO rootRoutes
+app.use("/", rootRoutes);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -61,17 +57,7 @@ app.use("/api/v1", authRoutes);
 app.use("/api/v1", userRoutes);
 app.use("/api/v1", aiRoutes);
 app.use("/api/v1", questionRoutes);
-app.use("/api/oauth", oauthRoutes);
 
-// ✅ ADMIN ONLY
-app.get("/api/admin/stats", protect, isAdmin, (req, res) => {
-  res.json({ message: "Admin stats accessed successfully 🔐", totalUsers: 1337 });
-});
-
-// ✅ TEST ROUTE
-app.get("/api/test", (req, res) => {
-  res.json({ message: "Backend working ✅" });
-});
 
 // ✅ SETUP PRODUCTION STATIC SERVE
 const distPath = path.join(__dirname, "../../dist");
@@ -84,13 +70,14 @@ if (fs.existsSync(distPath)) {
   });
 }
 
-// ✅ GLOBAL ERROR HANDLER
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error("Error: ", err.message || err);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error"
-  });
+// send back a 404 error for any unknown api request
+app.use((req, res, next) => {
+  next(new ApiError(404, "Not found"));
 });
+
+
+// ✅ ERROR CONVERTER AND HANDLER
+app.use(errorConverter);
+app.use(errorHandler);
 
 export default app;

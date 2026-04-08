@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AuthPage from "../core/pages/AuthPage";
-import { apiService as api } from "@shared/api";
+import { apiService as api } from "@services/apiService";
 
 // Mock Navigate
 const mockNavigate = vi.fn();
@@ -15,7 +15,7 @@ vi.mock("react-router-dom", async (importOriginal) => {
 });
 
 // Mock apiService
-vi.mock("@shared/api", () => ({
+vi.mock("@services/apiService", () => ({
   apiService: {
     login: vi.fn(),
   },

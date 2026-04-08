@@ -2,10 +2,10 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import AITutorPage from "../modules/ai/pages/AITutorPage";
-import { apiService as api } from "@shared/api";
+import { apiService as api } from "@services/apiService";
 
 // Mock apiService
-vi.mock("@shared/api", () => ({
+vi.mock("@services/apiService", () => ({
   apiService: {
     askAI: vi.fn(),
   },

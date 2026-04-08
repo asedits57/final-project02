@@ -1,0 +1,38 @@
+import { Navigate } from "react-router-dom";
+import { useUser } from "@hooks/useUser";
+import Spinner from "@components/ui/Spinner";
+import ErrorMessage from "@components/ui/ErrorMessage";
+
+const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+  const { user, isLoading, isError, refetch } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0F0A1E]">
+        <Spinner />
+      </div>
+    );
+  }
+
+  // If there's no token or auth failed and there's no cached user → redirect to login.
+  // A 401 simply means "not logged in", not a connection error.
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Query failed but we still have a cached user (transient network error) → show error UI
+  if (isError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0F0A1E] p-6">
+        <ErrorMessage 
+          message="Failed to load your profile. Please check your connection." 
+          onRetry={() => refetch()} 
+        />
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+export default AuthGuard;

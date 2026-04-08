@@ -1,67 +1,50 @@
 import { Request, Response } from "express";
-import { updateUserProgress, getLeaderboardCached, getUserById, getUserDashboard } from "../services/userService";
+import { updateUserProgress, getLeaderboardCached, getUserById, getUserDashboard, updateProfileData } from "../services/userService";
 import { updateProfileSchema } from "../validators/userValidator";
 import { sanitizeObject } from "../utils/sanitization";
+import catchAsync from "../utils/catchAsync";
 
 // GET PROFILE
-export const getProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.id;
-    const user = await getUserById(userId);
-    res.json(user);
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message || "Server error fetching profile" });
-  }
-};
+export const getProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const user = await getUserById(userId);
+  res.json(user);
+});
 
 // UPDATE PROFILE
-export const updateProfile = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.id;
-    // Validate schema
-    const validatedData = updateProfileSchema.parse(req.body);
-    // Sanitize object recursively
-    const sanitizedData = sanitizeObject(validatedData);
-    
-    const { fullName, username, dept, level } = sanitizedData;
-    const User = (await import("../models/User")).default;
-    const user = await User.findByIdAndUpdate(userId, { fullName, username, dept, level }, { new: true });
-    res.json(user);
-  } catch (err: any) {
-    if (err.name === "ZodError") {
-      return res.status(400).json({ success: false, message: "Invalid input data", errors: err.errors });
-    }
-    res.status(500).json({ success: false, message: err.message || "Server error updating profile" });
-  }
-};
+export const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  // Validate schema (will throw naturally if fails)
+  const validatedData = updateProfileSchema.parse(req.body);
+  // Sanitize object recursively
+  const sanitizedData = sanitizeObject(validatedData);
+  
+  // Delegate to service
+  const user = await updateProfileData(userId, sanitizedData);
+  res.json(user);
+});
 
 // GET DASHBOARD ANALYTICS
-export const getDashboard = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user.id;
-    const dashboard = await getUserDashboard(userId);
-    res.json(dashboard);
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message || "Server error fetching dashboard" });
-  }
-};
+export const getDashboard = catchAsync(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const dashboard = await getUserDashboard(userId);
+  res.json(dashboard);
+});
 
 // UPDATE SCORE + STREAK
-export const updateProgress = async (req: Request, res: Response) => {
-  try {
-    const user = await updateUserProgress((req as any).user.id, req.body.score);
-    res.json(user);
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+export const updateProgress = catchAsync(async (req: Request, res: Response) => {
+  const user = await updateUserProgress((req as any).user.id, req.body.score);
+  res.json(user);
+});
 
 // GET LEADERBOARD
-export const getLeaderboard = async (req: Request, res: Response) => {
-  try {
-    const users = await getLeaderboardCached();
-    res.json(users);
-  } catch (err: any) {
-    res.status(500).json({ success: false, message: err.message || "Server error fetching leaderboard" });
-  }
-};
+export const getLeaderboard = catchAsync(async (req: Request, res: Response) => {
+  const users = await getLeaderboardCached();
+  res.json(users);
+});
+
+// ADMIN: GET STATS
+export const getAdminStats = catchAsync(async (req: Request, res: Response) => {
+  // In a real app, this would query some aggregated stats service
+  res.json({ message: "Admin stats accessed successfully 🔐", totalUsers: 1337 });
+});

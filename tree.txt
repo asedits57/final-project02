@@ -1,0 +1,211 @@
+Folder PATH listing for volume ACER
+Volume serial number is 3A14-D6CA
+C:\USERS\ACER\ONEDRIVE\DESKTOP\FINAL-PROJECT02\SRC
+|   App.css
+|   App.tsx
+|   index.css
+|   main.tsx
+|   vite-env.d.ts
+|   
++---assets
+|   \---images
+|           liquid-bg.png
+|           
++---components
+|   +---leaderboard
+|   +---shared
+|   +---task
+|   \---ui
++---core
+|   |   authService.ts
+|   |   useAuthStore.ts
+|   |   userService.ts
+|   |   
+|   +---components
+|   |       AuthGuard.tsx
+|   |       
+|   \---pages
+|           AuthPage.tsx
+|           Login.tsx
+|           ProfilePage.tsx
+|           
++---data
+|       grammarQuestions.ts
+|       listeningExercises.ts
+|       readingPassages.ts
+|       speakingPrompts.ts
+|       writingTasks.ts
+|       
++---exam-guardian
+|   +---components
+|   \---pages
++---modules
+|   +---ai
+|   |   |   aiService.ts
+|   |   |   
+|   |   +---components
+|   |   \---pages
+|   |           AITutorPage.tsx
+|   |           
+|   +---exam
+|   |   +---components
+|   |   |   \---exam-guardian
+|   |   |       +---components
+|   |   |       |       AlertsPanel.tsx
+|   |   |       |       AuthGuard.tsx
+|   |   |       |       CameraPanel.tsx
+|   |   |       |       gazeUtils.ts
+|   |   |       |       NavBar.tsx
+|   |   |       |       ProctoringContext.tsx
+|   |   |       |       QuestionPanel.tsx
+|   |   |       |       RiskScore.tsx
+|   |   |       |       ScreenPanel.tsx
+|   |   |       |       Timeline.tsx
+|   |   |       |       VoicePanel.tsx
+|   |   |       |       
+|   |   |       \---pages
+|   |   |               ExamDashboard.tsx
+|   |   |               Results.tsx
+|   |   |               
+|   |   \---pages
+|   |           MockTest.tsx
+|   |           PracticeTest.tsx
+|   |           
+|   \---learning
+|       +---components
+|       |       GrammarCard.tsx
+|       |       SentenceCard.tsx
+|       |       SpellingCard.tsx
+|       |       TranslateCard.tsx
+|       |       
+|       \---pages
+|               GrammarModule.tsx
+|               LearningPage.tsx
+|               ListeningModule.tsx
+|               ReadingModule.tsx
+|               SpeakingModule.tsx
+|               WritingModule.tsx
+|               
++---pages
++---services
++---shared
+|   |   api.ts
+|   |   apiClient.ts
+|   |   questionService.ts
+|   |   
+|   +---components
+|   |   |   AnimatedBackground.tsx
+|   |   |   FloatingWord.tsx
+|   |   |   Login.tsx
+|   |   |   NavLink.tsx
+|   |   |   
+|   |   +---leaderboard
+|   |   |       Podium.tsx
+|   |   |       RankingsList.tsx
+|   |   |       
+|   |   +---shared
+|   |   |       ErrorBoundary.tsx
+|   |   |       
+|   |   +---task
+|   |   |       DailyChallenge.tsx
+|   |   |       HeroSection.tsx
+|   |   |       LearningSection.tsx
+|   |   |       Navbar.tsx
+|   |   |       StatsPanel.tsx
+|   |   |       TaskLevels.tsx
+|   |   |       
+|   |   \---ui
+|   |           accordion.tsx
+|   |           alert-dialog.tsx
+|   |           alert.tsx
+|   |           aspect-ratio.tsx
+|   |           avatar.tsx
+|   |           badge.tsx
+|   |           breadcrumb.tsx
+|   |           button.tsx
+|   |           calendar.tsx
+|   |           card.tsx
+|   |           carousel.tsx
+|   |           chart.tsx
+|   |           checkbox.tsx
+|   |           collapsible.tsx
+|   |           command.tsx
+|   |           context-menu.tsx
+|   |           dialog.tsx
+|   |           drawer.tsx
+|   |           dropdown-menu.tsx
+|   |           ErrorMessage.tsx
+|   |           form.tsx
+|   |           hover-card.tsx
+|   |           input-otp.tsx
+|   |           input.tsx
+|   |           label.tsx
+|   |           menubar.tsx
+|   |           navigation-menu.tsx
+|   |           pagination.tsx
+|   |           popover.tsx
+|   |           progress.tsx
+|   |           radio-group.tsx
+|   |           resizable.tsx
+|   |           scroll-area.tsx
+|   |           select.tsx
+|   |           separator.tsx
+|   |           sheet.tsx
+|   |           sidebar.tsx
+|   |           skeleton.tsx
+|   |           SkeletonLoader.tsx
+|   |           slider.tsx
+|   |           sonner.tsx
+|   |           Spinner.tsx
+|   |           switch.tsx
+|   |           table.tsx
+|   |           tabs.tsx
+|   |           textarea.tsx
+|   |           toast.tsx
+|   |           toaster.tsx
+|   |           toggle-group.tsx
+|   |           toggle.tsx
+|   |           tooltip.tsx
+|   |           use-toast.ts
+|   |           
+|   +---hooks
+|   |       use-mobile.tsx
+|   |       use-toast.ts
+|   |       useLeaderboard.ts
+|   |       useQuestions.ts
+|   |       useUser.ts
+|   |       
+|   +---lib
+|   |       auth.ts
+|   |       leaderboard-types.ts
+|   |       utils.ts
+|   |       
+|   +---pages
+|   |       AdminDashboard.tsx
+|   |       Dashboard.tsx
+|   |       HelpSupportPage.tsx
+|   |       Index.tsx
+|   |       Leaderboard.tsx
+|   |       NotFound.tsx
+|   |       PrivacyPage.tsx
+|   |       SettingsPage.tsx
+|   |       TaskDashboard.tsx
+|   |       
+|   \---utils
+|           dailyChallenge.ts
+|           GrammarCard.ts
+|           streak.ts
+|           streakHandler.ts
+|           
++---store
++---test
+|       components.test.tsx
+|       example.test.ts
+|       setup.tsx
+|       testUtils.tsx
+|       
+\---__tests__
+        ai.integration.test.tsx
+        auth.integration.test.tsx
+        leaderboard.integration.test.tsx
+        

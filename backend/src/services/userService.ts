@@ -12,10 +12,15 @@ export const getUserDashboard = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
   return {
-    score: user.score,
     streak: user.streak,
-    level: user.level || 1,
+    totalScore: user.score,
+    lastActive: user.lastActive,
   };
+};
+
+export const updateProfileData = async (userId: string, data: any) => {
+  const User = (await import("../models/User")).default;
+  return await User.findByIdAndUpdate(userId, data, { new: true });
 };
 
 export const updateUserProgress = async (userId: string, score: number) => {
@@ -55,7 +60,7 @@ export const updateUserProgress = async (userId: string, score: number) => {
 
   // Broadcast real-time update
   try {
-    const { getIO } = await import("../socket");
+    const { getIO } = await import("./socketService");
     getIO().emit("leaderboard_update", { userId, score: user.score });
   } catch (err) {
     console.warn("Socket broadcast failed:", err);

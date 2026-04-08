@@ -1,8 +1,10 @@
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response } from "express";
 import * as authService from "../services/authService";
 import { registerSchema } from "../validators/authValidator";
 import jwt from "jsonwebtoken";
 import { generateAccessToken } from "../utils/generateToken";
+import catchAsync from "../utils/catchAsync";
+import ApiError from "../utils/ApiError";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -12,46 +14,34 @@ const COOKIE_OPTIONS = {
 };
 
 // REGISTER
-export const registerUser: RequestHandler = async (req, res) => {
-  const parsed = registerSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ success: false, message: parsed.error.errors[0].message });
-    return;
-  }
-
-  try {
-    const { email, password, fullName, username, dept } = parsed.data;
-    const { message, accessToken, refreshToken, user } = await authService.registerUser(email, password, fullName, username, dept);
-    
-    res.cookie("jwt_refresh", refreshToken, COOKIE_OPTIONS);
-
-    res.json({ success: true, message, accessToken, user });
-  } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
-  }
-};
+export const registerUser = catchAsync(async (req: Request, res: Response) => {
+  const parsedData = registerSchema.parse(req.body);
+  const { email, password, fullName, username, dept } = parsedData;
+  const { message, accessToken, refreshToken, user } = await authService.registerUser(email, password, fullName, username, dept);
+  
+  res.cookie("jwt_refresh", refreshToken, COOKIE_OPTIONS);
+  res.json({ success: true, message, accessToken, user });
+});
 
 // LOGIN
-export const loginUser: RequestHandler = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const { message, accessToken, refreshToken, user } = await authService.loginUser(email, password);
-    
-    res.cookie("jwt_refresh", refreshToken, COOKIE_OPTIONS);
-
-    res.json({ success: true, message, accessToken, user });
-  } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+export const loginUser = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
   }
-};
+
+  const { message, accessToken, refreshToken, user } = await authService.loginUser(email, password);
+  
+  res.cookie("jwt_refresh", refreshToken, COOKIE_OPTIONS);
+  res.json({ success: true, message, accessToken, user });
+});
 
 // REFRESH TOKEN
-export const refreshAccessToken: RequestHandler = async (req, res) => {
+export const refreshAccessToken = catchAsync(async (req: Request, res: Response) => {
   const refreshToken = req.cookies.jwt_refresh;
 
   if (!refreshToken) {
-    res.status(401).json({ success: false, message: "No refresh token provided" });
-    return;
+    throw new ApiError(401, "No refresh token provided");
   }
 
   try {
@@ -60,12 +50,12 @@ export const refreshAccessToken: RequestHandler = async (req, res) => {
 
     res.json({ success: true, accessToken });
   } catch (err) {
-    res.status(401).json({ success: false, message: "Invalid refresh token" });
+    throw new ApiError(401, "Invalid refresh token");
   }
-};
+});
 
 // LOGOUT
-export const logoutUser: RequestHandler = async (req, res) => {
+export const logoutUser = catchAsync(async (req: Request, res: Response) => {
   res.clearCookie("jwt_refresh");
   res.json({ success: true, message: "Logged out successfully" });
-};
+});
