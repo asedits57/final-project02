@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Send, PenTool, CheckCircle2, ChevronRight, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,8 +7,11 @@ import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 import { GrammarQuestion, QuestionData } from "@services/questionService";
 import { apiService as api } from "@services/apiService";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
+import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";
 
 const GrammarModule = () => {
+    useLiveModuleActivity("grammar");
     const navigate = useNavigate();
     const [grammarQuestions, setGrammarQuestions] = useState<GrammarQuestion[]>([]);
     const [loading, setLoading] = useState(true);
@@ -18,6 +21,7 @@ const GrammarModule = () => {
     const [isAnswered, setIsAnswered] = useState(false);
     const [score, setScore] = useState(0);
     const [completed, setCompleted] = useState(false);
+    const hasAwardedScoreRef = useRef(false);
 
     useEffect(() => {
         const loadQuestions = async () => {
@@ -43,6 +47,19 @@ const GrammarModule = () => {
 
     const totalQuestions = grammarQuestions.length;
     const currentQuestion = grammarQuestions[currentIndex];
+    const correctOptionIndex = Number(currentQuestion?.correctAnswer);
+    const grammarCoachContext = currentQuestion
+        ? [
+            `Question: ${currentQuestion.question}`,
+            `Options: ${currentQuestion.options.map((option, idx) => `${idx + 1}. ${option}`).join(" | ")}`,
+            Number.isFinite(correctOptionIndex) && currentQuestion.options[correctOptionIndex]
+                ? `Correct answer: ${currentQuestion.options[correctOptionIndex]}`
+                : `Correct answer index: ${String(currentQuestion.correctAnswer)}`,
+            selectedOption !== null
+                ? `Learner selected: ${currentQuestion.options[selectedOption]}`
+                : "Learner has not selected an option yet.",
+          ].join("\n")
+        : "";
 
     // Load progress from localStorage if desired, but user wants to "complete" tasks
     // Let's just track the current session for now
@@ -83,7 +100,18 @@ const GrammarModule = () => {
         setIsAnswered(false);
         setScore(0);
         setCompleted(false);
+        hasAwardedScoreRef.current = false;
     };
+
+    useEffect(() => {
+        if (!completed || totalQuestions === 0 || hasAwardedScoreRef.current) {
+            return;
+        }
+
+        hasAwardedScoreRef.current = true;
+        const xpAwarded = Math.round((score / totalQuestions) * 100);
+        api.updateProgress(xpAwarded).catch(console.error);
+    }, [completed, score, totalQuestions]);
 
     if (loading) {
         return (
@@ -271,6 +299,23 @@ const GrammarModule = () => {
                         )}
                     </motion.div>
                 </AnimatePresence>
+
+                {isAnswered && currentQuestion && (
+                    <div className="mt-6">
+                        <ContextualAIAssistant
+                            title="Grammar explanation coach"
+                            description="Ask why the correct answer works, request the rule behind it, or get a similar practice question while this task is still fresh."
+                            placeholder="Ask the AI coach about this grammar question..."
+                            responseLabel="AI grammar coach"
+                            suggestions={[
+                                { label: "Why is it correct?", prompt: "Explain why the correct answer is right and why the others are weaker." },
+                                { label: "Teach the rule", prompt: "Teach me the grammar rule behind this question in simple language." },
+                                { label: "Similar practice", prompt: "Create one similar practice question with the answer hidden at the end." },
+                            ]}
+                            onAsk={(question) => api.askModuleCoach("grammar", grammarCoachContext, question)}
+                        />
+                    </div>
+                )}
                 
                 {/* Visual score hint */}
                 <div className="mt-8 flex justify-center gap-2">

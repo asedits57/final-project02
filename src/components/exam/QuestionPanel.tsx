@@ -1,23 +1,40 @@
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { apiService as api } from "@services/apiService";
+import { blobToDataUrl, getSupportedMediaRecorderMimeType, type CapturedRecordingAsset } from "@lib/mediaRecorder";
 
 export interface EvaluationResult {
   score: number;
   feedback: string;
+  transcript?: string;
+  audioRecording?: CapturedRecordingAsset;
 }
 
 interface QuestionPanelProps {
   onComplete?: (result: EvaluationResult) => void;
+  onRecordingStateChange?: (isRecording: boolean) => void;
 }
 
-const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
+const QuestionPanel = ({ onComplete, onRecordingStateChange }: QuestionPanelProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordTime, setRecordTime] = useState(30);
   const [transcript, setTranscript] = useState("");
   const [isEvaluating, setIsEvaluating] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef("");
+  const audioStreamRef = useRef<MediaStream | null>(null);
+  const audioRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordTimeRef = useRef(30);
+
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
+
+  useEffect(() => {
+    recordTimeRef.current = recordTime;
+  }, [recordTime]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
@@ -57,14 +74,43 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
     if (isRecording) {
       await stopRecording();
     } else {
-      startRecording();
+      await startRecording();
     }
   };
 
-  const startRecording = () => {
+  const startRecording = async () => {
     setTranscript("");
     setRecordTime(30);
     setIsRecording(true);
+    onRecordingStateChange?.(true);
+
+    if (typeof MediaRecorder !== "undefined") {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = stream;
+        audioChunksRef.current = [];
+        const mimeType = getSupportedMediaRecorderMimeType([
+          "audio/webm;codecs=opus",
+          "audio/webm",
+          "audio/mp4",
+        ]);
+
+        audioRecorderRef.current = mimeType
+          ? new MediaRecorder(stream, { mimeType })
+          : new MediaRecorder(stream);
+
+        audioRecorderRef.current.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data);
+          }
+        };
+
+        audioRecorderRef.current.start();
+      } catch (error) {
+        console.warn("Audio recording capture unavailable:", error);
+      }
+    }
+
     if (recognitionRef.current) {
       try {
         recognitionRef.current.start();
@@ -74,8 +120,56 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
     }
   };
 
+  const finalizeAudioRecording = async (): Promise<CapturedRecordingAsset | undefined> => {
+    const recorder = audioRecorderRef.current;
+
+    if (!recorder) {
+      audioStreamRef.current?.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+      return undefined;
+    }
+
+    const durationSeconds = Math.max(1, 30 - recordTimeRef.current);
+
+    return new Promise((resolve) => {
+      recorder.onstop = async () => {
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+          audioChunksRef.current = [];
+
+          if (blob.size === 0) {
+            resolve(undefined);
+            return;
+          }
+
+          const dataUrl = await blobToDataUrl(blob);
+          resolve({
+            dataUrl,
+            mimeType: recorder.mimeType || blob.type,
+            durationSeconds,
+            sizeBytes: blob.size,
+          });
+        } catch (error) {
+          console.warn("Failed to finalize audio recording:", error);
+          resolve(undefined);
+        } finally {
+          audioStreamRef.current?.getTracks().forEach((track) => track.stop());
+          audioStreamRef.current = null;
+          audioRecorderRef.current = null;
+        }
+      };
+
+      if (recorder.state !== "inactive") {
+        recorder.stop();
+      } else {
+        recorder.onstop?.(new Event("stop"));
+      }
+    });
+  };
+
   const stopRecording = async () => {
     setIsRecording(false);
+    onRecordingStateChange?.(false);
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -84,22 +178,41 @@ const QuestionPanel = ({ onComplete }: QuestionPanelProps) => {
       }
     }
 
-    if (!transcript.trim()) {
-      if (onComplete) onComplete({ score: 0, feedback: "No response recorded." });
+    const audioRecording = await finalizeAudioRecording();
+    const resolvedTranscript = transcriptRef.current.trim();
+
+    if (!resolvedTranscript) {
+      if (onComplete) {
+        onComplete({
+          score: 0,
+          feedback: "No response recorded.",
+          transcript: "",
+          audioRecording,
+        });
+      }
       return;
     }
 
     setIsEvaluating(true);
     try {
-      const res = await api.askAI(
-        `Evaluate the following spoken English response and return a JSON object with "score" (0-100) and "feedback" (string) fields only.\n\nResponse: "${transcript}"`
-      );
-      let data: EvaluationResult;
-      try { data = JSON.parse(res.reply); } catch { data = { score: 50, feedback: res.reply || "Evaluation complete." }; }
+      const review = await api.evaluateSpeaking("Describe your favorite place in your city.", resolvedTranscript);
+      const data: EvaluationResult = {
+        score: review.overall,
+        feedback: review.tips?.length ? review.tips.join(" ") : "Evaluation complete.",
+        transcript: resolvedTranscript,
+        audioRecording,
+      };
       if (onComplete) onComplete(data);
     } catch (error) {
       console.error("Evaluation error:", error);
-      if (onComplete) onComplete({ score: 0, feedback: "Error evaluating response." });
+      if (onComplete) {
+        onComplete({
+          score: 0,
+          feedback: "Error evaluating response.",
+          transcript: resolvedTranscript,
+          audioRecording,
+        });
+      }
     } finally {
       setIsEvaluating(false);
     }

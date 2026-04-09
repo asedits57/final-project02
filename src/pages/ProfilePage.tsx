@@ -10,6 +10,7 @@ import { useState, useRef } from "react";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
 import TaskLevels from "@components/task/TaskLevels";
 import { useStore } from "@store/useAuthStore";
+import AppBottomNav from "@components/shared/AppBottomNav";
 
 /* ─── Nav ─── */
 const navItems = [
@@ -547,49 +548,7 @@ export default function ProfilePage() {
             </AnimatePresence>
 
             {/* ══ BOTTOM NAV ══ */}
-            <motion.nav
-                className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-6 py-4"
-                style={{
-                    background: "rgba(15, 10, 30, 0.8)",
-                    backdropFilter: "blur(25px)",
-                    WebkitBackdropFilter: "blur(25px)",
-                    borderTop: "1px solid rgba(139, 92, 246, 0.25)",
-                    boxShadow: "0 -8px 40px rgba(0, 0, 0, 0.2)",
-                }}
-                initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}
-            >
-                {navItems.map(({ label, icon: Icon, path }) => {
-                    const active = location.pathname === path;
-                    return (
-                        <motion.button 
-                            key={label} 
-                            onClick={() => navigate(path)}
-                            whileHover={{ scale: 1.1, y: -2 }}
-                            whileTap={{ scale: 0.9 }}
-                            aria-label={`Go to ${label}`}
-                            className="flex flex-col items-center gap-1.5 px-5 py-2.5 rounded-[1.5rem] transition-all duration-300 group focus:outline-none focus:ring-2 focus:ring-violet-500"
-                            style={{
-                                background: active ? "rgba(139,92,246,0.22)" : "transparent",
-                                border: active ? "1px solid rgba(139,92,246,0.4)" : "1px solid transparent",
-                            }}
-                            onKeyDown={(e) => e.key === "Enter" && navigate(path)}
-                        >
-                            <Icon className="w-5 h-5 transition-all duration-300"
-                                style={{
-                                    color: active ? "hsl(270, 80%, 75%)" : "rgba(160, 140, 200, 0.5)",
-                                    filter: active ? "drop-shadow(0 0 8px hsl(270 80% 65%))" : "none",
-                                }} />
-                            <span className="text-[10px] font-black leading-none uppercase tracking-tighter"
-                                style={{
-                                    color: active ? "hsl(270, 80%, 85%)" : "rgba(160, 140, 200, 0.4)",
-                                    fontFamily: "'Inter', sans-serif",
-                                }}>
-                                {label}
-                            </span>
-                        </motion.button>
-                    );
-                })}
-            </motion.nav>
+            <AppBottomNav className="px-6 py-4" />
         </div>
     );
 }

@@ -1,0 +1,9 @@
+process.env.NODE_ENV = "test";
+process.env.JWT_SECRET = process.env.JWT_SECRET || "testsecret";
+process.env.OTP_HASH_SECRET = process.env.OTP_HASH_SECRET || "otp-test-secret";
+process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "google-client-id";
+process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "google-client-secret";
+process.env.GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "http://localhost:8080/auth/google/callback";
+process.env.EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || "resend";
+process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || "resend-api-key";
+process.env.EMAIL_FROM = process.env.EMAIL_FROM || "MEC Learning <no-reply@example.com>";

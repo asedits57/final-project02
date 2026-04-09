@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import AITutorPage from "../modules/ai/pages/AITutorPage";
+import AITutorPage from "../pages/AITutorPage";
 import { apiService as api } from "@services/apiService";
 
 // Mock apiService

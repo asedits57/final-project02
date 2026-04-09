@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService } from "@services/authService";
+import { clearOtpSession } from "@lib/otpSession";
 
 interface User {
     id: string;
@@ -8,10 +9,15 @@ interface User {
     fullName?: string;
     username?: string;
     dept?: string;
+    avatar?: string;
     level?: number;
     score?: number;
     streak?: number;
     role?: string;
+    oauthProvider?: "local" | "google" | "github";
+    isVerified?: boolean;
+    hasPassword?: boolean;
+    verifiedAt?: string;
     createdAt?: string;
 }
 
@@ -39,6 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             console.warn("Logout failed:", err);
             localStorage.removeItem("token"); // clear it anyway
         }
+        clearOtpSession();
         set({ user: null, loading: false, error: null });
     },
 }));
@@ -49,6 +56,7 @@ export const useStore = useAuthStore;
 // Listen for session expiry from API utility
 if (typeof window !== "undefined") {
   window.addEventListener("session-expired", () => {
+    clearOtpSession();
     useAuthStore.getState().setUser(null);
   });
 }

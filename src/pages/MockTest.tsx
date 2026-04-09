@@ -6,6 +6,7 @@ import { useAuthStore as useStore } from "@store/useAuthStore";
 import { apiService as api } from "@services/apiService";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
 
 
 const TOTAL_TIME = 1800; // 30 minutes
@@ -30,6 +31,7 @@ const typeColors: Record<QuestionType, string> = {
 };
 
 const MockTest = () => {
+    useLiveModuleActivity("mock-test");
     const navigate = useNavigate();
     const { 
         questions, loading, error, current, selected, timeLeft, finished, 

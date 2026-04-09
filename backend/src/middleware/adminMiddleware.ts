@@ -1,11 +1,24 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
-export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
-  const user = (req as any).user;
+import { type AuthenticatedRequest, type UserRole } from "../types/auth";
+import ApiError from "../utils/ApiError";
 
-  if (!user || user.role !== "admin") {
-    return res.status(403).json({ error: "Forbidden: Admin access required" });
-  }
+export const requireRole = (...roles: UserRole[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as AuthenticatedRequest).user;
 
-  next();
+    if (!user) {
+      next(new ApiError(401, "Not authorized, user context missing"));
+      return;
+    }
+
+    if (!roles.includes(user.role)) {
+      next(new ApiError(403, "Forbidden: Admin access required"));
+      return;
+    }
+
+    next();
+  };
 };
+
+export const isAdmin = requireRole("admin");

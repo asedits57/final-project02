@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import * as aiService from "../services/aiService";
+import * as aiService from "../services/aiRuntimeService";
 import { aiPromptSchema } from "../validators/aiValidator";
 import { sanitize } from "../utils/sanitization";
 import catchAsync from "../utils/catchAsync";

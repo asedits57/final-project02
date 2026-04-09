@@ -6,7 +6,7 @@ interface RankingsListProps {
     currentUserId?: string;
 }
 
-export function RankingsList({ users }: RankingsListProps) {
+export function RankingsList({ users, currentUserId }: RankingsListProps) {
     if (users.length === 0) return null;
 
     return (
@@ -14,8 +14,11 @@ export function RankingsList({ users }: RankingsListProps) {
             <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-violet-500/20 overflow-hidden">
                 <div className="divide-y divide-violet-500/10">
                     {users.map((user, index) => {
-                        const isCurrentUser = user.username === 'You';
+                        const isCurrentUser = user.is_current_user || user.id === currentUserId;
                         const progressPercent = Math.min((user.xp % 1000) / 10, 100);
+                        const liveLabel = user.live_modules?.length
+                            ? `Live in ${user.live_modules.map((module) => module.replace(/-/g, " ")).join(", ")}`
+                            : "Live now";
 
                         return (
                             <div
@@ -42,12 +45,20 @@ export function RankingsList({ users }: RankingsListProps) {
                                         <h3 className={`font-bold truncate ${isCurrentUser ? 'text-violet-300' : 'text-white'}`}>
                                             {user.username}
                                         </h3>
+                                        {user.is_live && (
+                                            <span className="flex-shrink-0 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">
+                                                Live
+                                            </span>
+                                        )}
                                         {isCurrentUser && (
                                             <span className="flex-shrink-0 bg-violet-500 text-white text-xs px-2 py-0.5 rounded-full">
                                                 You
                                             </span>
                                         )}
                                     </div>
+                                    {user.is_live && (
+                                        <p className="mb-1 text-xs text-emerald-200/80">{liveLabel}</p>
+                                    )}
                                     <div className="flex items-center gap-2">
                                         <div className="flex-1 bg-gray-800 rounded-full h-2 overflow-hidden">
                                             <div

@@ -7,6 +7,7 @@ import {
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
+import AppBottomNav from "@components/shared/AppBottomNav";
 
 /* ── Nav ── */
 const navItems = [
@@ -400,25 +401,7 @@ export default function PrivacyPage() {
             </AnimatePresence>
 
             {/* BOTTOM NAV */}
-            <motion.nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center px-4 py-3"
-                style={{ background: "rgba(15,10,30,0.75)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(139,92,246,0.2)", boxShadow: "0 -4px 30px rgba(139,92,246,0.1)" }}
-                initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
-                {navItems.map(({ label, icon: Icon, path }) => {
-                    const active = location.pathname === path;
-                    return (
-                        <button key={label} onClick={() => navigate(path)}
-                            className="flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-200"
-                            style={{ background: active ? "rgba(139,92,246,0.18)" : "transparent", border: active ? "1px solid rgba(139,92,246,0.35)" : "1px solid transparent" }}>
-                            <Icon className="w-5 h-5"
-                                style={{ color: active ? "hsl(270,80%,75%)" : "rgba(160,140,200,0.6)", filter: active ? "drop-shadow(0 0 6px hsl(270 80% 65%))" : "none" }} />
-                            <span className="text-[10px] font-medium leading-none"
-                                style={{ color: active ? "hsl(270,80%,80%)" : "rgba(160,140,200,0.5)", fontFamily: "'Inter', sans-serif" }}>
-                                {label}
-                            </span>
-                        </button>
-                    );
-                })}
-            </motion.nav>
+            <AppBottomNav />
         </div>
     );
 }

@@ -18,7 +18,7 @@ const Login = () => {
             const data = await api.login(email, password);
             localStorage.setItem("token", data.token);
             if (data.user) setUser(data.user);
-            navigate("/dashboard");
+            navigate("/");
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -33,7 +33,7 @@ const Login = () => {
             const data = await api.register(email, password);
             localStorage.setItem("token", data.token);
             if (data.user) setUser(data.user);
-            navigate("/dashboard");
+            navigate("/");
         } catch (err: any) {
             setError(err.message);
         } finally {

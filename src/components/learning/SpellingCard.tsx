@@ -2,15 +2,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Type, Loader2 } from "lucide-react";
 import { apiService as api } from "@services/apiService";
-
-interface SpellingError {
-  word: string;
-  suggestion: string;
-}
+import type { SpellingIssue } from "@services/aiService";
+import { useToast } from "@hooks/use-toast";
 
 const SpellingCard = () => {
+  const { toast } = useToast();
   const [input, setInput] = useState("");
-  const [results, setResults] = useState<SpellingError[]>([]);
+  const [results, setResults] = useState<SpellingIssue[]>([]);
   const [checked, setChecked] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -18,16 +16,17 @@ const SpellingCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const res = await api.askAI(
-        `Check the spelling of the following text and return a JSON array of objects with "word" (misspelled) and "suggestion" (correct) fields. Only return the JSON array, nothing else.\n\nText: "${input.trim()}"`
-      );
-      let parsed;
-      try { parsed = JSON.parse(res.reply); } catch { parsed = []; }
+      const parsed = await api.checkSpelling(input);
       setResults(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
-    } catch {
+    } catch (error: any) {
+      toast({
+        title: "Spelling Check Failed",
+        description: error?.message || "The AI spelling helper is temporarily unavailable.",
+        variant: "destructive",
+      });
       setResults([]);
-      setChecked(true);
+      setChecked(false);
     } finally {
       setLoading(false);
     }

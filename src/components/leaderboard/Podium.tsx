@@ -7,6 +7,8 @@ interface PodiumProps {
 
 export function Podium({ topThree }: PodiumProps) {
     const [first, second, third] = topThree;
+    const formatLiveModules = (modules?: string[]) =>
+        modules && modules.length > 0 ? modules.map((module) => module.replace(/-/g, " ")).join(", ") : "";
 
     if (!first) return null;
 
@@ -24,7 +26,18 @@ export function Podium({ topThree }: PodiumProps) {
                                     <img src={second.avatar_url} alt={second.username} className="w-full h-full object-cover" />
                                 </div>
                                 <h3 className="text-white font-bold text-lg mb-1">{second.username}</h3>
+                                {second.is_live && (
+                                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        Live now
+                                    </div>
+                                )}
                                 <p className="text-gray-400 text-sm mb-2">Level {second.level}</p>
+                                {second.is_live && second.live_modules?.length ? (
+                                    <p className="mb-2 text-center text-xs text-emerald-200/80">
+                                        {formatLiveModules(second.live_modules)}
+                                    </p>
+                                ) : null}
                                 <div className="bg-gray-700 rounded-full px-4 py-1">
                                     <p className="text-violet-400 font-bold">{second.weekly_xp.toLocaleString()} XP</p>
                                 </div>
@@ -49,7 +62,18 @@ export function Podium({ topThree }: PodiumProps) {
                                     <img src={first.avatar_url} alt={first.username} className="w-full h-full object-cover" />
                                 </div>
                                 <h3 className="text-white font-bold text-xl mb-1">{first.username}</h3>
+                                {first.is_live && (
+                                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                                        Live now
+                                    </div>
+                                )}
                                 <p className="text-violet-200 text-sm mb-3">Level {first.level}</p>
+                                {first.is_live && first.live_modules?.length ? (
+                                    <p className="mb-3 text-center text-xs text-violet-100/80">
+                                        {formatLiveModules(first.live_modules)}
+                                    </p>
+                                ) : null}
                                 <div className="bg-white/20 backdrop-blur-sm rounded-full px-5 py-2">
                                     <p className="text-white font-bold text-lg">{first.weekly_xp.toLocaleString()} XP</p>
                                 </div>
@@ -78,7 +102,18 @@ export function Podium({ topThree }: PodiumProps) {
                                     <img src={third.avatar_url} alt={third.username} className="w-full h-full object-cover" />
                                 </div>
                                 <h3 className="text-white font-bold text-lg mb-1">{third.username}</h3>
+                                {third.is_live && (
+                                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        Live now
+                                    </div>
+                                )}
                                 <p className="text-gray-400 text-sm mb-2">Level {third.level}</p>
+                                {third.is_live && third.live_modules?.length ? (
+                                    <p className="mb-2 text-center text-xs text-emerald-200/80">
+                                        {formatLiveModules(third.live_modules)}
+                                    </p>
+                                ) : null}
                                 <div className="bg-gray-700 rounded-full px-4 py-1">
                                     <p className="text-violet-400 font-bold">{third.weekly_xp.toLocaleString()} XP</p>
                                 </div>

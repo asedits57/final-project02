@@ -1,14 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Download, RefreshCw, Eye, Shield, Trophy } from "lucide-react";
 import { EvaluationResult } from "@components/exam/QuestionPanel";
+import type { AdminFinalTestRecord } from "@services/adminService";
 
 const Results = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const evaluation = location.state?.evaluation as EvaluationResult | undefined;
+  const submission = location.state?.submission as AdminFinalTestRecord | undefined;
   
   const overall = evaluation?.score || 0;
   const feedback = evaluation?.feedback || "No feedback available.";
+  const reviewStatus = submission?.reviewStatus || "pending";
+  const hasCertificate = reviewStatus === "approved" || reviewStatus === "reviewed";
 
   return (
     <div className="min-h-screen gradient-bg flex items-center justify-center p-6">
@@ -52,6 +56,21 @@ const Results = () => {
             <p className="text-sm text-foreground leading-relaxed">{feedback}</p>
         </div>
 
+        {submission ? (
+          <div className="glass rounded-lg p-5 space-y-2">
+            <h3 className="font-bold">Submission Status</h3>
+            <p className="text-sm text-muted-foreground">
+              Submission ID: {submission._id}
+            </p>
+            <p className="text-sm text-foreground">
+              Review status: <span className="font-semibold capitalize">{reviewStatus.replaceAll("_", " ")}</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Your transcript, audio capture, video capture, and proctoring evidence are now available to admins for review.
+            </p>
+          </div>
+        ) : null}
+
         {/* AI Integrity */}
         <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-success/10 border border-success/20">
           <Shield className="w-5 h-5 text-success" />
@@ -63,7 +82,10 @@ const Results = () => {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3 justify-center">
-          <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/80 transition-all neon-glow">
+          <button
+            disabled={!hasCertificate}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/80 transition-all neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download className="w-4 h-4" /> Download Certificate
           </button>
           <button className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/80 transition-all">

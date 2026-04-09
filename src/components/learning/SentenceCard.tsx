@@ -2,8 +2,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Loader2 } from "lucide-react";
 import { apiService as api } from "@services/apiService";
+import { useToast } from "@hooks/use-toast";
 
 const SentenceCard = () => {
+  const { toast } = useToast();
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,10 +14,15 @@ const SentenceCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const res = await api.askAI(`Improve the following English sentence. Return only the improved sentence, nothing else.\n\n"${input.trim()}"`);
-      setOutput(res.reply || "");
-    } catch {
-      // handled
+      const improved = await api.improveSentence(input);
+      setOutput(improved);
+    } catch (error: any) {
+      toast({
+        title: "Improvement Failed",
+        description: error?.message || "The AI writing helper is temporarily unavailable.",
+        variant: "destructive",
+      });
+      setOutput("");
     } finally {
       setLoading(false);
     }

@@ -19,15 +19,13 @@ const TranslateCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const res = await api.askAI(
-        `Translate the following text from ${fromLang} to ${toLang}. Only return the translated text, nothing else.\n\n"${input.trim()}"`
-      );
-      setOutput(res.reply || "");
+      const translated = await api.translateText(input, fromLang, toLang);
+      setOutput(translated);
     } catch (err: any) {
       console.error("Translation Error:", err);
       toast({
         title: "Translation Failed",
-        description: "We couldn't reach the AI translator. Please try again.",
+        description: err?.message || "We couldn't reach the AI translator. Please try again.",
         variant: "destructive",
       });
       setOutput("");
@@ -75,7 +73,10 @@ const TranslateCard = () => {
           className="glass-input min-h-[100px] text-sm flex-1 resize-none"
           placeholder={mode === "tamil-to-english" ? "Paste Tamil text here..." : "Paste English text here..."}
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            setOutput("");
+          }}
         />
         <motion.button
           className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center"
@@ -85,6 +86,22 @@ const TranslateCard = () => {
           <Mic className="w-4 h-4 text-violet-bright" />
         </motion.button>
       </div>
+
+      <button
+        type="button"
+        className="violet-button w-full flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={handleTranslate}
+        disabled={loading || !input.trim()}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Translating...
+          </>
+        ) : (
+          "Translate"
+        )}
+      </button>
 
       {loading && (
         <div className="space-y-2 py-4 px-4 bg-white/5 rounded-2xl border border-white/10">

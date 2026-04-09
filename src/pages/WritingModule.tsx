@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { apiService as api } from "@services/apiService";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
 
 
 
@@ -22,6 +23,7 @@ interface WritingFeedback {
 import { useQuestions } from "@hooks/useQuestions";
 
 const WritingModule = () => {
+    useLiveModuleActivity("writing");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
     const writingTasks = questionData?.writing || [];
@@ -84,13 +86,7 @@ const WritingModule = () => {
 
         setIsEvaluating(true);
         try {
-            const aiResponse = await api.processAI("evaluate", JSON.stringify({
-                type: "writing",
-                prompt: currentTask.prompt,
-                studentSubmission: text
-            }));
-
-            const parsedFeedback = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+            const parsedFeedback = await api.evaluateWriting(currentTask.prompt, text);
             setFeedback(parsedFeedback);
 
             if (parsedFeedback?.score) {

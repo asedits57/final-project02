@@ -1,6 +1,22 @@
 import { apiClient } from "@services/apiClient";
 import { User } from "./authService";
 
+export interface LeaderboardEntry {
+  id: string;
+  email: string;
+  score: number;
+  streak: number;
+  level: number;
+  isLive: boolean;
+  liveModules: string[];
+}
+
+export interface LeaderboardSnapshot {
+  users: LeaderboardEntry[];
+  activeUsers: number;
+  updatedAt: string;
+}
+
 export const userService = {
   fetchProfile(): Promise<User> {
     return apiClient<User>("/profile");
@@ -20,7 +36,7 @@ export const userService = {
     });
   },
 
-  fetchLeaderboard(): Promise<User[]> {
-    return apiClient<User[]>("/leaderboard");
+  fetchLeaderboard(): Promise<LeaderboardSnapshot> {
+    return apiClient<LeaderboardSnapshot>("/leaderboard");
   }
 };

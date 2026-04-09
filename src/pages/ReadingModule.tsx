@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle, XCircle, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
+import { apiService as api } from "@services/apiService";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
+import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";
 
 
 import { useQuestions } from "@hooks/useQuestions";
@@ -11,6 +14,7 @@ import { useQuestions } from "@hooks/useQuestions";
 import { ReadingPassage } from "@services/questionService";
 
 const ReadingModule = () => {
+    useLiveModuleActivity("reading");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
     const readingPassages = questionData?.reading || [];
@@ -34,6 +38,7 @@ const ReadingModule = () => {
     const [showFeedback, setShowFeedback] = useState(false);
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
+    const hasAwardedScoreRef = useRef(false);
 
     useEffect(() => {
         if (readingPassages.length > 0) {
@@ -53,6 +58,16 @@ const ReadingModule = () => {
     const currentQuestion = currentPassage?.questions[currentQuestionIndex];
     const totalQuestions = readingPassages.reduce((acc, p) => acc + p.questions.length, 0);
     const overallProgress = readingPassages.slice(0, currentPassageIndex).reduce((acc, p) => acc + p.questions.length, 0) + currentQuestionIndex;
+    const readingCoachContext = currentPassage && currentQuestion
+        ? [
+            `Passage title: ${currentPassage.title}`,
+            `Passage content: ${currentPassage.content}`,
+            `Question: ${currentQuestion.question}`,
+            `Options: ${currentQuestion.options.map((option, idx) => `${String.fromCharCode(65 + idx)}. ${option}`).join(" | ")}`,
+            `Correct answer: ${currentQuestion.answer}`,
+            selectedAnswer ? `Learner selected: ${selectedAnswer}` : "Learner has not selected an answer yet.",
+          ].join("\n\n")
+        : "";
 
     // Persist progress
     useEffect(() => {
@@ -95,7 +110,18 @@ const ReadingModule = () => {
         localStorage.removeItem("reading_passage_index");
         localStorage.removeItem("reading_question_index");
         localStorage.removeItem("reading_progress_count");
+        hasAwardedScoreRef.current = false;
     };
+
+    useEffect(() => {
+        if (!isFinished || totalQuestions === 0 || hasAwardedScoreRef.current) {
+            return;
+        }
+
+        hasAwardedScoreRef.current = true;
+        const xpAwarded = Math.round((score / totalQuestions) * 100);
+        api.updateProgress(xpAwarded).catch(console.error);
+    }, [isFinished, score, totalQuestions]);
 
     if (isLoading) {
         return (
@@ -206,6 +232,19 @@ const ReadingModule = () => {
                                 })}
                             </div>
                         </div>
+
+                        <ContextualAIAssistant
+                            title="Reading coach"
+                            description="Use the passage itself as context so the AI can explain answers, summarize the text, or unpack difficult vocabulary."
+                            placeholder="Ask about this passage or question..."
+                            responseLabel="AI reading coach"
+                            suggestions={[
+                                { label: "Summarize passage", prompt: "Summarize this passage in simple English." },
+                                { label: "Explain answer", prompt: "Explain the best answer to the current question." },
+                                { label: "Difficult words", prompt: "Teach me the difficult vocabulary from this passage with short meanings." },
+                            ]}
+                            onAsk={(question) => api.askModuleCoach("reading", readingCoachContext, question)}
+                        />
                     </motion.div>
                 </AnimatePresence>
             </main>

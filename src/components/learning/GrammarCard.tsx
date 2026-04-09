@@ -4,11 +4,7 @@ import { CheckCircle, Loader2 } from "lucide-react";
 import { apiService as api } from "@services/apiService";
 import { useToast } from "@hooks/use-toast";
 import { Skeleton } from "@components/ui/skeleton";
-
-interface GrammarIssue {
-  issue: string;
-  suggestion: string;
-}
+import type { GrammarIssue } from "@services/aiService";
 
 const GrammarCard = () => {
   const { toast } = useToast();
@@ -21,22 +17,14 @@ const GrammarCard = () => {
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const res = await api.askAI(
-        `Check the grammar of the following text and return a JSON array of objects with "issue" and "suggestion" fields. Only return the JSON array, nothing else.\n\nText: "${input.trim()}"`
-      );
-      let parsed;
-      try {
-        parsed = JSON.parse(res.reply);
-      } catch (e) {
-        parsed = [];
-      }
+      const parsed = await api.checkGrammar(input);
       setIssues(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
     } catch (error: any) {
       console.error("Grammar check error:", error);
       toast({
         title: "Check Failed",
-        description: "The AI evaluator is briefly unavailable. Please try again.",
+        description: error?.message || "The AI evaluator is briefly unavailable. Please try again.",
         variant: "destructive",
       });
       setIssues([]);
@@ -68,6 +56,22 @@ const GrammarCard = () => {
         value={input}
         onChange={(e) => { setInput(e.target.value); setChecked(false); }}
       />
+
+      <button
+        type="button"
+        className="violet-button w-full flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={handleCheck}
+        disabled={loading || !input.trim()}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking...
+          </>
+        ) : (
+          "Check"
+        )}
+      </button>
 
       {loading && (
         <div className="space-y-3 py-4 px-4 bg-white/5 rounded-2xl border border-white/10">

@@ -2,6 +2,9 @@ import { authService } from "@services/authService";
 import { questionService } from "@services/questionService";
 import { userService } from "@services/userService";
 import { aiService } from "@services/aiService";
+import { adminService } from "@services/adminService";
+import { finalTestService } from "@services/finalTestService";
+import { learningContentService } from "@services/learningContentService";
 import { apiClient } from "@services/apiClient";
 
 export const apiService = {
@@ -9,6 +12,9 @@ export const apiService = {
   ...questionService,
   ...userService,
   ...aiService,
+  ...adminService,
+  ...finalTestService,
+  ...learningContentService,
   fetch: <T>(endpoint: string, options?: RequestInit): Promise<T> => {
     return apiClient<T>(endpoint, options);
   }

@@ -16,6 +16,21 @@ If the user asks an irrelevant question, gently guide them back to learning Engl
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+const getFriendlyAIErrorReply = (error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  const lowerMessage = message.toLowerCase();
+
+  if (message.includes("OPENAI_API_KEY_MISSING")) {
+    return "AI is not configured yet. Add OPENAI_API_KEY to backend/.env and restart the backend server.";
+  }
+
+  if (lowerMessage.includes("incorrect api key") || lowerMessage.includes("invalid api key")) {
+    return "The configured OpenAI API key looks invalid. Update OPENAI_API_KEY in backend/.env and restart the backend server.";
+  }
+
+  return "I'm having a little trouble thinking of an answer right now. Could you please check your internet connection or try asking again in a few moments?";
+};
+
 export const askAI = async (prompt: string, retries = 3) => {
   const startTime = performance.now();
   const hash = crypto.createHash("md5").update(prompt).digest("hex");

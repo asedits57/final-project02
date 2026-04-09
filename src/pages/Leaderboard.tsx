@@ -1,4 +1,5 @@
-import { Sparkles, Home, CheckSquare, Trophy, User, BookOpen } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Activity, Sparkles, Home, CheckSquare, Trophy, User, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Podium } from '@components/leaderboard/Podium';
 import { RankingsList } from '@components/leaderboard/RankingsList';
@@ -8,6 +9,9 @@ import { SkeletonPodiumItem, SkeletonListRow } from "@components/ui/SkeletonLoad
 import ErrorMessage from "@components/ui/ErrorMessage";
 import Spinner from "@components/ui/Spinner";
 import { useLeaderboard } from '../hooks/useLeaderboard';
+import { disconnectRealtimeSocket, getRealtimeSocket } from '@lib/socket';
+import { useAuthStore } from '@store/useAuthStore';
+import type { LeaderboardSnapshot } from '@services/userService';
 
 const navItems = [
     { label: 'Home', icon: Home, path: '/' },
@@ -37,8 +41,44 @@ function LeaderboardSkeleton() {
 const Leaderboard = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
+    const currentUserId = useAuthStore((state) => state.user?.id);
     const { data, isLoading, isError, error, refetch } = useLeaderboard();
+    const [liveSnapshot, setLiveSnapshot] = useState<LeaderboardSnapshot | null>(null);
+
+    useEffect(() => {
+        if (data) {
+            setLiveSnapshot(data);
+        }
+    }, [data]);
+
+    useEffect(() => {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const socket = getRealtimeSocket(token);
+        if (!socket) {
+            return;
+        }
+
+        const handleSnapshot = (snapshot: LeaderboardSnapshot) => {
+            setLiveSnapshot(snapshot);
+        };
+
+        const subscribe = () => {
+            socket.emit("leaderboard:subscribe");
+        };
+
+        socket.on("leaderboard:snapshot", handleSnapshot);
+        if (socket.connected) {
+            subscribe();
+        } else {
+            socket.on("connect", subscribe);
+        }
+
+        return () => {
+            socket.off("leaderboard:snapshot", handleSnapshot);
+            socket.off("connect", subscribe);
+            disconnectRealtimeSocket();
+        };
+    }, []);
 
     if (isError) {
         return (
@@ -51,17 +91,23 @@ const Leaderboard = () => {
         );
     }
 
-    // Map to frontend expected format if needed
-    const users: LeaderboardUser[] = (data || []).map((u: { id?: string; _id?: string; email: string; score?: number }, idx: number) => ({
-        id: u.id || u._id || String(idx + 1),
+    const snapshot = liveSnapshot || data;
+    const activeUsers = snapshot?.activeUsers || 0;
+    const snapshotUsers = snapshot?.users || [];
+
+    const users: LeaderboardUser[] = snapshotUsers.map((u, idx) => ({
+        id: u.id || String(idx + 1),
         username: u.email.split('@')[0],
         xp: u.score || 0,
-        level: Math.floor((u.score || 0) / 100) + 1,
+        level: u.level || Math.floor((u.score || 0) / 100) + 1,
         avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`,
         weekly_xp: u.score || 0,
         rank: idx + 1,
         created_at: '',
-        updated_at: ''
+        updated_at: '',
+        is_live: u.isLive,
+        live_modules: u.liveModules,
+        is_current_user: currentUserId === u.id,
     }));
 
     const topThree = users.slice(0, 3);
@@ -86,7 +132,13 @@ const Leaderboard = () => {
                             </h1>
                             <Sparkles className="w-6 h-6 text-violet-400 animate-sparkle" style={{ animationDelay: '1s' }} />
                         </motion.div>
-                        <p className="text-gray-400 text-lg">Top Language Learners This Week</p>
+                        <p className="text-gray-400 text-lg">
+                            {activeUsers > 0 ? `${activeUsers} learners are performing live right now` : "Waiting for learners to start live practice"}
+                        </p>
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
+                            <Activity className="h-4 w-4" />
+                            Live users rise to the top as they practice and score points.
+                        </div>
                     </div>
                 </header>
 
@@ -100,7 +152,7 @@ const Leaderboard = () => {
                     >
                         <Podium topThree={topThree} />
                         <div className="mt-8">
-                            <RankingsList users={remaining} />
+                            <RankingsList users={remaining} currentUserId={currentUserId} />
                         </div>
                     </motion.div>
                 )}

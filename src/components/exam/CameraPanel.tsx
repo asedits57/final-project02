@@ -3,6 +3,7 @@ import { Eye, AlertTriangle, User, VideoOff } from "lucide-react";
 import * as faceapi from "face-api.js";
 import { estimateGaze, type GazeDirection } from "./gazeUtils";
 import { useProctoring } from "./ProctoringContext";
+import { blobToDataUrl, getSupportedMediaRecorderMimeType, type CapturedRecordingAsset } from "@lib/mediaRecorder";
 
 const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model";
 
@@ -11,7 +12,12 @@ interface Detection {
   landmarks: { x: number; y: number }[];
 }
 
-const CameraPanel = () => {
+interface CameraPanelProps {
+  recordingActive?: boolean;
+  onRecordingComplete?: (recording?: CapturedRecordingAsset) => void;
+}
+
+const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPanelProps) => {
   const { pushEvent } = useProctoring();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,6 +32,9 @@ const CameraPanel = () => {
   const [eyeFocused, setEyeFocused] = useState(false);
   const lookAwayTimer = useRef<number>(0);
   const detectionRef = useRef<number>();
+  const videoRecorderRef = useRef<MediaRecorder | null>(null);
+  const videoChunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef<number | null>(null);
 
   // Load face-api models
   useEffect(() => {
@@ -173,6 +182,77 @@ const CameraPanel = () => {
       if (detectionRef.current) cancelAnimationFrame(detectionRef.current);
     };
   }, [cameraActive, modelsLoaded, detect]);
+
+  useEffect(() => {
+    const stream = videoRef.current?.srcObject as MediaStream | null;
+
+    if (!recordingActive || !cameraActive || !stream || typeof MediaRecorder === "undefined") {
+      if (videoRecorderRef.current && videoRecorderRef.current.state !== "inactive") {
+        videoRecorderRef.current.stop();
+      }
+      return;
+    }
+
+    if (videoRecorderRef.current && videoRecorderRef.current.state !== "inactive") {
+      return;
+    }
+
+    try {
+      const mimeType = getSupportedMediaRecorderMimeType([
+        "video/webm;codecs=vp8",
+        "video/webm",
+        "video/mp4",
+      ]);
+
+      videoChunksRef.current = [];
+      recordingStartedAtRef.current = Date.now();
+      videoRecorderRef.current = mimeType
+        ? new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 250_000 })
+        : new MediaRecorder(stream);
+
+      videoRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          videoChunksRef.current.push(event.data);
+        }
+      };
+
+      videoRecorderRef.current.onstop = async () => {
+        try {
+          const recorder = videoRecorderRef.current;
+          const blob = new Blob(videoChunksRef.current, { type: recorder?.mimeType || "video/webm" });
+          videoChunksRef.current = [];
+
+          if (blob.size === 0) {
+            onRecordingComplete?.(undefined);
+            return;
+          }
+
+          const dataUrl = await blobToDataUrl(blob);
+          const durationSeconds = recordingStartedAtRef.current
+            ? Math.max(1, Math.round((Date.now() - recordingStartedAtRef.current) / 1000))
+            : undefined;
+
+          onRecordingComplete?.({
+            dataUrl,
+            mimeType: recorder?.mimeType || blob.type,
+            durationSeconds,
+            sizeBytes: blob.size,
+          });
+        } catch (error) {
+          console.warn("Failed to finalize camera recording:", error);
+          onRecordingComplete?.(undefined);
+        } finally {
+          recordingStartedAtRef.current = null;
+          videoRecorderRef.current = null;
+        }
+      };
+
+      videoRecorderRef.current.start();
+    } catch (error) {
+      console.warn("Video recording capture unavailable:", error);
+      onRecordingComplete?.(undefined);
+    }
+  }, [cameraActive, onRecordingComplete, recordingActive]);
 
   return (
     <div className="glass neon-border p-4 flex flex-col">

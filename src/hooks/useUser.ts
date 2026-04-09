@@ -26,8 +26,12 @@ export const useUser = () => {
         // during transient network failures or while cookie refresh runs
     }, [query.data, setUser]);
 
+    const resolvedUser = hasToken
+        ? currentUser || query.data || null
+        : currentUser;
+
     return {
         ...query,
-        user: query.data || currentUser,
+        user: resolvedUser,
     };
 };

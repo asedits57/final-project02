@@ -7,6 +7,7 @@ import ErrorMessage from "@components/ui/ErrorMessage";
 
 
 import { apiService as api } from "@services/apiService";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
 
 const difficultyColor: Record<string, string> = {
     Beginner: "text-glow-cyan",
@@ -101,6 +102,7 @@ const PracticeTest = () => {
     const navigate = useNavigate();
     const { level } = useParams<{ level: string }>();
     const levelLabel = level ? levelLabels[level] || "Beginner" : "Beginner";
+    useLiveModuleActivity(`practice-${level || "beginner"}`);
 
     const [state, dispatch] = useReducer(practiceReducer, initialState(900));
     const { 

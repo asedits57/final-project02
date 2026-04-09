@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Bot, User, Sparkles, BookOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiService as api } from "@services/apiService";
 import { useToast } from "@hooks/use-toast";
 import { ToastAction } from "@components/ui/toast";
@@ -18,8 +18,13 @@ const presetPrompts = [
     { icon: Sparkles, text: "How to improve vocabulary?" },
 ];
 
+type TutorRouteState = {
+    initialPrompt?: string;
+};
+
 const AITutorPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { toast } = useToast();
     const [messages, setMessages] = useState<Message[]>([
         {
@@ -32,6 +37,7 @@ const AITutorPage = () => {
     const [inputValue, setInputValue] = useState("");
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const initialPromptSentRef = useRef(false);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -41,7 +47,7 @@ const AITutorPage = () => {
         scrollToBottom();
     }, [messages, isTyping, scrollToBottom]);
 
-    const handleSend = async (text: string) => {
+    const handleSend = useCallback(async (text: string) => {
         if (!text.trim()) return;
 
         const userMsg: Message = {
@@ -63,6 +69,9 @@ const AITutorPage = () => {
             const prompt = `You are a friendly English tutor. Answer clearly and helpfully.\n\n${context}\nTutor:`;
 
             const res = await api.askAI(prompt);
+            if (res.fallback || res.errorCode) {
+                throw new Error(res.reply || "AI is temporarily unavailable.");
+            }
 
             const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
@@ -76,7 +85,7 @@ const AITutorPage = () => {
             
             toast({
                 title: "Tutor Connection Error",
-                description: "I'm having trouble connecting to my AI brain. Would you like to try again?",
+                description: error?.message || "I'm having trouble connecting to my AI brain. Would you like to try again?",
                 variant: "destructive",
                 action: (
                     <ToastAction altText="Try again" onClick={() => handleSend(text)}>
@@ -88,14 +97,27 @@ const AITutorPage = () => {
             const errorMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 sender: "ai",
-                text: "⚠️ I'm sorry, I'm having trouble connecting to my brain right now. Please try using the 'Try again' button above!",
+                text: error?.message || "I'm sorry, I'm having trouble connecting to my brain right now. Please try using the 'Try again' button above.",
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMsg]);
         } finally {
             setIsTyping(false);
         }
-    };
+    }, [messages, toast]);
+
+    useEffect(() => {
+        const state = (location.state as TutorRouteState | null) || null;
+        const seededPrompt = state?.initialPrompt?.trim();
+
+        if (!seededPrompt || initialPromptSentRef.current) {
+            return;
+        }
+
+        initialPromptSentRef.current = true;
+        void handleSend(seededPrompt);
+        navigate(location.pathname, { replace: true, state: null });
+    }, [handleSend, location.pathname, location.state, navigate]);
 
 
 

@@ -8,6 +8,9 @@ export interface LeaderboardUser {
     rank: number;
     created_at: string;
     updated_at: string;
+    is_live?: boolean;
+    live_modules?: string[];
+    is_current_user?: boolean;
 }
 
 export interface Database {

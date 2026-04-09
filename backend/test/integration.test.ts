@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import User from '../src/models/User';
 import * as userService from '../src/services/userService';
 import { vi } from 'vitest';
+import { createMongoMemoryServer } from '../src/config/memoryMongo';
 
-let mongoServer: MongoMemoryServer;
+let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
 
 describe('UserService Integration', () => {
   beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await createMongoMemoryServer();
     await mongoose.connect(mongoServer.getUri());
   });
 

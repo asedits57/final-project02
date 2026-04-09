@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
 import app from '../src/app';
 import User from '../src/models/User';
+import { createMongoMemoryServer } from '../src/config/memoryMongo';
 
-let mongoServer: MongoMemoryServer;
+let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
 
 describe('Auth API', () => {
   beforeAll(async () => {
     process.env.JWT_SECRET = 'testsecret';
-    mongoServer = await MongoMemoryServer.create();
+    mongoServer = await createMongoMemoryServer();
     const uri = mongoServer.getUri();
     await mongoose.connect(uri);
   });
@@ -24,10 +24,10 @@ describe('Auth API', () => {
     await User.deleteMany({});
   });
 
-  describe('POST /api/register', () => {
+  describe('POST /api/v1/auth/register', () => {
     it('should register a new user successfully and set a cookie', async () => {
       const res = await request(app)
-        .post('/api/v1/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
           password: 'password123'
@@ -50,7 +50,7 @@ describe('Auth API', () => {
       });
 
       const res = await request(app)
-        .post('/api/v1/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'test@example.com',
           password: 'password123'
@@ -61,17 +61,17 @@ describe('Auth API', () => {
     });
   });
 
-  describe('POST /api/login', () => {
+  describe('POST /api/v1/auth/login', () => {
     it('should login an existing user successfully and set a cookie', async () => {
       await request(app)
-        .post('/api/v1/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'login@example.com',
           password: 'password123'
         });
 
       const res = await request(app)
-        .post('/api/v1/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'login@example.com',
           password: 'password123'
@@ -85,14 +85,14 @@ describe('Auth API', () => {
 
     it('should not login with wrong password', async () => {
       await request(app)
-        .post('/api/v1/register')
+        .post('/api/v1/auth/register')
         .send({
           email: 'wrongpass@example.com',
           password: 'password123'
         });
 
       const res = await request(app)
-        .post('/api/v1/login')
+        .post('/api/v1/auth/login')
         .send({
           email: 'wrongpass@example.com',
           password: 'wrongpassword'
@@ -105,7 +105,7 @@ describe('Auth API', () => {
 
   describe('GET /api/admin/stats', () => {
     it('should not allow access without a cookie', async () => {
-      const res = await request(app).get('/api/admin/stats');
+      const res = await request(app).get('/api/v1/admin/stats');
       expect(res.status).toBe(401);
       expect(res.body.message).toBe('Not authorized, no token provided');
     });

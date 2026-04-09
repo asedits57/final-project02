@@ -1,0 +1,258 @@
+openapi: 3.0.3
+info:
+  title: Final Project 02 Auth OTP API
+  version: 1.0.0
+  description: Google login callback and email OTP verification endpoints.
+servers:
+  - url: /api/v1
+paths:
+  /auth/google/callback-handler:
+    post:
+      summary: Exchange Google auth code, start OTP verification if needed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+                redirectUri:
+                  type: string
+                  format: uri
+      responses:
+        "200":
+          description: Authenticated and OTP decision returned
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/GoogleOtpRequiredResponse"
+                  - $ref: "#/components/schemas/GoogleAlreadyVerifiedResponse"
+  /auth/otp/send:
+    post:
+      summary: Send a verification OTP to the authenticated Google email
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpSendRequest"
+      responses:
+        "200":
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpSendResponse"
+  /auth/otp/resend:
+    post:
+      summary: Resend a verification OTP for the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpResendRequest"
+      responses:
+        "200":
+          description: OTP resent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpSendResponse"
+  /auth/otp/verify:
+    post:
+      summary: Verify the submitted OTP for the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpVerifyRequest"
+      responses:
+        "200":
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpVerifySuccessResponse"
+        "400":
+          description: Invalid or expired OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpVerifyFailureResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        avatar:
+          type: string
+        oauthProvider:
+          type: string
+          enum: [local, google, github]
+        isVerified:
+          type: boolean
+    GoogleOtpRequiredResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: OTP sent successfully
+        verified:
+          type: boolean
+          example: false
+        email:
+          type: string
+          format: email
+        requestId:
+          type: string
+          format: uuid
+        expiresIn:
+          type: integer
+          example: 300
+        resendAvailableIn:
+          type: integer
+          example: 60
+        expiresAt:
+          type: string
+          format: date-time
+        resendAvailableAt:
+          type: string
+          format: date-time
+        redirectTo:
+          type: string
+          example: /verify-otp?requestId=uuid
+        accessToken:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+    GoogleAlreadyVerifiedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: User already verified
+        verified:
+          type: boolean
+          example: true
+        redirectTo:
+          type: string
+          example: /
+        accessToken:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+    OtpSendRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    OtpResendRequest:
+      type: object
+      required:
+        - requestId
+      properties:
+        requestId:
+          type: string
+          format: uuid
+    OtpVerifyRequest:
+      type: object
+      required:
+        - requestId
+        - otp
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        otp:
+          type: string
+          pattern: "^[0-9]{6}$"
+    OtpSendResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: OTP sent successfully
+        requestId:
+          type: string
+          format: uuid
+        expiresIn:
+          type: integer
+          example: 300
+        resendAvailableIn:
+          type: integer
+          example: 60
+        expiresAt:
+          type: string
+          format: date-time
+        resendAvailableAt:
+          type: string
+          format: date-time
+        email:
+          type: string
+          format: email
+    OtpVerifySuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: OTP verified successfully
+        verified:
+          type: boolean
+          example: true
+        next:
+          type: string
+          example: /
+        user:
+          $ref: "#/components/schemas/User"
+    OtpVerifyFailureResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Invalid or expired OTP
+        verified:
+          type: boolean
+          example: false

@@ -4,6 +4,8 @@ import { ArrowLeft, Play, Pause, RotateCcw, Send, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
+import { apiService as api } from "@services/apiService";
+import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";
 
 const WAVEFORM_BARS = 32;
 
@@ -30,7 +32,7 @@ const ListeningModule = () => {
     const [progress, setProgress] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
     const [submitted, setSubmitted] = useState(false);
-    const [feedback, setFeedback] = useState<{ score: number; message: string } | null>(null);
+    const [feedback, setFeedback] = useState<{ score: number; message: string; tips: string[] } | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
@@ -41,6 +43,16 @@ const ListeningModule = () => {
     }, [exercises]);
 
     const current = exercises[currentIdx];
+    const listeningCoachContext = current
+        ? [
+            `Exercise title: ${current.title}`,
+            `Description: ${current.description}`,
+            `Transcript or listening script: ${current.text || "No transcript available."}`,
+            submitted
+                ? `Selected answers: ${current.mcqs?.map((q) => `${q.id}:${selectedAnswers[q.id] ?? "blank"}`).join(" | ") || "No answers submitted."}`
+                : "The learner is still working on this exercise.",
+          ].join("\n\n")
+        : "";
 
     useEffect(() => {
         return () => {
@@ -124,27 +136,61 @@ const ListeningModule = () => {
         }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         window.speechSynthesis.cancel();
         
         let correctCount = 0;
+        const incorrectQuestions: string[] = [];
         current.mcqs?.forEach(q => {
             if (selectedAnswers[q.id] === q.correctAnswer) {
                 correctCount++;
+            } else {
+                incorrectQuestions.push(q.question.replace(/^\d+\.\s*/, ""));
             }
         });
         
         const totalQs = current.mcqs?.length || 1;
         const score = Math.round((correctCount / totalQs) * 100);
-        
-        const msg =
-            score >= 80
-                ? "Excellent listening comprehension and grammar skills!"
-                : score >= 50
-                    ? "Good effort! Review the questions you missed for better understanding."
-                    : "Keep practicing! Listen carefully and take notes next time.";
-                    
-        setFeedback({ score, message: msg });
+
+        try {
+            const review = await api.reviewListeningPerformance({
+                title: current.title,
+                transcript: current.text || current.description,
+                score,
+                totalQuestions: totalQs,
+                incorrectQuestions,
+            });
+
+            setFeedback({
+                score,
+                message:
+                    review.message ||
+                    (score >= 80
+                        ? "Excellent listening comprehension and grammar skills!"
+                        : score >= 50
+                            ? "Good effort. Review the missed questions and try again."
+                            : "Keep practicing. Focus on the main idea and important detail words next time."),
+                tips: review.tips?.length
+                    ? review.tips
+                    : ["Replay the audio and listen for keywords that signal the correct answer."],
+            });
+        } catch (error) {
+            console.error("Listening AI review error:", error);
+            setFeedback({
+                score,
+                message:
+                    score >= 80
+                        ? "Excellent listening comprehension and grammar skills!"
+                        : score >= 50
+                            ? "Good effort! Review the questions you missed for better understanding."
+                            : "Keep practicing! Listen carefully and take notes next time.",
+                tips: [
+                    "Replay the audio once more and listen for transition words like however, because, and finally.",
+                    "Pause after each sentence and restate the key idea in your own words.",
+                ],
+            });
+        }
+
         setSubmitted(true);
     };
 
@@ -374,6 +420,20 @@ const ListeningModule = () => {
                     )}
                 </motion.div>
 
+                <ContextualAIAssistant
+                    title="Listening coach"
+                    description="Ask for summaries, vocabulary help, or a reminder of what to listen for before you submit."
+                    placeholder="Ask about this listening exercise..."
+                    responseLabel="AI listening coach"
+                    suggestions={[
+                        { label: "Summarize audio", prompt: "Summarize the listening passage in simple English." },
+                        { label: "Key facts", prompt: "List the most important facts or ideas I should notice." },
+                        { label: "Listening strategy", prompt: "What should I listen for to answer these questions better?" },
+                    ]}
+                    onAsk={(question) => api.askModuleCoach("listening", listeningCoachContext, question)}
+                    className="mb-8"
+                />
+
                 {/* AI Feedback */}
                 <AnimatePresence>
                     {feedback && (
@@ -407,6 +467,16 @@ const ListeningModule = () => {
                                 </div>
                             </div>
                             <p className="text-sm text-muted-foreground font-poppins">{feedback.message}</p>
+                            {feedback.tips.length > 0 && (
+                                <div className="mt-4 space-y-2 border-t border-violet-400/12 pt-4">
+                                    {feedback.tips.map((tip, index) => (
+                                        <div key={index} className="flex items-start gap-2 text-xs text-slate-300/78">
+                                            <span className="mt-0.5 text-violet-300">-</span>
+                                            <span>{tip}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -414,7 +484,7 @@ const ListeningModule = () => {
                 {/* Action Button */}
                 {!submitted ? (
                     <button
-                        onClick={handleSubmit}
+                        onClick={() => void handleSubmit()}
                         disabled={Object.keys(selectedAnswers).length < (current.mcqs?.length || 0)}
                         className="flex items-center gap-2 w-full justify-center rounded-2xl py-4 font-poppins font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-40 disabled:cursor-not-allowed mb-10"
                         style={{

@@ -1,30 +1,63 @@
 import User from "../models/User";
 import Leaderboard from "../models/Leaderboard";
 import { safeGet, safeSet, safeDel } from "../config/redis";
+import { toPublicUser } from "../utils/toPublicUser";
 
-export const getUserById = async (userId: string) => {
-  const user = await User.findById(userId).select("-password");
-  if (!user) throw new Error("User not found");
-  return user;
+const LEADERBOARD_CACHE_KEY = "leaderboard";
+
+type LeaderboardRecord = {
+  id: string;
+  email: string;
+  streak: number;
+  level: number;
+  score: number;
 };
 
-export const getUserDashboard = async (userId: string) => {
+export type LeaderboardSnapshotUser = LeaderboardRecord & {
+  isLive: boolean;
+  liveModules: string[];
+};
+
+export type LeaderboardSnapshot = {
+  users: LeaderboardSnapshotUser[];
+  activeUsers: number;
+  updatedAt: string;
+};
+
+const toLeaderboardRecord = (user: {
+  _id?: { toString(): string };
+  id?: string;
+  email?: string;
+  streak?: number;
+  level?: number;
+  score?: number;
+}) => {
+  const score = Math.max(0, Number(user.score || 0));
+
+  return {
+    id: user._id ? user._id.toString() : String(user.id || ""),
+    email: user.email || "unknown@example.com",
+    streak: user.streak || 0,
+    level: Math.max(1, user.level || Math.floor(score / 100) + 1),
+    score,
+  };
+};
+
+export const getUserById = async (userId: string) => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
-  return {
-    streak: user.streak,
-    totalScore: user.score,
-    lastActive: user.lastActive,
-  };
+  return toPublicUser(user);
 };
 
 export const updateProfileData = async (userId: string, data: any) => {
   const User = (await import("../models/User")).default;
-  return await User.findByIdAndUpdate(userId, data, { new: true });
+  return await User.findByIdAndUpdate(userId, data, { returnDocument: "after" });
 };
 
 export const updateUserProgress = async (userId: string, score: number) => {
   const user = await User.findById(userId);
+  const parsedScore = Number(score);
+  const awardedScore = Number.isFinite(parsedScore) ? Math.max(0, Math.round(parsedScore)) : 0;
 
   if (!user) throw new Error("User not found");
 
@@ -43,7 +76,8 @@ export const updateUserProgress = async (userId: string, score: number) => {
     user.streak = 1;
   }
 
-  user.score += (score || 0);
+  user.score += awardedScore;
+  user.level = Math.max(1, Math.floor(user.score / 100) + 1);
   user.lastActive = new Date();
 
   await user.save();
@@ -52,16 +86,16 @@ export const updateUserProgress = async (userId: string, score: number) => {
   await Leaderboard.findOneAndUpdate(
     { userId },
     { score: user.score },
-    { upsert: true, new: true }
+    { upsert: true, returnDocument: "after" }
   );
 
   // Invalidate leaderboard cache when score is updated
-  await safeDel("leaderboard:top10");
+  await safeDel(LEADERBOARD_CACHE_KEY);
 
   // Broadcast real-time update
   try {
-    const { getIO } = await import("./socketService");
-    getIO().emit("leaderboard_update", { userId, score: user.score });
+    const { emitLeaderboardSnapshot } = await import("./socketService");
+    await emitLeaderboardSnapshot();
   } catch (err) {
     console.warn("Socket broadcast failed:", err);
   }
@@ -69,8 +103,8 @@ export const updateUserProgress = async (userId: string, score: number) => {
   return user;
 };
 
-export const getLeaderboardCached = async () => {
-  const cacheKey = "leaderboard";
+export const getLeaderboardCached = async (): Promise<LeaderboardRecord[]> => {
+  const cacheKey = LEADERBOARD_CACHE_KEY;
 
   // Check Redis
   const cachedData = await safeGet(cacheKey);
@@ -81,18 +115,20 @@ export const getLeaderboardCached = async () => {
 
   // Check DB using new Leaderboard schema
   const lbEntries = await Leaderboard.find()
-    .populate("userId", "email streak level")
+    .populate("userId", "email streak level score")
     .sort({ score: -1 })
     .limit(10);
 
   // Map to frontend expected format
-  const users = lbEntries.map((e: any) => ({
-    id: e.userId._id,
-    email: e.userId.email,
-    streak: e.userId.streak,
-    level: e.userId.level,
-    score: e.score,
-  }));
+  const users = lbEntries
+    .filter((entry: any) => !!entry.userId)
+    .map((entry: any) => toLeaderboardRecord({
+      _id: entry.userId._id,
+      email: entry.userId.email,
+      streak: entry.userId.streak,
+      level: entry.userId.level,
+      score: entry.score,
+    }));
 
   // Cache in Redis (60 seconds)
   await safeSet(cacheKey, JSON.stringify(users), {
@@ -101,4 +137,53 @@ export const getLeaderboardCached = async () => {
   console.log("Serving Leaderboard from DB and Caching 💾");
 
   return users;
+};
+
+export const getLeaderboardSnapshot = async (): Promise<LeaderboardSnapshot> => {
+  const users = await getLeaderboardCached();
+  const { getActiveParticipantIds, getActiveParticipantModules } = await import("./socketService");
+  const activeIds = getActiveParticipantIds();
+  const activeModules = getActiveParticipantModules();
+  const knownIds = new Set(users.map((user) => user.id));
+  const missingActiveIds = Array.from(activeIds).filter((id) => !knownIds.has(id));
+
+  let activeUsersWithoutScores: LeaderboardRecord[] = [];
+  if (missingActiveIds.length > 0) {
+    const extraUsers = await User.find({ _id: { $in: missingActiveIds } }).select("email streak level score");
+    activeUsersWithoutScores = extraUsers.map((user) => toLeaderboardRecord({
+      _id: user._id,
+      email: user.email,
+      streak: user.streak,
+      level: user.level,
+      score: user.score,
+    }));
+  }
+
+  const snapshotUsers = [...users, ...activeUsersWithoutScores]
+    .map((user) => ({
+      ...user,
+      isLive: activeIds.has(user.id),
+      liveModules: activeModules[user.id] || [],
+    }))
+    .sort((left, right) => {
+      if (left.isLive !== right.isLive) {
+        return left.isLive ? -1 : 1;
+      }
+
+      if (right.score !== left.score) {
+        return right.score - left.score;
+      }
+
+      return left.email.localeCompare(right.email);
+    })
+    .map((user) => ({
+      ...user,
+      level: Math.max(1, Math.floor(user.score / 100) + 1),
+    }));
+
+  return {
+    users: snapshotUsers,
+    activeUsers: activeIds.size,
+    updatedAt: new Date().toISOString(),
+  };
 };

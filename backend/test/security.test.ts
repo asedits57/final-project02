@@ -2,12 +2,12 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
 import app from "../src/app";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { createMongoMemoryServer } from "../src/config/memoryMongo";
 
-let mongo: MongoMemoryServer;
+let mongo: Awaited<ReturnType<typeof createMongoMemoryServer>>;
 
 beforeAll(async () => {
-  mongo = await MongoMemoryServer.create();
+  mongo = await createMongoMemoryServer();
   const uri = mongo.getUri();
   await mongoose.connect(uri);
 });
@@ -45,7 +45,7 @@ describe("Backend Security Hardening", () => {
 
     // We'll test the register endpoint as it's public and uses sanitization via Zod or middleware
     const res = await request(app)
-      .post("/api/v1/register")
+      .post("/api/v1/auth/register")
       .send({
         email: "security@test.com",
         password: "password123",

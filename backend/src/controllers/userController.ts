@@ -1,19 +1,20 @@
 import { Request, Response } from "express";
-import { updateUserProgress, getLeaderboardCached, getUserById, getUserDashboard, updateProfileData } from "../services/userService";
+import { updateUserProgress, getLeaderboardSnapshot, getUserById, updateProfileData } from "../services/userService";
 import { updateProfileSchema } from "../validators/userValidator";
 import { sanitizeObject } from "../utils/sanitization";
 import catchAsync from "../utils/catchAsync";
+import { getAuthenticatedUserId } from "../utils/authRequest";
+import { toPublicUser } from "../utils/toPublicUser";
 
 // GET PROFILE
 export const getProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const user = await getUserById(userId);
+  const user = await getUserById(getAuthenticatedUserId(req));
   res.json(user);
 });
 
 // UPDATE PROFILE
 export const updateProfile = catchAsync(async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
+  const userId = getAuthenticatedUserId(req);
   // Validate schema (will throw naturally if fails)
   const validatedData = updateProfileSchema.parse(req.body);
   // Sanitize object recursively
@@ -21,26 +22,19 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
   
   // Delegate to service
   const user = await updateProfileData(userId, sanitizedData);
-  res.json(user);
-});
-
-// GET DASHBOARD ANALYTICS
-export const getDashboard = catchAsync(async (req: Request, res: Response) => {
-  const userId = (req as any).user.id;
-  const dashboard = await getUserDashboard(userId);
-  res.json(dashboard);
+  res.json(user ? toPublicUser(user) : null);
 });
 
 // UPDATE SCORE + STREAK
 export const updateProgress = catchAsync(async (req: Request, res: Response) => {
-  const user = await updateUserProgress((req as any).user.id, req.body.score);
-  res.json(user);
+  const user = await updateUserProgress(getAuthenticatedUserId(req), req.body.score);
+  res.json(toPublicUser(user));
 });
 
 // GET LEADERBOARD
 export const getLeaderboard = catchAsync(async (req: Request, res: Response) => {
-  const users = await getLeaderboardCached();
-  res.json(users);
+  const snapshot = await getLeaderboardSnapshot();
+  res.json(snapshot);
 });
 
 // ADMIN: GET STATS

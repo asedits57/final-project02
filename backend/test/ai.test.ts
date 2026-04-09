@@ -2,12 +2,17 @@ import request from "supertest";
 import app from "../src/app";
 import User from "../src/models/User";
 import { generateAccessToken } from "../src/utils/generateToken";
+import mongoose from "mongoose";
+import { createMongoMemoryServer } from "../src/config/memoryMongo";
 
 describe("AI Controller Tests", () => {
   let token: string;
+  let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
 
   beforeAll(async () => {
-    // Note: Database is expected to be managed by a global setup
+    mongoServer = await createMongoMemoryServer();
+    await mongoose.connect(mongoServer.getUri());
+
     const testUser = await User.create({
       email: "ai_test@example.com",
       password: "password123",
@@ -19,6 +24,8 @@ describe("AI Controller Tests", () => {
 
   afterAll(async () => {
     await User.deleteOne({ email: "ai_test@example.com" });
+    await mongoose.disconnect();
+    await mongoServer.stop();
   });
 
   it("POST /api/v1/ai/generate - should return 401 if unauthenticated", async () => {

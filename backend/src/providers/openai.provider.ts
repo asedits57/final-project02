@@ -3,14 +3,21 @@ import { IAIProvider, IAIPayload } from "./aiProvider.interface";
 
 export class OpenAIProvider implements IAIProvider {
   private openai: OpenAI;
+  private apiKeyMissing: boolean;
 
   constructor() {
+    const apiKey = process.env.OPENAI_API_KEY?.trim();
+    this.apiKeyMissing = !apiKey;
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || "dummy_key_to_prevent_local_crash",
+      apiKey: apiKey || "missing_openai_key",
     });
   }
 
   async generateText(payload: IAIPayload): Promise<string> {
+    if (this.apiKeyMissing) {
+      throw new Error("OPENAI_API_KEY_MISSING");
+    }
+
     const response = await this.openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [

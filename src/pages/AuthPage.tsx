@@ -1,10 +1,10 @@
-import { lazy, Suspense, useRef, useCallback, useEffect, useReducer } from "react";
+import { useRef, useCallback, useEffect, useReducer } from "react";
 import { FloatingWord } from "@components/shared/FloatingWord";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { Eye, EyeOff, User, Mail, Github, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, User, Mail, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,9 +13,9 @@ import { useToast } from "@hooks/use-toast";
 
 import { useAuthStore as useStore } from "@store/useAuthStore";
 import { apiService as api } from "@services/apiService";
-
-// Deferred: load particle canvas only after card is visible
-const AnimatedBackground = lazy(() => import("@components/shared/AnimatedBackground"));
+import AnimatedBackground from "@components/shared/AnimatedBackground";
+import { preloadHomePage } from "@lib/preloadRoutes";
+import { buildGoogleAuthUrl, resolveGoogleOAuthConfig, storeGoogleRedirectUri } from "@lib/googleAuth";
 
 // ------------------------------------------------------------------
 // Google Icon
@@ -42,8 +42,6 @@ const step1Schema = z.object({
 const step3Schema = z.object({
     email: z.string().email("Invalid email address"),
     fullName: z.string().min(2, "Full Name is required"),
-    username: z.string().min(3, "Username must be at least 3 characters"),
-    dept: z.string().min(2, "Dept name is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -56,7 +54,7 @@ interface AuthPageState {
     step: AuthStep;
     isLoading: boolean;
     otpValue: string;
-    generatedOtp: string;
+    otpRequestId: string;
     email: string;
     showPassword: boolean;
     error: string | null;
@@ -68,12 +66,12 @@ type AuthAction =
     | { type: "SET_STEP"; payload: AuthStep }
     | { type: "SET_LOADING"; payload: boolean }
     | { type: "SET_OTP"; payload: string }
-    | { type: "SET_GENERATED_OTP"; payload: string }
+    | { type: "SET_OTP_REQUEST_ID"; payload: string }
     | { type: "SET_EMAIL"; payload: string }
     | { type: "TOGGLE_PASSWORD" }
     | { type: "SET_ERROR"; payload: string | null }
     | { type: "TICK" }
-    | { type: "START_COUNTDOWN" }
+    | { type: "START_COUNTDOWN"; payload: number }
     | { type: "RESET_FORM" };
 
 const initialAuthState: AuthPageState = {
@@ -81,7 +79,7 @@ const initialAuthState: AuthPageState = {
     step: "credentials",
     isLoading: false,
     otpValue: "",
-    generatedOtp: "",
+    otpRequestId: "",
     email: "",
     showPassword: false,
     error: null,
@@ -98,8 +96,8 @@ function authReducer(state: AuthPageState, action: AuthAction): AuthPageState {
             return { ...state, isLoading: action.payload };
         case "SET_OTP":
             return { ...state, otpValue: action.payload };
-        case "SET_GENERATED_OTP":
-            return { ...state, generatedOtp: action.payload };
+        case "SET_OTP_REQUEST_ID":
+            return { ...state, otpRequestId: action.payload };
         case "SET_EMAIL":
             return { ...state, email: action.payload };
         case "TOGGLE_PASSWORD":
@@ -109,7 +107,7 @@ function authReducer(state: AuthPageState, action: AuthAction): AuthPageState {
         case "TICK":
             return { ...state, seconds: Math.max(0, state.seconds - 1) };
         case "START_COUNTDOWN":
-            return { ...state, seconds: 30 };
+            return { ...state, seconds: Math.max(0, action.payload) };
         case "RESET_FORM":
             return { ...initialAuthState, isLogin: state.isLogin };
         default:
@@ -124,7 +122,7 @@ const AuthPage = () => {
 
     const [state, dispatch] = useReducer(authReducer, initialAuthState);
     const { 
-        isLogin, step, isLoading, otpValue, generatedOtp, 
+        isLogin, step, isLoading, otpValue, otpRequestId,
         email, showPassword, error, seconds 
     } = state;
 
@@ -157,19 +155,22 @@ const AuthPage = () => {
                 : stepRef.current === "account" ? step3Schema : step1Schema;
             return zodResolver(schema)(values, context, options) as never;
         },
-        defaultValues: { fullName: "", email: "", username: "", password: "" },
+        defaultValues: { fullName: "", email: "", password: "" },
     });
 
-    const sendOtp = useCallback((emailVal: string) => {
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
-        dispatch({ type: "SET_GENERATED_OTP", payload: otp });
-        dispatch({ type: "SET_EMAIL", payload: emailVal });
-        console.log(`[AUTH] Sent OTP ${otp} to ${emailVal}`);
+    const sendOtp = useCallback(async (emailVal: string, existingRequestId?: string) => {
+        const response = existingRequestId
+            ? await api.resendSignupOtp(existingRequestId)
+            : await api.sendSignupOtp(emailVal);
+
+        dispatch({ type: "SET_OTP_REQUEST_ID", payload: response.requestId });
+        dispatch({ type: "SET_EMAIL", payload: response.email });
         toast({
             title: "OTP Sent",
-            description: `Verification code sent to ${emailVal}. (Development: ${otp})`,
+            description: `Verification code sent to ${response.email}.`,
         });
-        dispatch({ type: "START_COUNTDOWN" });
+        dispatch({ type: "START_COUNTDOWN", payload: response.resendAvailableIn });
+        return response;
     }, [toast]);
 
     const onSubmit = async (values: Record<string, unknown>) => {
@@ -187,8 +188,9 @@ const AuthPage = () => {
                     localStorage.setItem("token", data.accessToken);
                     setStoreUser(data.user);
 
+                    await preloadHomePage();
                     toast({ title: "✅ Welcome back!", description: `Hello, ${userId}!` });
-                    setTimeout(() => navigate("/"), 400);
+                    navigate("/", { replace: true });
                 } else {
                     throw new Error(res.message || "Invalid credentials");
                 }
@@ -196,44 +198,43 @@ const AuthPage = () => {
                 // ── SIGNUP Step 1: Send OTP ──
             } else if (step === "credentials") {
                 const emailVal = (values.email as string).trim();
-                dispatch({ type: "SET_EMAIL", payload: emailVal });
-                sendOtp(emailVal);
+                await sendOtp(emailVal);
                 dispatch({ type: "SET_STEP", payload: "otp" });
 
                 // ── SIGNUP Step 2: Verify OTP ──
             } else if (step === "otp") {
-                if (otpValue.length !== 4) {
-                    dispatch({ type: "SET_ERROR", payload: "Please enter all 4 digits" });
+                if (!otpRequestId) {
+                    dispatch({ type: "SET_ERROR", payload: "Your verification request is missing. Request a new code." });
                     dispatch({ type: "SET_LOADING", payload: false });
                     return;
                 }
-                if (otpValue !== generatedOtp) {
-                    dispatch({ type: "SET_ERROR", payload: "The code you entered is incorrect. Please try again." });
+                if (otpValue.length !== 6) {
+                    dispatch({ type: "SET_ERROR", payload: "Please enter all 6 digits" });
                     dispatch({ type: "SET_LOADING", payload: false });
                     return;
                 }
+                const verification = await api.verifySignupOtp(otpRequestId, otpValue);
                 dispatch({ type: "SET_STEP", payload: "account" });
                 dispatch({ type: "SET_OTP", payload: "" });
+                dispatch({ type: "SET_EMAIL", payload: verification.email });
                 
                 // Prefill form for Step 3 (account)
-                form.setValue("email", email);
+                form.setValue("email", verification.email);
 
                 // ── SIGNUP Step 3: Create account ──
             } else if (step === "account") {
                 const emailVal = values.email as string;
                 const passwordVal = values.password as string;
                 const fullNameVal = values.fullName as string;
-                const usernameVal = values.username as string;
-                const deptVal = values.dept as string;
-
-                const res = await api.register(emailVal, passwordVal, fullNameVal, usernameVal, deptVal);
+                const res = await api.register(emailVal, passwordVal, fullNameVal, undefined, undefined, otpRequestId);
                 if (res.success) {
                     const data = res;
                     localStorage.setItem("token", data.accessToken);
                     setStoreUser(data.user);
 
+                    await preloadHomePage();
                     toast({ title: "🎉 Account Created!", description: "Account setup successful." });
-                    setTimeout(() => navigate("/"), 400);
+                    navigate("/", { replace: true });
                 } else {
                     throw new Error(res.message || "Registration failed");
                 }
@@ -259,60 +260,37 @@ const AuthPage = () => {
         form.reset();
     };
 
-    const resendOtp = () => {
-        if (canResend) {
-            sendOtp(email);
+    const resendOtp = async () => {
+        if (!canResend || !otpRequestId) {
+            return;
+        }
+
+        dispatch({ type: "SET_LOADING", payload: true });
+        dispatch({ type: "SET_ERROR", payload: null });
+        try {
+            await sendOtp(email, otpRequestId);
+            dispatch({ type: "SET_OTP", payload: "" });
+        } catch (err: any) {
+            dispatch({ type: "SET_ERROR", payload: err.message || "Failed to resend OTP" });
+        } finally {
+            dispatch({ type: "SET_LOADING", payload: false });
         }
     };
 
     const handleGoogleLogin = async () => {
         try {
             dispatch({ type: "SET_LOADING", payload: true });
-            const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-            const redirectUri = `${window.location.origin}/auth/google/callback`;
-            const scope = "openid email profile";
-            const responseType = "code";
-            const state = "provider=google";
-
-            if (!clientId) {
-                toast({
-                    title: "Configuration Error",
-                    description: "Google OAuth is not properly configured. Please contact support.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=${responseType}&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=select_account&state=${encodeURIComponent(state)}`;
-            window.location.href = googleAuthUrl;
+            const googleConfig = await resolveGoogleOAuthConfig();
+            storeGoogleRedirectUri(googleConfig.redirectUri);
+            window.location.href = buildGoogleAuthUrl(googleConfig);
         } catch (err: any) {
-            dispatch({ type: "SET_ERROR", payload: err.message || "Google login failed" });
-        } finally {
-            dispatch({ type: "SET_LOADING", payload: false });
-        }
-    };
-
-    const handleGithubLogin = async () => {
-        try {
-            dispatch({ type: "SET_LOADING", payload: true });
-            const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || "";
-            const redirectUri = `${window.location.origin}/auth/github/callback`;
-            const scope = "user:email";
-            const state = "provider=github";
-
-            if (!clientId) {
-                toast({
-                    title: "Configuration Error",
-                    description: "GitHub OAuth is not properly configured. Please contact support.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&allow_signup=true&state=${encodeURIComponent(state)}`;
-            window.location.href = githubAuthUrl;
-        } catch (err: any) {
-            dispatch({ type: "SET_ERROR", payload: err.message || "GitHub login failed" });
+            const message = err.message || "Google login failed";
+            dispatch({ type: "SET_ERROR", payload: message });
+            toast({
+                title: "Configuration Error",
+                description: message,
+                variant: "destructive",
+            });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
         }
@@ -320,9 +298,7 @@ const AuthPage = () => {
 
     return (
         <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-foreground relative perspective-1000 overflow-hidden">
-            <Suspense fallback={null}>
-                <AnimatedBackground />
-            </Suspense>
+            <AnimatedBackground />
 
             {/* Ambient Background Orbs */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
@@ -372,10 +348,10 @@ const AuthPage = () => {
                             >
                                 <div className="text-center">
                                     <h2 className="text-xl font-bold font-poppins mb-2">Verify Contact</h2>
-                                    <p className="text-sm text-muted-foreground font-poppins">Enter the 4-digit code sent to {email}</p>
+                                    <p className="text-sm text-muted-foreground font-poppins">Enter the 6-digit code sent to {email}</p>
                                 </div>
                                 <div className="flex justify-center gap-3">
-                                    {[0, 1, 2, 3].map((i) => (
+                                    {[0, 1, 2, 3, 4, 5].map((i) => (
                                         <input
                                             key={i}
                                             type="text"
@@ -387,7 +363,7 @@ const AuthPage = () => {
                                                     const newVal = otpValue.split("");
                                                     newVal[i] = val;
                                                     dispatch({ type: "SET_OTP", payload: newVal.join("") });
-                                                    if (i < 3) (e.target.nextElementSibling as HTMLInputElement)?.focus();
+                                                    if (i < 5) (e.target.nextElementSibling as HTMLInputElement)?.focus();
                                                 }
                                             }}
                                             onKeyDown={(e) => {
@@ -531,34 +507,6 @@ const AuthPage = () => {
                                                                 </FormItem>
                                                             )}
                                                         />
-                                                        <div className="grid grid-cols-2 gap-3">
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="username"
-                                                                render={({ field }) => (
-                                                                    <FormItem>
-                                                                        <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">MEC ID</FormLabel>
-                                                                        <FormControl>
-                                                                            <Input {...field} value={field.value as string || ""} className="h-12 rounded-2xl border-white/5 bg-white/5 font-poppins" />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                            <FormField
-                                                                control={form.control}
-                                                                name="dept"
-                                                                render={({ field }) => (
-                                                                    <FormItem>
-                                                                        <FormLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Dept</FormLabel>
-                                                                        <FormControl>
-                                                                            <Input {...field} value={field.value as string || ""} className="h-12 rounded-2xl border-white/5 bg-white/5 font-poppins" />
-                                                                        </FormControl>
-                                                                        <FormMessage />
-                                                                    </FormItem>
-                                                                )}
-                                                            />
-                                                        </div>
                                                         <FormField
                                                             control={form.control}
                                                             name="password"
@@ -605,7 +553,7 @@ const AuthPage = () => {
                                         )}
 
                                         {isLogin && (
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <div className="grid grid-cols-1 gap-3">
                                                 <Button 
                                                     type="button" 
                                                     variant="outline" 
@@ -614,15 +562,6 @@ const AuthPage = () => {
                                                     disabled={isLoading}
                                                 >
                                                     <GoogleIcon className="w-4 h-4" /> Google
-                                                </Button>
-                                                <Button 
-                                                    type="button" 
-                                                    variant="outline" 
-                                                    className="rounded-2xl border-white/10 hover:bg-white/5 gap-2 font-poppins"
-                                                    onClick={handleGithubLogin}
-                                                    disabled={isLoading}
-                                                >
-                                                    <Github className="w-4 h-4" /> GitHub
                                                 </Button>
                                             </div>
                                         )}

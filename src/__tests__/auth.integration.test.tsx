@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import AuthPage from "../core/pages/AuthPage";
+import AuthPage from "../pages/AuthPage";
 import { apiService as api } from "@services/apiService";
 
 // Mock Navigate
@@ -30,10 +30,10 @@ describe("AuthPage Integration", () => {
     localStorage.clear();
   });
 
-  it("should successfully log in and navigate to dashboard", async () => {
+  it("should successfully log in and navigate to the home page", async () => {
     (api.login as any).mockResolvedValue({
       success: true,
-      token: "mock-token",
+      accessToken: "mock-token",
       user: { id: "1", email: "test@example.com", username: "testuser" },
     });
 
@@ -51,7 +51,7 @@ describe("AuthPage Integration", () => {
     await waitFor(() => {
       expect(api.login).toHaveBeenCalledWith("testuser", "password123");
       expect(localStorage.getItem("token")).toBe("mock-token");
-      expect(mockNavigate).toHaveBeenCalledWith("/dashboard");
+      expect(mockNavigate).toHaveBeenCalledWith("/", { replace: true });
     });
   });
 

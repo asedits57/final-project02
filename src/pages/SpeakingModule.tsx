@@ -9,6 +9,7 @@ import ErrorMessage from "@components/ui/ErrorMessage";
 
 import { toast } from "sonner";
 import { useQuestions } from "@hooks/useQuestions";
+import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
 
 // Type definitions for Web Speech API
 interface SpeechRecognitionResult {
@@ -64,8 +65,6 @@ interface Feedback {
     coherence: number;
     tips: string[];
 }
-
-import { useQuestions } from "@hooks/useQuestions";
 
 // ------------------------------------------------------------------
 // State Types & Reducer
@@ -146,6 +145,7 @@ function speakingReducer(state: SpeakingState, action: SpeakingAction): Speaking
 }
 
 const SpeakingModule = () => {
+    useLiveModuleActivity("speaking");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
     const speakingPrompts = questionData?.speaking || [];
@@ -256,13 +256,10 @@ const SpeakingModule = () => {
         dispatch({ type: "SET_EVALUATING", payload: true });
 
         try {
-            const aiResponse = await api.processAI("evaluate", JSON.stringify({
-                type: "speaking",
-                prompt: currentPrompt.prompt,
-                transcript: transcript || "No speech detected."
-            }));
-
-            const parsedFeedback = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+            const parsedFeedback = await api.evaluateSpeaking(
+                currentPrompt.prompt,
+                transcript || "No speech detected."
+            );
             dispatch({ type: "SET_FEEDBACK", payload: parsedFeedback });
 
             if (parsedFeedback?.overall) {
