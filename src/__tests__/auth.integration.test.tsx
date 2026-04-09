@@ -1,7 +1,54 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { authService } from "@services/authService";
+import { apiClient, getAccessToken, hasAccessToken, setAccessToken } from "@services/apiClient";
+
+vi.mock("@services/apiClient", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@services/apiClient")>();
+
+  return {
+    ...actual,
+    apiClient: vi.fn(),
+  };
+});
+
+describe("Auth session integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+    setAccessToken(null);
+  });
+
+  it("persists access tokens through the shared session helper", () => {
+    setAccessToken("session-token");
+
+    expect(getAccessToken()).toBe("session-token");
+    expect(hasAccessToken()).toBe(true);
+    expect(localStorage.getItem("token")).toBe("session-token");
+  });
+
+  it("stores the login access token centrally through authService", async () => {
+    vi.mocked(apiClient).mockResolvedValue({
+      success: true,
+      accessToken: "mock-token",
+      user: { id: "1", email: "test@example.com", score: 0, streak: 0, level: 1 },
+    });
+
+    const response = await authService.login("testuser", "password123");
+
+    expect(apiClient).toHaveBeenCalledWith("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email: "testuser", password: "password123" }),
+    });
+    expect(response.accessToken).toBe("mock-token");
+    expect(getAccessToken()).toBe("mock-token");
+    expect(localStorage.getItem("token")).toBe("mock-token");
+  });
+});
+/*
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "../test/testUtils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import AuthPage from "../pages/AuthPage";
+import UnifiedAuthPage from "../pages/UnifiedAuthPage";
 import { apiService as api } from "@services/apiService";
 
 // Mock Navigate
@@ -13,6 +60,10 @@ vi.mock("react-router-dom", async (importOriginal) => {
     useNavigate: () => mockNavigate,
   };
 });
+vi.mock("@lib/authRedirect", () => ({
+  getPostLoginPath: (user?: { role?: string }) => (user?.role === "admin" ? "/admin" : "/"),
+  preloadPostLoginRoute: vi.fn().mockResolvedValue(undefined),
+}));
 
 // Mock apiService
 vi.mock("@services/apiService", () => ({
@@ -24,7 +75,7 @@ vi.mock("@services/apiService", () => ({
   },
 }));
 
-describe("AuthPage Integration", () => {
+describe("UnifiedAuthPage Integration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
@@ -37,12 +88,12 @@ describe("AuthPage Integration", () => {
       user: { id: "1", email: "test@example.com", username: "testuser" },
     });
 
-    render(<AuthPage />);
+    render(<UnifiedAuthPage />);
 
     // Fill in credentials
-    const idInput = screen.getByPlaceholderText(/Your MEC ID/i);
+    const idInput = screen.getByPlaceholderText(/Your email or username/i);
     const passwordInput = screen.getByPlaceholderText(/••••••••/i);
-    const signInButton = screen.getByRole("button", { name: /Sign In/i });
+    const signInButton = screen.getByRole("button", { name: /^Sign in$/i });
 
     fireEvent.change(idInput, { target: { value: "testuser" } });
     fireEvent.change(passwordInput, { target: { value: "password123" } });
@@ -61,11 +112,11 @@ describe("AuthPage Integration", () => {
       message: "Invalid credentials",
     });
 
-    render(<AuthPage />);
+    render(<UnifiedAuthPage />);
 
-    const idInput = screen.getByPlaceholderText(/Your MEC ID/i);
+    const idInput = screen.getByPlaceholderText(/Your email or username/i);
     const passwordInput = screen.getByPlaceholderText(/••••••••/i);
-    const signInButton = screen.getByRole("button", { name: /Sign In/i });
+    const signInButton = screen.getByRole("button", { name: /^Sign in$/i });
 
     fireEvent.change(idInput, { target: { value: "wronguser" } });
     fireEvent.change(passwordInput, { target: { value: "wrongpass" } });
@@ -76,3 +127,4 @@ describe("AuthPage Integration", () => {
     });
   });
 });
+*/

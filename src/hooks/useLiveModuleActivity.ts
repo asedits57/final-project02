@@ -1,9 +1,10 @@
 import { useEffect } from "react";
+import { getAccessToken } from "@services/apiClient";
 import { disconnectRealtimeSocket, getRealtimeSocket } from "@lib/socket";
 
 export const useLiveModuleActivity = (moduleName: string) => {
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = getAccessToken();
     const socket = getRealtimeSocket(token);
     if (!socket) {
       return;

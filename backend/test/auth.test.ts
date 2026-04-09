@@ -1,23 +1,23 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import bcrypt from 'bcrypt';
 import request from 'supertest';
-import mongoose from 'mongoose';
 import app from '../src/app';
 import User from '../src/models/User';
-import { createMongoMemoryServer } from '../src/config/memoryMongo';
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from './support/database';
 
-let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
 
-describe('Auth API', () => {
+describeMongo('Auth API', () => {
+  let database: TestDatabaseHandle;
+
   beforeAll(async () => {
     process.env.JWT_SECRET = 'testsecret';
-    mongoServer = await createMongoMemoryServer();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri);
+    database = await connectMongoTestDatabase();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await database.stop();
   });
 
   beforeEach(async () => {
@@ -25,30 +25,7 @@ describe('Auth API', () => {
   });
 
   describe('POST /api/v1/auth/register', () => {
-    it('should register a new user successfully and set a cookie', async () => {
-      const res = await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          email: 'test@example.com',
-          password: 'password123'
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-      expect(res.body.message).toBe('User registered');
-      expect(res.header['set-cookie']).toBeDefined();
-      expect(res.header['set-cookie'][0]).toContain('jwt_refresh=');
-
-      const user = await User.findOne({ email: 'test@example.com' });
-      expect(user).toBeTruthy();
-    });
-
-    it('should not register a user with an existing email', async () => {
-      await User.create({
-        email: 'test@example.com',
-        password: 'hashedpassword'
-      });
-
+    it('requires a verified signup request id', async () => {
       const res = await request(app)
         .post('/api/v1/auth/register')
         .send({
@@ -57,18 +34,17 @@ describe('Auth API', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body.message).toBe('User already exists');
+      expect(String(res.body.message)).toContain('requestId');
     });
   });
 
   describe('POST /api/v1/auth/login', () => {
     it('should login an existing user successfully and set a cookie', async () => {
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          email: 'login@example.com',
-          password: 'password123'
-        });
+      await User.create({
+        email: 'login@example.com',
+        password: await bcrypt.hash('password123', 10),
+        username: 'login-user',
+      });
 
       const res = await request(app)
         .post('/api/v1/auth/login')
@@ -84,12 +60,10 @@ describe('Auth API', () => {
     });
 
     it('should not login with wrong password', async () => {
-      await request(app)
-        .post('/api/v1/auth/register')
-        .send({
-          email: 'wrongpass@example.com',
-          password: 'password123'
-        });
+      await User.create({
+        email: 'wrongpass@example.com',
+        password: await bcrypt.hash('password123', 10),
+      });
 
       const res = await request(app)
         .post('/api/v1/auth/login')
@@ -100,6 +74,25 @@ describe('Auth API', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.message).toBe('Invalid password');
+    });
+
+    it('supports logging in with username as well as email', async () => {
+      await User.create({
+        email: 'username@example.com',
+        username: 'username-login',
+        password: await bcrypt.hash('password123', 10),
+      });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'username-login',
+          password: 'password123'
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.user.email).toBe('username@example.com');
     });
   });
 

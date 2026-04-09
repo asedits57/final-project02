@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User";
 import { type AuthenticatedRequest } from "../types/auth";
 import ApiError from "../utils/ApiError";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 import { toPublicUser } from "../utils/toPublicUser";
 
 type JwtPayload = {
@@ -45,7 +47,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
       return;
     }
 
-    console.error("Token verification failed:", error);
+    logger.warn("Token verification failed", serializeError(error));
     next(new ApiError(401, "Not authorized, invalid token"));
   }
 };

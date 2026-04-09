@@ -1,23 +1,22 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import app from "../src/app";
-import { createMongoMemoryServer } from "../src/config/memoryMongo";
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from "./support/database";
 
-let mongo: Awaited<ReturnType<typeof createMongoMemoryServer>>;
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
 
-beforeAll(async () => {
-  mongo = await createMongoMemoryServer();
-  const uri = mongo.getUri();
-  await mongoose.connect(uri);
-});
+describeMongo("Backend Security Hardening", () => {
+  let database: TestDatabaseHandle;
 
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongo.stop();
-});
+  beforeAll(async () => {
+    database = await connectMongoTestDatabase();
+  });
 
-describe("Backend Security Hardening", () => {
+  afterAll(async () => {
+    await database.stop();
+  });
+
   it("should have Helmet security headers active", async () => {
     const res = await request(app).get("/api/test");
     

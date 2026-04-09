@@ -1,11 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import request from "supertest";
-import mongoose from "mongoose";
 import axios from "axios";
 import app from "../src/app";
 import User from "../src/models/User";
-import OtpVerification from "../src/models/OtpVerification";
-import { createMongoMemoryServer } from "../src/config/memoryMongo";
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from "./support/database";
 
 vi.mock("axios", () => ({
   default: {
@@ -16,38 +14,26 @@ vi.mock("axios", () => ({
 
 const mockedAxios = vi.mocked(axios, true);
 
-describe("Google OTP Auth Flow", () => {
-  let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
-  let sentOtpCodes: string[] = [];
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
+
+describeMongo("Google Auth Flow", () => {
+  let database: TestDatabaseHandle;
 
   beforeAll(async () => {
-    mongoServer = await createMongoMemoryServer();
-    await mongoose.connect(mongoServer.getUri());
+    database = await connectMongoTestDatabase();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    if (mongoServer) {
-      await mongoServer.stop();
-    }
+    await database.stop();
   });
 
   beforeEach(async () => {
-    sentOtpCodes = [];
     await User.deleteMany({});
 
-    mockedAxios.post.mockImplementation(async (url: string, payload: unknown) => {
+    mockedAxios.post.mockImplementation(async (url: string) => {
       if (url.includes("oauth2.googleapis.com/token")) {
         return { data: { access_token: "google-access-token" } } as never;
-      }
-
-      if (url.includes("api.resend.com/emails")) {
-        const emailPayload = typeof payload === "object" && payload !== null ? payload as { text?: string } : {};
-        const match = String(emailPayload.text || "").match(/OTP is (\d{6})/);
-        if (match) {
-          sentOtpCodes.push(match[1]);
-        }
-        return { data: { id: `email_${sentOtpCodes.length}` } } as never;
       }
 
       throw new Error(`Unexpected POST ${url}`);
@@ -64,7 +50,7 @@ describe("Google OTP Auth Flow", () => {
     } as never);
   });
 
-  it("sends an OTP after Google callback, verifies it, and completes the profile", async () => {
+  it("trusts Google's verified email and sends the user to complete their profile when needed", async () => {
     const callbackRes = await request(app)
       .post("/api/v1/auth/google/callback-handler")
       .set("User-Agent", "vitest-agent")
@@ -75,38 +61,11 @@ describe("Google OTP Auth Flow", () => {
 
     expect(callbackRes.status).toBe(200);
     expect(callbackRes.body.success).toBe(true);
-    expect(callbackRes.body.verified).toBe(false);
-    expect(callbackRes.body.email).toBe("otpuser@gmail.com");
-    expect(callbackRes.body.requestId).toBeTruthy();
-    expect(sentOtpCodes).toHaveLength(1);
-
-    const sessionRes = await request(app)
-      .post("/api/v1/auth/otp/session")
-      .set("Authorization", `Bearer ${callbackRes.body.accessToken}`)
-      .set("User-Agent", "vitest-agent")
-      .send({
-        requestId: callbackRes.body.requestId,
-      });
-
-    expect(sessionRes.status).toBe(200);
-    expect(sessionRes.body.success).toBe(true);
-    expect(sessionRes.body.requestId).toBe(callbackRes.body.requestId);
-    expect(sessionRes.body.email).toBe("otpuser@gmail.com");
-
-    const verifyRes = await request(app)
-      .post("/api/v1/auth/otp/verify")
-      .set("Authorization", `Bearer ${callbackRes.body.accessToken}`)
-      .set("User-Agent", "vitest-agent")
-      .send({
-        requestId: callbackRes.body.requestId,
-        otp: sentOtpCodes[0],
-      });
-
-    expect(verifyRes.status).toBe(200);
-    expect(verifyRes.body.success).toBe(true);
-    expect(verifyRes.body.verified).toBe(true);
-    expect(verifyRes.body.next).toBe("/complete-profile");
-    expect(verifyRes.body.requiresProfileCompletion).toBe(true);
+    expect(callbackRes.body.verified).toBe(true);
+    expect(callbackRes.body.redirectTo).toBe("/complete-profile");
+    expect(callbackRes.body.user.email).toBe("otpuser@gmail.com");
+    expect(callbackRes.body.user.isVerified).toBe(true);
+    expect(callbackRes.body.user.hasPassword).toBe(false);
 
     const completeProfileRes = await request(app)
       .post("/api/v1/auth/google/complete-profile")
@@ -126,7 +85,7 @@ describe("Google OTP Auth Flow", () => {
     expect(user?.password).toBeTruthy();
   });
 
-  it("resends an OTP with a new request id and invalidates the previous request", async () => {
+  it("returns the normal app redirect once the Google user already has a password", async () => {
     const callbackRes = await request(app)
       .post("/api/v1/auth/google/callback-handler")
       .set("User-Agent", "vitest-agent")
@@ -135,52 +94,26 @@ describe("Google OTP Auth Flow", () => {
         redirectUri: "http://localhost:8080/auth/google/callback",
       });
 
-    await OtpVerification.findOneAndUpdate(
-      { requestId: callbackRes.body.requestId },
-      {
-        $set: {
-          resendAvailableAt: new Date(Date.now() - 1000),
-        },
-      },
-    );
-
-    const resendRes = await request(app)
-      .post("/api/v1/auth/otp/resend")
+    await request(app)
+      .post("/api/v1/auth/google/complete-profile")
       .set("Authorization", `Bearer ${callbackRes.body.accessToken}`)
-      .set("User-Agent", "vitest-agent")
       .send({
-        requestId: callbackRes.body.requestId,
+        fullName: "OTP User Updated",
+        password: "password123",
       });
 
-    expect(resendRes.status).toBe(200);
-    expect(resendRes.body.success).toBe(true);
-    expect(resendRes.body.requestId).not.toBe(callbackRes.body.requestId);
-    expect(sentOtpCodes).toHaveLength(2);
-
-    const oldVerifyRes = await request(app)
-      .post("/api/v1/auth/otp/verify")
-      .set("Authorization", `Bearer ${callbackRes.body.accessToken}`)
+    const secondCallbackRes = await request(app)
+      .post("/api/v1/auth/google/callback-handler")
       .set("User-Agent", "vitest-agent")
       .send({
-        requestId: callbackRes.body.requestId,
-        otp: sentOtpCodes[0],
+        code: "google-auth-code",
+        redirectUri: "http://localhost:8080/auth/google/callback",
       });
 
-    expect(oldVerifyRes.status).toBe(400);
-    expect(oldVerifyRes.body.success).toBe(false);
-    expect(oldVerifyRes.body.verified).toBe(false);
-
-    const newVerifyRes = await request(app)
-      .post("/api/v1/auth/otp/verify")
-      .set("Authorization", `Bearer ${callbackRes.body.accessToken}`)
-      .set("User-Agent", "vitest-agent")
-      .send({
-        requestId: resendRes.body.requestId,
-        otp: sentOtpCodes[1],
-      });
-
-    expect(newVerifyRes.status).toBe(200);
-    expect(newVerifyRes.body.success).toBe(true);
-    expect(newVerifyRes.body.verified).toBe(true);
+    expect(secondCallbackRes.status).toBe(200);
+    expect(secondCallbackRes.body.success).toBe(true);
+    expect(secondCallbackRes.body.verified).toBe(true);
+    expect(secondCallbackRes.body.redirectTo).toBe("/");
+    expect(secondCallbackRes.body.user.hasPassword).toBe(true);
   });
 });

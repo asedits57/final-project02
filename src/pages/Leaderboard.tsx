@@ -10,6 +10,7 @@ import ErrorMessage from "@components/ui/ErrorMessage";
 import Spinner from "@components/ui/Spinner";
 import { useLeaderboard } from '../hooks/useLeaderboard';
 import { disconnectRealtimeSocket, getRealtimeSocket } from '@lib/socket';
+import { getAccessToken } from '@services/apiClient';
 import { useAuthStore } from '@store/useAuthStore';
 import type { LeaderboardSnapshot } from '@services/userService';
 
@@ -52,7 +53,7 @@ const Leaderboard = () => {
     }, [data]);
 
     useEffect(() => {
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const token = getAccessToken();
         const socket = getRealtimeSocket(token);
         if (!socket) {
             return;

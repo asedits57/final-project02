@@ -12,6 +12,7 @@ import { useToast } from "@hooks/use-toast";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
 import { useAuthStore as useStore } from "@store/useAuthStore";
 import { apiService as api } from "@services/apiService";
+import { hasAccessToken } from "@services/apiClient";
 import { getPostLoginPath, preloadPostLoginRoute } from "@lib/authRedirect";
 import { buildGoogleAuthUrl, resolveGoogleOAuthConfig, storeGoogleRedirectUri } from "@lib/googleAuth";
 
@@ -125,8 +126,7 @@ const UnifiedAuthPage = () => {
   }, [seconds]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token && token !== "undefined" && isLogin) {
+    if (hasAccessToken() && isLogin) {
       navigate(getPostLoginPath(currentUser), { replace: true });
     }
   }, [currentUser, navigate, isLogin]);
@@ -201,7 +201,6 @@ const UnifiedAuthPage = () => {
     try {
       if (isLogin) {
         const res = await api.login(values.userId as string, values.password as string);
-        localStorage.setItem("token", res.accessToken);
         setStoreUser(res.user);
         await preloadPostLoginRoute(res.user);
         toast({ title: "Welcome back", description: "You are now in the MEC Learning workspace." });
@@ -232,7 +231,6 @@ const UnifiedAuthPage = () => {
           undefined,
           otpRequestId,
         );
-        localStorage.setItem("token", res.accessToken);
         setStoreUser(res.user);
         await preloadPostLoginRoute(res.user);
         toast({ title: "Account created", description: "Your MEC Learning account is ready." });

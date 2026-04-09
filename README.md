@@ -2,6 +2,13 @@
 
 Welcome to **Sandysquad**, an elite, full-stack application designed to gamify English language learning. This platform features AI-driven tutoring, real-time massive multiplayer leaderboards, and enterprise-grade security.
 
+Accurate project note:
+- The frontend is React + TypeScript + Vite.
+- The backend is Express + TypeScript + Mongoose.
+- Auth now uses one shared frontend token helper plus backend refresh cookies.
+- Google sign-in trusts Google's verified email and routes first-time Google users to `/complete-profile` instead of a second OTP gate.
+- Mongo-backed backend tests now require `TEST_MONGO_URI`, `MONGO_MEMORY_BINARY`, or `MONGO_MEMORY_ALLOW_DOWNLOAD=true`; otherwise those suites can skip cleanly in offline environments.
+
 ---
 
 ## 🎯 Features
@@ -117,3 +124,20 @@ OpenAPI docs for the new auth flow live at `backend/docs/openapi.yaml`.
 
 ---
 > Developed intentionally to easily pass any Senior Full-Stack Engineering technical assessments.
+# Sandysquad
+
+This note supersedes the older marketing copy below.
+
+- The frontend is React + TypeScript + Vite.
+- The backend is Express + TypeScript + Mongoose.
+- Auth now uses one shared access-token helper on the frontend plus refresh cookies on the backend.
+- Google sign-in trusts Google's verified email and sends first-time Google users to `/complete-profile` when they still need a password.
+- Admin access is role-based and enforced on backend admin routes.
+- Mongo-backed backend tests support `TEST_MONGO_URI`, `MONGO_MEMORY_BINARY`, or `MONGO_MEMORY_ALLOW_DOWNLOAD=true`; otherwise those suites can be skipped cleanly in offline environments.
+
+## Read This First
+
+1. Setup Instructions
+2. Environment Variables
+3. API Endpoints
+4. `backend/docs/openapi.yaml`

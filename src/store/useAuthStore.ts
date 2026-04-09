@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService } from "@services/authService";
+import { setAccessToken } from "@services/apiClient";
 import { clearOtpSession } from "@lib/otpSession";
 
 interface User {
@@ -40,10 +41,12 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ loading: true });
         try {
             await authService.logout();
-            localStorage.removeItem("token");
         } catch (err) {
-            console.warn("Logout failed:", err);
-            localStorage.removeItem("token"); // clear it anyway
+            if (import.meta.env.DEV) {
+                console.warn("Logout failed:", err);
+            }
+        } finally {
+            setAccessToken(null);
         }
         clearOtpSession();
         set({ user: null, loading: false, error: null });

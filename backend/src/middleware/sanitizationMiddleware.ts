@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { sanitizeObject } from "../utils/sanitization";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 
 /**
  * Middleware that recursively sanitizes req.body, req.query, and req.params.
@@ -21,7 +23,7 @@ export const sanitizationMiddleware = (req: Request, res: Response, next: NextFu
     }
     next();
   } catch (error) {
-    console.error("Sanitization Error:", error);
+    logger.warn("Sanitization middleware failed", serializeError(error));
     next(); // Continue even if sanitization fails, or handle as error
   }
 };

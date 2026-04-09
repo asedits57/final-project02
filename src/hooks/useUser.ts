@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { hasAccessToken } from "@services/apiClient";
 import { userService } from "@services/userService";
 import { useAuthStore } from "@store/useAuthStore";
 import { useEffect } from "react";
@@ -7,7 +8,7 @@ export const useUser = () => {
     const setUser = useAuthStore((state) => state.setUser);
     const currentUser = useAuthStore((state) => state.user);
 
-    const hasToken = !!(typeof window !== "undefined" && localStorage.getItem("token") && localStorage.getItem("token") !== "undefined");
+    const hasToken = hasAccessToken();
 
     const query = useQuery({
         queryKey: ["user", "profile"],

@@ -27,8 +27,6 @@ const OAuthCallback = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    const userData = searchParams.get("user");
     const error = searchParams.get("error");
     const code = searchParams.get("code");
     const isGoogleCallback = window.location.pathname.endsWith("/auth/google/callback");
@@ -49,7 +47,6 @@ const OAuthCallback = () => {
           return;
         }
 
-        localStorage.setItem("token", response.accessToken);
         setUser(response.user);
 
         if (response.verified) {
@@ -85,7 +82,6 @@ const OAuthCallback = () => {
       } catch (err: unknown) {
         clearOtpSession();
         clearStoredGoogleRedirectUri();
-        localStorage.removeItem("token");
         setAccessToken(null);
         setUser(null);
         toast({
@@ -100,7 +96,6 @@ const OAuthCallback = () => {
     if (error) {
       clearOtpSession();
       clearStoredGoogleRedirectUri();
-      localStorage.removeItem("token");
       setAccessToken(null);
       setUser(null);
       toast({
@@ -119,39 +114,10 @@ const OAuthCallback = () => {
       };
     }
 
-    if (token && userData) {
-      try {
-        const user = JSON.parse(decodeURIComponent(userData));
-        localStorage.setItem("token", token);
-        setAccessToken(token);
-        setUser(user);
-        clearStoredGoogleRedirectUri();
-
-        toast({
-          title: "Successfully authenticated",
-          description: `Welcome back, ${user.fullName || user.username || "User"}!`,
-        });
-
-        void preloadPostLoginRoute(user);
-        navigate(getPostLoginPath(user), { replace: true });
-      } catch (err) {
-        console.error("OAuth Data Parse Error:", err);
-        localStorage.removeItem("token");
-        setAccessToken(null);
-        setUser(null);
-        toast({
-          title: "Authentication Error",
-          description: "Failed to process login data.",
-          variant: "destructive",
-        });
-        navigate("/login", { replace: true });
-      }
-    } else {
-      const timeout = setTimeout(() => {
-        navigate("/login", { replace: true });
-      }, 1200);
-      return () => clearTimeout(timeout);
-    }
+    const timeout = setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 1200);
+    return () => clearTimeout(timeout);
   }, [searchParams, navigate, setUser, toast]);
 
   return (

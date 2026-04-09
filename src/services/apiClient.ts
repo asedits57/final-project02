@@ -1,14 +1,38 @@
-const getStoredAccessToken = () =>
-  typeof window !== "undefined" ? localStorage.getItem("token") : null;
+export const ACCESS_TOKEN_STORAGE_KEY = "token";
 
-let accessToken: string | null = getStoredAccessToken();
+const normalizeAccessToken = (token: string | null | undefined) => {
+  if (!token || token === "undefined") {
+    return null;
+  }
+
+  return token;
+};
+
+const readStoredAccessToken = () =>
+  typeof window !== "undefined"
+    ? normalizeAccessToken(localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY))
+    : null;
+
+const persistAccessToken = (token: string | null) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (token) {
+    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+    return;
+  }
+
+  localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+};
+
+let accessToken: string | null = readStoredAccessToken();
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
-const clearSession = () => {
-  accessToken = null;
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("token");
+const clearSession = (notify = true) => {
+  setAccessToken(null);
+  if (notify && typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("session-expired"));
   }
 };
@@ -22,7 +46,7 @@ const onTokenRefreshed = (token: string) => {
   refreshSubscribers = [];
 };
 
-const BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 const buildNetworkErrorMessage = (error: unknown, options?: RequestInit) => {
   const payloadLength = typeof options?.body === "string" ? options.body.length : 0;
@@ -38,20 +62,23 @@ const buildNetworkErrorMessage = (error: unknown, options?: RequestInit) => {
 };
 
 export const apiClient = async <T>(endpoint: string, options?: RequestInit): Promise<T> => {
-  if (!accessToken) {
-    accessToken = getStoredAccessToken();
-  }
+  const url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
-  const url = `${BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
-  
   const makeRequest = async (token: string | null) => {
+    const headers = new Headers(options?.headers);
+    const isFormData = typeof FormData !== "undefined" && options?.body instanceof FormData;
+
+    if (!headers.has("Content-Type") && !isFormData) {
+      headers.set("Content-Type", "application/json");
+    }
+
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
     return fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options?.headers,
-      },
+      headers,
       credentials: "include",
     });
   };
@@ -59,7 +86,7 @@ export const apiClient = async <T>(endpoint: string, options?: RequestInit): Pro
   let response: Response;
 
   try {
-    response = await makeRequest(accessToken);
+    response = await makeRequest(getAccessToken());
   } catch (error) {
     throw new Error(buildNetworkErrorMessage(error, options));
   }
@@ -69,19 +96,19 @@ export const apiClient = async <T>(endpoint: string, options?: RequestInit): Pro
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const refreshRes = await fetch(`${BASE_URL}/auth/refresh-token`, {
+        const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
           method: "POST",
           credentials: "include"
         });
         
         if (refreshRes.ok) {
           const data = await refreshRes.json();
-          accessToken = data.accessToken;
+          setAccessToken(data.accessToken);
           isRefreshing = false;
-          onTokenRefreshed(accessToken!);
+          onTokenRefreshed(getAccessToken()!);
 
           // Re-attempt original request as the initiator
-          const retryRes = await makeRequest(accessToken);
+          const retryRes = await makeRequest(getAccessToken());
           const retryData = await retryRes.json().catch(() => ({}));
           if (!retryRes.ok) {
             if (retryRes.status === 401 || retryRes.status === 403) {
@@ -151,6 +178,17 @@ export const apiClient = async <T>(endpoint: string, options?: RequestInit): Pro
   return data;
 };
 
+export const getAccessToken = () => {
+  if (!accessToken) {
+    accessToken = readStoredAccessToken();
+  }
+
+  return accessToken;
+};
+
+export const hasAccessToken = () => !!getAccessToken();
+
 export const setAccessToken = (token: string | null) => {
-  accessToken = token;
+  accessToken = normalizeAccessToken(token);
+  persistAccessToken(accessToken);
 };

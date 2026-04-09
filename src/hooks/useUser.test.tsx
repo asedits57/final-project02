@@ -3,6 +3,7 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUser } from "./useUser";
+import { setAccessToken } from "@services/apiClient";
 import { useAuthStore } from "@store/useAuthStore";
 import { userService } from "@services/userService";
 
@@ -38,13 +39,14 @@ describe("useUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    setAccessToken(null);
     act(() => {
       useAuthStore.setState({ user: null, loading: false, error: null });
     });
   });
 
   it("prefers the latest store user over stale query data after OTP verification", async () => {
-    localStorage.setItem("token", "otp-token");
+    setAccessToken("otp-token");
 
     vi.mocked(userService.fetchProfile).mockResolvedValue({
       id: "google-user",

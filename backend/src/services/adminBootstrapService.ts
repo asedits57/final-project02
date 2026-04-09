@@ -3,6 +3,7 @@ import crypto from "crypto";
 import mongoose from "mongoose";
 
 import User from "../models/User";
+import { logger } from "../utils/logger";
 
 const deriveNameFromEmail = (email: string) => {
   const localPart = email.split("@")[0] || "Admin";
@@ -43,7 +44,7 @@ export const ensureBootstrapAdmin = async () => {
       verifiedAt: nextVerifiedAt,
     });
 
-    console.log(`Bootstrap admin created for ${email}`);
+    logger.info("Bootstrap admin created", { email });
     return createdUser;
   }
 
@@ -81,7 +82,7 @@ export const ensureBootstrapAdmin = async () => {
 
   if (shouldSave) {
     await existingUser.save();
-    console.log(`Bootstrap admin updated for ${email}`);
+    logger.info("Bootstrap admin updated", { email });
   }
 
   return existingUser;

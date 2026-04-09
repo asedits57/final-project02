@@ -1,3 +1,5 @@
+export { default } from "./UnifiedAuthPage";
+/*
 import { useRef, useCallback, useEffect, useReducer } from "react";
 import { FloatingWord } from "@components/shared/FloatingWord";
 import { motion, AnimatePresence } from "framer-motion";
@@ -591,3 +593,4 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
+*/

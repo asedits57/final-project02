@@ -1,17 +1,19 @@
 import request from "supertest";
+import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import app from "../src/app";
 import User from "../src/models/User";
 import { generateAccessToken } from "../src/utils/generateToken";
-import mongoose from "mongoose";
-import { createMongoMemoryServer } from "../src/config/memoryMongo";
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from "./support/database";
 
-describe("AI Controller Tests", () => {
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
+
+describeMongo("AI Controller Tests", () => {
   let token: string;
-  let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
+  let database: TestDatabaseHandle;
 
   beforeAll(async () => {
-    mongoServer = await createMongoMemoryServer();
-    await mongoose.connect(mongoServer.getUri());
+    database = await connectMongoTestDatabase();
 
     const testUser = await User.create({
       email: "ai_test@example.com",
@@ -24,8 +26,7 @@ describe("AI Controller Tests", () => {
 
   afterAll(async () => {
     await User.deleteOne({ email: "ai_test@example.com" });
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await database.stop();
   });
 
   it("POST /api/v1/ai/generate - should return 401 if unauthenticated", async () => {

@@ -5,7 +5,7 @@ import { aiService } from "@services/aiService";
 import { adminService } from "@services/adminService";
 import { finalTestService } from "@services/finalTestService";
 import { learningContentService } from "@services/learningContentService";
-import { apiClient } from "@services/apiClient";
+import { apiClient, API_BASE_URL } from "@services/apiClient";
 
 export const apiService = {
   ...authService,
@@ -24,4 +24,4 @@ export const apiService = {
 export const api = apiService;
 
 // For any code that still needs the raw BASE_URL
-export const BASE_URL = import.meta.env.VITE_API_URL || "https://your-production-api.com/api";
+export const BASE_URL = API_BASE_URL;

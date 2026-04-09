@@ -1,6 +1,8 @@
 import User from "../models/User";
 import Leaderboard from "../models/Leaderboard";
 import { safeGet, safeSet, safeDel } from "../config/redis";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 import { toPublicUser } from "../utils/toPublicUser";
 
 const LEADERBOARD_CACHE_KEY = "leaderboard";
@@ -49,7 +51,17 @@ export const getUserById = async (userId: string) => {
   return toPublicUser(user);
 };
 
-export const updateProfileData = async (userId: string, data: any) => {
+type ProfileUpdatePayload = Partial<{
+  avatar: string;
+  dept: string;
+  fullName: string;
+  level: number;
+  score: number;
+  streak: number;
+  username: string;
+}>;
+
+export const updateProfileData = async (userId: string, data: ProfileUpdatePayload) => {
   const User = (await import("../models/User")).default;
   return await User.findByIdAndUpdate(userId, data, { returnDocument: "after" });
 };
@@ -97,7 +109,7 @@ export const updateUserProgress = async (userId: string, score: number) => {
     const { emitLeaderboardSnapshot } = await import("./socketService");
     await emitLeaderboardSnapshot();
   } catch (err) {
-    console.warn("Socket broadcast failed:", err);
+    logger.warn("Socket broadcast failed", serializeError(err));
   }
 
   return user;
@@ -109,7 +121,7 @@ export const getLeaderboardCached = async (): Promise<LeaderboardRecord[]> => {
   // Check Redis
   const cachedData = await safeGet(cacheKey);
   if (cachedData) {
-    console.log("Serving Leaderboard from Cache 🚀");
+    logger.debug("Serving leaderboard from cache");
     return JSON.parse(cachedData);
   }
 
@@ -134,7 +146,7 @@ export const getLeaderboardCached = async (): Promise<LeaderboardRecord[]> => {
   await safeSet(cacheKey, JSON.stringify(users), {
     EX: 60,
   });
-  console.log("Serving Leaderboard from DB and Caching 💾");
+  logger.debug("Serving leaderboard from database and caching result");
 
   return users;
 };

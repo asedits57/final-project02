@@ -1,10 +1,12 @@
 import "dotenv/config";
+import { logger } from "./utils/logger";
+import { serializeError } from "./utils/logging";
 
 // ✅ VALIDATE ENVIRONMENT VARIABLES
 const REQUIRED_ENV = ["JWT_SECRET", "MONGO_URI"];
 REQUIRED_ENV.forEach((key) => {
   if (!process.env[key]) {
-    console.error(`❌ Error: Environment variable ${key} is missing!`);
+    logger.error("Missing required environment variable", { key });
     process.exit(1);
   }
 });
@@ -26,20 +28,20 @@ const shutdown = async (signal: string, exitCode = 0) => {
   }
 
   shuttingDown = true;
-  console.log(`Received ${signal}. Shutting down server gracefully...`);
+  logger.info("Shutting down server gracefully", { signal });
 
   try {
     await new Promise<void>((resolve) => {
       httpServer.close(() => resolve());
     });
   } catch (error) {
-    console.error("HTTP server shutdown failed:", error);
+    logger.error("HTTP server shutdown failed", serializeError(error));
   }
 
   try {
     await disconnectDB();
   } catch (error) {
-    console.error("Database shutdown failed:", error);
+    logger.error("Database shutdown failed", serializeError(error));
   }
 
   process.exit(exitCode);
@@ -50,16 +52,16 @@ const startServer = async () => {
 
   httpServer.on("error", (error: NodeJS.ErrnoException) => {
     if (error.code === "EADDRINUSE") {
-      console.error(`Port ${PORT} is already in use. Stop the existing process or change PORT in backend/.env.`);
+      logger.error("Server port is already in use", { port: PORT, code: error.code });
     } else {
-      console.error("HTTP server error:", error);
+      logger.error("HTTP server error", serializeError(error));
     }
 
     void shutdown("server-error", 1);
   });
 
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    logger.info("Server running", { url: `http://localhost:${PORT}` });
   });
 };
 
@@ -72,16 +74,16 @@ process.on("SIGTERM", () => {
 });
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled promise rejection:", reason);
+  logger.error("Unhandled promise rejection", serializeError(reason));
   void shutdown("unhandledRejection", 1);
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("Uncaught exception:", error);
+  logger.error("Uncaught exception", serializeError(error));
   void shutdown("uncaughtException", 1);
 });
 
 startServer().catch((err) => {
-  console.error("Failed to start server:", err);
+  logger.error("Failed to start server", serializeError(err));
   process.exit(1);
 });

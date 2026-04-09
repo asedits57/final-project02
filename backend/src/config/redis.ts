@@ -1,4 +1,6 @@
 import { createClient } from "redis";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 
 const redisUrl = process.env.REDIS_URL?.trim();
 
@@ -13,10 +15,12 @@ export const redisClient = redisUrl
 
 if (redisClient) {
   redisClient.on("error", (err) => {
-    console.warn("Redis connection issue:", err.message || err);
+    logger.warn("Redis connection issue", serializeError(err));
   });
 
-  redisClient.connect().catch(() => console.warn("Redis offline: caching disabled."));
+  redisClient.connect().catch((error) => {
+    logger.warn("Redis offline: caching disabled", serializeError(error));
+  });
 }
 
 export const safeGet = async (key: string) => {
@@ -24,7 +28,7 @@ export const safeGet = async (key: string) => {
     if (!redisClient?.isOpen) return null;
     return await redisClient.get(key);
   } catch (err) {
-    console.warn(`Redis GET error for ${key}:`, err);
+    logger.warn("Redis GET failed", { key, ...serializeError(err) });
     return null;
   }
 };
@@ -34,7 +38,7 @@ export const safeSet = async (key: string, value: string, options?: Record<strin
     if (!redisClient?.isOpen) return;
     await redisClient.set(key, value, options);
   } catch (err) {
-    console.warn(`Redis SET error for ${key}:`, err);
+    logger.warn("Redis SET failed", { key, ...serializeError(err) });
   }
 };
 
@@ -43,7 +47,7 @@ export const safeDel = async (key: string) => {
     if (!redisClient?.isOpen) return;
     await redisClient.del(key);
   } catch (err) {
-    console.warn(`Redis DEL error for ${key}:`, err);
+    logger.warn("Redis DEL failed", { key, ...serializeError(err) });
   }
 };
 

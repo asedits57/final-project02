@@ -7,3 +7,4 @@ process.env.GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "http://loc
 process.env.EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || "resend";
 process.env.RESEND_API_KEY = process.env.RESEND_API_KEY || "resend-api-key";
 process.env.EMAIL_FROM = process.env.EMAIL_FROM || "MEC Learning <no-reply@example.com>";
+process.env.MONGO_MEMORY_ALLOW_DOWNLOAD = process.env.MONGO_MEMORY_ALLOW_DOWNLOAD || "false";

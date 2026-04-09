@@ -81,7 +81,7 @@ export const resolveMongoMemoryRoot = () => {
   return ensureDirectory(bestRoot.candidate);
 };
 
-const resolveBundledBinary = () => {
+export const resolveMongoMemoryBinary = () => {
   const configuredBinary = process.env.MONGO_MEMORY_BINARY?.trim();
   if (configuredBinary && fs.existsSync(configuredBinary)) {
     return configuredBinary;
@@ -101,7 +101,7 @@ export const createMongoMemoryServer = async () => {
   const memoryRoot = resolveMongoMemoryRoot();
   const instanceRoot = fs.mkdtempSync(path.join(memoryRoot, "instance-"));
   const binaryRoot = ensureDirectory(path.join(memoryRoot, "binaries"));
-  const systemBinary = resolveBundledBinary();
+  const systemBinary = resolveMongoMemoryBinary();
 
   if (systemBinary) {
     process.env.MONGOMS_SYSTEM_BINARY_VERSION_CHECK = "false";

@@ -10,6 +10,7 @@ import UnifiedPageShell from "@components/shared/UnifiedPageShell";
 import type { LeaderboardUser } from "@lib/leaderboard-types";
 import { useLeaderboard } from "@hooks/useLeaderboard";
 import { disconnectRealtimeSocket, getRealtimeSocket } from "@lib/socket";
+import { getAccessToken } from "@services/apiClient";
 import { useAuthStore } from "@store/useAuthStore";
 import type { LeaderboardSnapshot } from "@services/userService";
 
@@ -42,7 +43,7 @@ const UnifiedLeaderboardPage = () => {
   }, [data]);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = getAccessToken();
     const socket = getRealtimeSocket(token);
     if (!socket) {
       return;

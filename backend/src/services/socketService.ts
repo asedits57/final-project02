@@ -2,6 +2,8 @@ import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 
 let io: Server;
 
@@ -147,7 +149,7 @@ export const emitLeaderboardSnapshot = async (target?: Socket) => {
 
     io.emit("leaderboard:snapshot", snapshot);
   } catch (error) {
-    console.warn("Failed to emit leaderboard snapshot:", error);
+    logger.warn("Failed to emit leaderboard snapshot", serializeError(error));
   }
 };
 
@@ -179,7 +181,7 @@ export const initSocket = (httpServer: HttpServer) => {
         socket.data.user = { id: user._id.toString() } satisfies AuthenticatedSocketUser;
       }
     } catch (error) {
-      console.warn("Socket authentication failed:", error);
+      logger.warn("Socket authentication failed", serializeError(error));
     }
 
     next();
@@ -191,7 +193,7 @@ export const initSocket = (httpServer: HttpServer) => {
       addSocketForUser(authenticatedUser.id, socket.id);
     }
 
-    console.log("Client connected:", socket.id);
+    logger.debug("Client connected", { socketId: socket.id });
 
     socket.on("leaderboard:subscribe", () => {
       void emitLeaderboardSnapshot(socket);
@@ -218,7 +220,7 @@ export const initSocket = (httpServer: HttpServer) => {
     socket.on("disconnect", () => {
       stopSocketActivity(socket.id);
       removeSocketForUser(socket.id);
-      console.log("Client disconnected:", socket.id);
+      logger.debug("Client disconnected", { socketId: socket.id });
       void emitLeaderboardSnapshot();
     });
   });
@@ -228,7 +230,7 @@ export const initSocket = (httpServer: HttpServer) => {
 
 export const getIO = () => {
   if (!io) {
-    console.warn("Socket.io not initialized. Returning mock for safety.");
+    logger.warn("Socket.io not initialized. Returning mock transport.");
     return {
       emit: () => {},
       on: () => {},

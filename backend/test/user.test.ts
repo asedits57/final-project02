@@ -1,18 +1,20 @@
 import request from "supertest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import app from "../src/app";
 import User from "../src/models/User";
 import { generateAccessToken } from "../src/utils/generateToken";
-import mongoose from "mongoose";
-import { createMongoMemoryServer } from "../src/config/memoryMongo";
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from "./support/database";
 
-describe("User Controller Tests", () => {
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
+
+describeMongo("User Controller Tests", () => {
   let token: string;
   let testUser: { _id: { toString(): string } };
-  let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
+  let database: TestDatabaseHandle;
 
   beforeAll(async () => {
-    mongoServer = await createMongoMemoryServer();
-    await mongoose.connect(mongoServer.getUri());
+    database = await connectMongoTestDatabase();
 
     testUser = await User.create({
       email: "user_test@example.com",
@@ -26,8 +28,7 @@ describe("User Controller Tests", () => {
 
   afterAll(async () => {
     await User.deleteOne({ email: "user_test@example.com" });
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await database.stop();
   });
 
   it("GET /api/v1/profile - should return user profile if authenticated", async () => {

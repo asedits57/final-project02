@@ -10,6 +10,8 @@ import Task from "../models/Task";
 import TaskSubmission from "../models/TaskSubmission";
 import User from "../models/User";
 import ApiError from "../utils/ApiError";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 import { buildSearchRegex, getPagination } from "../utils/query";
 import { getLeaderboardSnapshot } from "./userService";
 import { getRecentAdminActivity, recordAdminActivity } from "./adminActivityService";
@@ -24,7 +26,7 @@ const invalidateLeaderboard = async () => {
     const { emitLeaderboardSnapshot } = await import("./socketService");
     await emitLeaderboardSnapshot();
   } catch (error) {
-    console.warn("Failed to refresh leaderboard snapshot:", error);
+    logger.warn("Failed to refresh leaderboard snapshot", serializeError(error));
   }
 };
 

@@ -1,39 +1,52 @@
 import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
 import ApiError from "../utils/ApiError";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 
 /**
  * Global Error Handling Middleware
  */
-const errorConverter = (err: any, req: Request, res: Response, next: NextFunction) => {
+const errorConverter = (err: unknown, req: Request, res: Response, next: NextFunction) => {
   let error = err;
   if (!(error instanceof ApiError)) {
-    const statusCode = error.statusCode || 400;
-    const message = error.message || "Something went wrong";
-    error = new ApiError(statusCode, message, false, err.stack);
+    const statusCode =
+      typeof err === "object" && err && "statusCode" in err && typeof err.statusCode === "number"
+        ? err.statusCode
+        : 400;
+    const message = err instanceof Error ? err.message : "Something went wrong";
+    const stack = err instanceof Error ? err.stack : undefined;
+    error = new ApiError(statusCode, message, false, stack);
   }
   next(error);
 };
 
-const errorHandler = (err: ApiError, req: Request, res: Response, next: NextFunction) => {
-  let { statusCode, message } = err;
+const errorHandler = (err: ApiError | ZodError, req: Request, res: Response, next: NextFunction) => {
+  let statusCode = err instanceof ApiError ? err.statusCode : 400;
+  let message = err.message;
+  const stack = err instanceof Error ? err.stack : undefined;
 
   // Handle Zod Validation Errors
-  if (err.name === "ZodError") {
+  if (err instanceof ZodError) {
     statusCode = 400;
-    // @ts-ignore
-    message = err.errors.map((e: any) => e.message).join(", ");
+    message = err.errors.map((error) => error.message).join(", ");
   }
 
-  res.locals.errorMessage = err.message;
+  res.locals.errorMessage = message;
 
   const response = {
     success: false,
     message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack }),
   };
 
   if (process.env.NODE_ENV === "development") {
-    console.error(err);
+    logger.error("Request failed", {
+      method: req.method,
+      path: req.originalUrl,
+      statusCode,
+      ...serializeError(err),
+    });
   }
 
   res.status(statusCode).send(response);

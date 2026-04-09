@@ -1,21 +1,21 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import mongoose from 'mongoose';
 import User from '../src/models/User';
 import * as userService from '../src/services/userService';
 import { vi } from 'vitest';
-import { createMongoMemoryServer } from '../src/config/memoryMongo';
+import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from './support/database';
 
-let mongoServer: Awaited<ReturnType<typeof createMongoMemoryServer>>;
+const mongoSupport = getMongoTestAvailability();
+const describeMongo = mongoSupport.enabled ? describe : describe.skip;
 
-describe('UserService Integration', () => {
+describeMongo('UserService Integration', () => {
+  let database: TestDatabaseHandle;
+
   beforeAll(async () => {
-    mongoServer = await createMongoMemoryServer();
-    await mongoose.connect(mongoServer.getUri());
+    database = await connectMongoTestDatabase();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
+    await database.stop();
   });
 
   beforeEach(async () => {

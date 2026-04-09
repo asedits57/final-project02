@@ -6,6 +6,8 @@ import Question from "../models/Question";
 import { createMongoMemoryServer, resolveMongoMemoryRoot } from "./memoryMongo";
 import { ensureBootstrapAdmin } from "../services/adminBootstrapService";
 import { backfillTaskQuestionBankAssignments } from "../services/taskService";
+import { logger } from "../utils/logger";
+import { serializeError } from "../utils/logging";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,12 +39,12 @@ const attachConnectionListeners = () => {
 
   mongoose.connection.on("disconnected", () => {
     lastDatabaseHealthCheckAt = 0;
-    console.warn("MongoDB disconnected");
+    logger.warn("MongoDB disconnected");
   });
 
   mongoose.connection.on("error", (error) => {
     lastDatabaseHealthCheckAt = 0;
-    console.error("MongoDB connection error:", error);
+    logger.error("MongoDB connection error", serializeError(error));
   });
 };
 
@@ -50,7 +52,7 @@ const runPostConnectTasks = async () => {
   await ensureBootstrapAdmin();
   const syncedTasks = await backfillTaskQuestionBankAssignments();
   if (syncedTasks > 0) {
-    console.log(`Backfilled question bank questions into ${syncedTasks} existing task(s)`);
+    logger.info("Backfilled question bank questions into existing tasks", { syncedTasks });
   }
 };
 
@@ -118,7 +120,7 @@ const seedQuestionsIfNeeded = async () => {
 
   if (flattened.length > 0) {
     await Question.insertMany(flattened);
-    console.log(`Seeded ${flattened.length} questions into MongoDB memory mode`);
+    logger.info("Seeded questions into MongoDB memory mode", { count: flattened.length });
   }
 };
 
@@ -128,7 +130,7 @@ const connectMemoryDB = async () => {
   }
 
   await mongoose.connect(mongoMemoryServer.getUri(), DB_CONNECT_OPTIONS);
-  console.log(`MongoDB memory mode connected (${resolveMongoMemoryRoot()})`);
+  logger.info("MongoDB memory mode connected", { root: resolveMongoMemoryRoot() });
   await seedQuestionsIfNeeded();
   await runPostConnectTasks();
 };
@@ -153,7 +155,7 @@ const disconnectMongoose = async () => {
   try {
     await mongoose.disconnect();
   } catch (error) {
-    console.warn("MongoDB disconnect warning:", error);
+    logger.warn("MongoDB disconnect warning", serializeError(error));
   } finally {
     lastDatabaseHealthCheckAt = 0;
   }
@@ -181,10 +183,13 @@ const reconnectDatabase = async () => {
 
     try {
       await mongoose.connect(mongoUri, DB_CONNECT_OPTIONS);
-      console.log(`MongoDB reconnected: ${mongoUri}`);
+      logger.info("MongoDB reconnected", { mongoUri });
       await runPostConnectTasks();
     } catch (error) {
-      console.log(`MongoDB at ${mongoUri} unavailable during reconnect. Falling back to in-memory MongoDB.`);
+      logger.warn("MongoDB reconnect failed. Falling back to memory mode", {
+        mongoUri,
+        ...serializeError(error),
+      });
       await stopMemoryServer();
       await connectMemoryDB();
     }
@@ -218,7 +223,7 @@ const pingDatabase = async () => {
     return true;
   } catch (error) {
     lastDatabaseHealthCheckAt = 0;
-    console.warn("MongoDB health check failed. Reconnecting...", error);
+    logger.warn("MongoDB health check failed. Reconnecting", serializeError(error));
     return false;
   }
 };
@@ -244,11 +249,14 @@ export const connectDB = async () => {
 
   try {
     await mongoose.connect(mongoUri, DB_CONNECT_OPTIONS);
-    console.log(`MongoDB connected: ${mongoUri}`);
+    logger.info("MongoDB connected", { mongoUri });
     await runPostConnectTasks();
   } catch (err) {
     const targetLabel = mongoUri ? `MongoDB at ${mongoUri}` : "Configured MongoDB";
-    console.log(`${targetLabel} unavailable. Falling back to in-memory MongoDB.`);
+    logger.warn("Configured MongoDB unavailable. Falling back to memory mode", {
+      targetLabel,
+      ...serializeError(err),
+    });
 
     await connectMemoryDB();
   }
