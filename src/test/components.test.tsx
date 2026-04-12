@@ -7,7 +7,7 @@ import React from 'react';
 describe('DailyChallenge Component', () => {
   it('should render the Daily Challenge heading', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DailyChallenge />
       </MemoryRouter>
     );
@@ -18,7 +18,7 @@ describe('DailyChallenge Component', () => {
 
   it('should render a start button', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <DailyChallenge />
       </MemoryRouter>
     );

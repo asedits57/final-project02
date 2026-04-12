@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import User from '../src/models/User';
 import * as userService from '../src/services/userService';
-import { vi } from 'vitest';
 import { connectMongoTestDatabase, getMongoTestAvailability, type TestDatabaseHandle } from './support/database';
 
 const mongoSupport = getMongoTestAvailability();

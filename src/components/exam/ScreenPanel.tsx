@@ -1,6 +1,6 @@
 import { Monitor, AlertTriangle, MonitorOff } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 
 const ScreenPanel = () => {
   const { pushEvent } = useProctoring();

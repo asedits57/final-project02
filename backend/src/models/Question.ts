@@ -70,7 +70,7 @@ const questionSchema = new mongoose.Schema({
   },
   targetType: {
     type: String,
-    enum: ["task", "daily-task", "both"],
+    enum: ["task", "daily-task", "final-test", "both", "all"],
     default: "both",
     index: true,
   },

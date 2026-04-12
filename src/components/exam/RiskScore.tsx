@@ -1,5 +1,5 @@
 import { ShieldAlert } from "lucide-react";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 
 const RiskScore = () => {
   const { riskScore: score } = useProctoring();

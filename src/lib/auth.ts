@@ -1,5 +1,3 @@
-const USER_KEY = "li_user";
-
 export type UserLevel = "beginner" | "intermediate" | "advanced" | "expert";
 
 export interface AuthUser {

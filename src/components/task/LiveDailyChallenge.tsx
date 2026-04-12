@@ -133,43 +133,22 @@ const LiveDailyChallenge = () => {
     };
 
     return (
-        <section className="relative w-full px-6 pt-6 md:px-8">
+        <section className="w-full">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, delay: 0.15 }}
-                className="relative overflow-hidden rounded-3xl p-8"
-                style={{
-                    background: "linear-gradient(135deg, hsla(270, 30%, 9%, 0.92) 0%, hsla(262, 50%, 12%, 0.92) 100%)",
-                    backdropFilter: "blur(20px)",
-                    border: "1px solid hsla(270, 80%, 55%, 0.25)",
-                    boxShadow: "0 0 40px hsla(270, 80%, 55%, 0.1), inset 0 1px 0 hsla(270, 60%, 70%, 0.08)",
-                }}
+                transition={{ duration: 0.45, delay: 0.12 }}
+                className="app-surface px-5 py-5 sm:px-6 md:px-7"
             >
-                <div
-                    className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-20"
-                    style={{ background: "hsl(270, 80%, 55%)", filter: "blur(60px)" }}
-                />
-                <div
-                    className="pointer-events-none absolute -bottom-16 -left-10 h-48 w-48 rounded-full opacity-10"
-                    style={{ background: "hsl(185, 100%, 50%)", filter: "blur(50px)" }}
-                />
-
-                <div className="relative z-10">
-                    <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                <div>
+                    <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                         <div className="flex-1">
-                            <div
-                                className="mb-4 inline-flex items-center gap-2 rounded-full px-4 py-1.5"
-                                style={{
-                                    background: "hsla(270, 80%, 55%, 0.15)",
-                                    border: "1px solid hsla(270, 80%, 55%, 0.3)",
-                                }}
-                            >
+                            <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-500/10 px-4 py-1.5">
                                 <Flame className="h-4 w-4 text-orange-400" />
-                                <span className="font-poppins text-xs font-semibold tracking-wide text-violet-300">
+                                <span className="font-poppins text-xs font-semibold tracking-wide text-cyan-100">
                                     Daily Challenge
                                 </span>
-                                <span className="text-xs font-bold text-orange-400">Live task</span>
+                                <span className="text-xs font-bold text-orange-300">Live task</span>
                             </div>
 
                             {loading ? (
@@ -195,7 +174,7 @@ const LiveDailyChallenge = () => {
                                         {dailyTask.description}
                                     </p>
 
-                                    <div className="mt-5 flex flex-wrap items-center gap-5">
+                                    <div className="mt-4 flex flex-wrap items-center gap-4">
                                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                                             <Clock className="h-4 w-4 text-violet-400" />
                                             Active until {new Date(dailyTask.expiryDate).toLocaleDateString()}
@@ -230,50 +209,40 @@ const LiveDailyChallenge = () => {
                             <button
                                 type="button"
                                 onClick={() => setExpanded((current) => !current)}
-                                className="group relative shrink-0 overflow-hidden rounded-2xl px-7 py-3.5 font-poppins font-semibold text-white transition-all duration-300 hover:scale-105"
-                                style={{
-                                    background: "linear-gradient(135deg, #7f5af0, #8b5cf6)",
-                                    boxShadow: "0 0 25px hsla(262, 83%, 58%, 0.4)",
-                                }}
+                                className="brand-button-primary w-full shrink-0 md:w-auto"
                             >
-                                <span
-                                    className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                    style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.1), transparent)" }}
-                                />
-                                <span className="relative z-10">
-                                    {dailyTask.submission ? (expanded ? "Hide results" : "Review results") : (expanded ? "Hide challenge" : "Open challenge")}
-                                </span>
+                                {dailyTask.submission ? (expanded ? "Hide results" : "Review results") : (expanded ? "Hide challenge" : "Open challenge")}
                             </button>
                         ) : null}
                     </div>
 
                     {error ? (
-                        <div className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
                             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                             <span>{error}</span>
                         </div>
                     ) : null}
 
                     {expanded && dailyTask ? (
-                        <div className="mt-8 space-y-5 border-t border-white/10 pt-6">
+                        <div className="mt-6 space-y-4 border-t border-white/10 pt-5">
                             {dailyTask.submission ? (
-                                <div className="grid gap-4 md:grid-cols-3">
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                <div className="grid gap-3 md:grid-cols-3">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3.5">
                                         <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Task score</p>
-                                        <p className="mt-3 text-3xl font-bold text-white">
+                                        <p className="mt-2.5 text-3xl font-bold text-white">
                                             {dailyTask.submission.score ?? 0}
                                             <span className="ml-2 text-base font-medium text-slate-400">/ {dailyTask.submission.maxScore ?? 0}</span>
                                         </p>
                                     </div>
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3.5">
                                         <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Leaderboard XP</p>
-                                        <p className="mt-3 text-3xl font-bold text-violet-100">
+                                        <p className="mt-2.5 text-3xl font-bold text-violet-100">
                                             +{dailyTask.submission.earnedPoints ?? dailyTask.rewardPoints}
                                         </p>
                                     </div>
-                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                                    <div className="rounded-2xl border border-white/10 bg-white/5 p-3.5">
                                         <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Completed on</p>
-                                        <p className="mt-3 text-lg font-semibold text-white">
+                                        <p className="mt-2.5 text-lg font-semibold text-white">
                                             {dailyTask.submission.submittedAt
                                                 ? new Date(dailyTask.submission.submittedAt).toLocaleString()
                                                 : "Today"}
@@ -282,7 +251,7 @@ const LiveDailyChallenge = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid gap-4">
+                                    <div className="grid gap-3.5">
                                         {orderedQuestions.map(({ question }, index) => {
                                             const answerValue = answers[question._id] || "";
                                             const isChoiceQuestion = Array.isArray(question.options) && question.options.length > 0;
@@ -290,24 +259,24 @@ const LiveDailyChallenge = () => {
                                             return (
                                                 <div
                                                     key={question._id}
-                                                    className="rounded-3xl border border-white/10 bg-white/[0.04] p-5"
+                                                    className="app-surface-soft p-4"
                                                 >
                                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                                         <div>
-                                                            <p className="text-[11px] uppercase tracking-[0.22em] text-violet-300/72">
+                                                            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
                                                                 Question {index + 1}
                                                             </p>
                                                             <h4 className="mt-2 text-lg font-semibold text-white">
                                                                 {question.questionText}
                                                             </h4>
                                                         </div>
-                                                        <span className="rounded-full border border-violet-300/18 bg-violet-500/10 px-3 py-1 text-[11px] text-violet-100">
+                                                        <span className="rounded-full border border-cyan-300/18 bg-cyan-500/10 px-3 py-1 text-[11px] text-cyan-100">
                                                             {question.points || 1} pts
                                                         </span>
                                                     </div>
 
                                                     {isChoiceQuestion ? (
-                                                        <div className="mt-4 grid gap-2">
+                                                        <div className="mt-3 grid gap-2">
                                                             {question.options!.map((option) => {
                                                                 const isSelected = answerValue === option;
                                                                 return (
@@ -315,9 +284,9 @@ const LiveDailyChallenge = () => {
                                                                         key={option}
                                                                         type="button"
                                                                         onClick={() => handleAnswerChange(question._id, option)}
-                                                                        className={`rounded-2xl border px-4 py-3 text-left text-sm transition ${
+                                                                        className={`rounded-2xl border px-3.5 py-2.5 text-left text-sm transition ${
                                                                             isSelected
-                                                                                ? "border-violet-400/60 bg-violet-500/16 text-white"
+                                                                                ? "border-cyan-300/40 bg-cyan-500/12 text-white"
                                                                                 : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
                                                                         }`}
                                                                     >
@@ -332,12 +301,12 @@ const LiveDailyChallenge = () => {
                                                             onChange={(event) => handleAnswerChange(question._id, event.target.value)}
                                                             rows={3}
                                                             placeholder="Write your answer here..."
-                                                            className="mt-4 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-400/50 focus:bg-black/30"
+                                                            className="glass-input mt-3"
                                                         />
                                                     )}
 
                                                     {question.explanation ? (
-                                                        <p className="mt-3 text-xs leading-relaxed text-slate-400">
+                                                        <p className="mt-2.5 text-xs leading-relaxed text-slate-400">
                                                             Tip: {question.explanation}
                                                         </p>
                                                     ) : null}
@@ -350,7 +319,7 @@ const LiveDailyChallenge = () => {
                                         type="button"
                                         onClick={() => void handleSubmit()}
                                         disabled={!allQuestionsAnswered || submitting}
-                                        className="inline-flex items-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(109,40,217,0.35)] transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-55"
+                                        className="brand-button-primary w-full disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
                                     >
                                         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                                         Submit daily task

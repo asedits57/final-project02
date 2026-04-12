@@ -109,26 +109,6 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
     () => Array.from(new Set(["general", ...defaultTaskCategories, ...defaultVideoCategories, ...questions.map((question) => question.category.trim().toLowerCase()).filter(Boolean)])),
     [questions],
   );
-  const matchingQuestionBankQuestions = useMemo(() => {
-    const selectedCategory = normalizeCategory(taskForm.category);
-    if (!selectedCategory) {
-      return [];
-    }
-
-    const eligibleQuestions = questions.filter((question) => {
-      const targetMatches = question.targetType === "task" || question.targetType === "both";
-      return (
-        question.status === "published" &&
-        targetMatches &&
-        normalizeCategory(question.category) === selectedCategory
-      );
-    });
-
-    const exactDifficultyMatches = eligibleQuestions.filter((question) => question.difficulty === taskForm.difficulty);
-    const fallbackMatches = eligibleQuestions.filter((question) => question.difficulty !== taskForm.difficulty);
-    return [...exactDifficultyMatches, ...fallbackMatches];
-  }, [questions, taskForm.category, taskForm.difficulty]);
-  const questionBankPreview = matchingQuestionBankQuestions.slice(0, 4);
   const parsedQuestionOptions = useMemo(
     () => questionOptionsText.split("\n").map((line) => line.trim()).filter(Boolean),
     [questionOptionsText],
@@ -338,9 +318,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
       resetTaskForm();
       toast({
         title: "Task created",
-        description: matchingQuestionBankQuestions.length
-          ? `The task was saved with matching question-bank questions for ${taskForm.category}.`
-          : "The new practice task is now saved in the admin backend.",
+        description: "The new practice task is now saved in the admin backend.",
       });
     } catch (error) {
       toast({
@@ -381,7 +359,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
   };
 
   return (
-    <div className="grid gap-4 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Card className="rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_20px_70px_rgba(3,7,18,0.35)] backdrop-blur-2xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
@@ -399,7 +377,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
                 Send Admin Request
               </Button>
             </DialogTrigger>
-            <DialogContent className="border-white/10 bg-[#090c18] text-slate-100">
+            <DialogContent className="max-h-[90vh] border-white/10 bg-[#090c18] text-slate-100">
               <DialogHeader>
                 <DialogTitle>Send admin invitation</DialogTitle>
                 <DialogDescription className="text-slate-400">
@@ -666,7 +644,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
             Add Practice Task
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Create a task quickly and the backend will also attach matching question-bank items for that category.
+            Create a task quickly with the core details learners need to see right away.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -680,7 +658,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
               <DialogHeader>
                 <DialogTitle>Quick add task</DialogTitle>
                 <DialogDescription className="text-slate-400">
-                  Keep it simple: add the task name, category, and short instruction. Matching published question-bank items will be linked automatically, and typed questions are optional extras.
+                  Keep it simple: add the task name, category, and short instruction. Typed questions are optional extras.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-3 md:grid-cols-2">
@@ -733,42 +711,6 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
                 placeholder="Describe what the learner should do"
                 className={`min-h-[88px] rounded-3xl ${controlClassName}`}
               />
-              <div className="rounded-3xl border border-violet-400/15 bg-violet-500/[0.08] p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-white">Question bank match</p>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                      Published <span className="text-slate-200">{taskForm.category}</span> questions for tasks are added automatically by the backend when you save.
-                    </p>
-                  </div>
-                  <Badge className="border-violet-300/20 bg-violet-500/12 text-violet-100">
-                    {matchingQuestionBankQuestions.length} visible matches
-                  </Badge>
-                </div>
-                {questionBankPreview.length ? (
-                  <div className="mt-3 space-y-2">
-                    {questionBankPreview.map((question) => (
-                      <div key={question._id} className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2">
-                        <p className="text-sm text-slate-100">{question.title}</p>
-                        <div className="mt-1 flex flex-wrap gap-2 text-[11px] text-slate-400">
-                          <span>{question.difficulty}</span>
-                          <span>{question.questionType.replaceAll("_", " ")}</span>
-                          <span>{question.points} pts</span>
-                        </div>
-                      </div>
-                    ))}
-                    {matchingQuestionBankQuestions.length > questionBankPreview.length ? (
-                      <p className="text-[11px] text-slate-500">
-                        Showing {questionBankPreview.length} of {matchingQuestionBankQuestions.length} visible matches from the loaded question bank.
-                      </p>
-                    ) : null}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-xs text-slate-500">
-                    No published question-bank items are visible for this category yet. The task will still save with the typed questions below.
-                  </p>
-                )}
-              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-white">Extra typed questions</p>
@@ -799,7 +741,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
                 <Button
                   className="rounded-2xl bg-fuchsia-600 text-white hover:bg-fuchsia-500"
                   onClick={() => void handleTaskSubmit()}
-                  disabled={taskBusy || !taskForm.title.trim() || !taskForm.description.trim() || !taskForm.category.trim() || (!matchingQuestionBankQuestions.length && !taskQuestionsText.split("\n").some((line) => line.trim()))}
+                  disabled={taskBusy || !taskForm.title.trim() || !taskForm.description.trim() || !taskForm.category.trim()}
                 >
                   {taskBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Add Task
@@ -827,7 +769,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
                 Create Video
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl border-white/10 bg-[#090c18] text-slate-100">
+            <DialogContent className="max-h-[88vh] max-w-3xl overflow-y-auto border-white/10 bg-[#090c18] text-slate-100">
               <DialogHeader>
                 <DialogTitle>Create learning video</DialogTitle>
                 <DialogDescription className="text-slate-400">
@@ -909,7 +851,7 @@ export default function AdminManagementActions({ questions, onSuccess, openTaskR
                     type="file"
                     accept="video/*"
                     onChange={(event) => void handleVideoFileChange(event)}
-                    className={`${controlClassName} max-w-sm file:mr-3 file:rounded-xl file:border-0 file:bg-violet-500/15 file:px-3 file:py-2 file:text-sm file:font-medium file:text-violet-100`}
+                    className={`${controlClassName} w-full md:max-w-sm file:mr-3 file:rounded-xl file:border-0 file:bg-violet-500/15 file:px-3 file:py-2 file:text-sm file:font-medium file:text-violet-100`}
                   />
                 </div>
                 {videoFileName ? (

@@ -1,26 +1,17 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Home, CheckSquare, Trophy, User, Settings,
+    Settings,
     Flame, Star, BookOpen, Clock, Target,
     TrendingUp, Award, Crown, Edit3,
     Bell, Lock, Volume2, X, Save, LogOut,
 } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
 import TaskLevels from "@components/task/TaskLevels";
 import { useStore } from "@store/useAuthStore";
-import AppBottomNav from "@components/shared/AppBottomNav";
 
 /* ─── Nav ─── */
-const navItems = [
-    { label: "Home", icon: Home, path: "/" },
-    { label: "Task", icon: CheckSquare, path: "/task" },
-    { label: "Learn", icon: BookOpen, path: "/learning" },
-    { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
-    { label: "Profile", icon: User, path: "/profile" },
-];
-
 /* ─── Static data ─── */
 const achievementsList = [
     { id: 1, name: "First Steps", icon: Star, unlocked: true, color: "text-yellow-400" },
@@ -50,7 +41,6 @@ const glassBtn = {
 
 export default function ProfilePage() {
     const navigate = useNavigate();
-    const location = useLocation();
     const clearUser = useStore(s => s.clearUser);
     const storeUser = useStore(s => s.user);
 
@@ -138,7 +128,7 @@ export default function ProfilePage() {
             />
 
             {/* ══ Content ══ */}
-            <div className="relative z-10 max-w-6xl mx-auto px-4 py-6 pb-28">
+            <div className="relative z-10 max-w-6xl mx-auto px-4 py-6 pb-10">
 
                 {/* TOP BAR */}
                 <motion.div className="flex items-center justify-between mb-8"
@@ -548,7 +538,6 @@ export default function ProfilePage() {
             </AnimatePresence>
 
             {/* ══ BOTTOM NAV ══ */}
-            <AppBottomNav className="px-6 py-4" />
         </div>
     );
 }

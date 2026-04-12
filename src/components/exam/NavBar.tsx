@@ -1,5 +1,4 @@
 import { Camera, Mic, Monitor, Clock, BarChart3, Shield } from "lucide-react";
-import { useEffect, useState } from "react";
 
 interface NavBarProps {
   timeLeft: number;
@@ -14,13 +13,13 @@ const NavBar = ({ timeLeft, progress }: NavBarProps) => {
   };
 
   return (
-    <nav className="glass-strong neon-border px-6 py-3 flex items-center justify-between">
+    <nav className="glass-strong neon-border flex flex-col gap-3 rounded-[1.75rem] px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-3">
         <Shield className="w-6 h-6 text-primary" />
-        <span className="font-display font-bold text-lg text-glow">AI English Test</span>
+        <span className="font-display text-base font-bold text-glow sm:text-lg">AI English Test</span>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
         <StatusDot icon={Camera} label="Camera" active />
         <StatusDot icon={Mic} label="Mic" active />
         <StatusDot icon={Monitor} label="Screen" active />
@@ -32,7 +31,7 @@ const NavBar = ({ timeLeft, progress }: NavBarProps) => {
 
         <div className="flex items-center gap-2 text-sm">
           <BarChart3 className="w-4 h-4 text-muted-foreground" />
-          <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 w-20 overflow-hidden rounded-full bg-muted sm:w-24">
             <div
               className="h-full bg-primary rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
@@ -42,7 +41,7 @@ const NavBar = ({ timeLeft, progress }: NavBarProps) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 animate-pulse-neon rounded-full px-4 py-1.5 bg-primary/10 border border-primary/30">
+      <div className="flex items-center gap-2 self-start rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 sm:self-auto">
         <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
         <span className="text-xs font-medium text-primary">AI Monitoring Active</span>
       </div>

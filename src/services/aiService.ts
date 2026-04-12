@@ -116,7 +116,7 @@ const parseStructuredReply = <T>(result: AIResult | string, fallback: T): T => {
 };
 
 export const aiService = {
-  processAI(tool: string, text: string): Promise<any> {
+  processAI(tool: string, text: string): Promise<AIResult> {
     return requestAI(`${tool}: ${text}`);
   },
 

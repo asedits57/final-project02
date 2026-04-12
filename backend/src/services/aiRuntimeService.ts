@@ -4,6 +4,7 @@ import { OpenAIProvider } from "../providers/openai.provider";
 import { IAIProvider } from "../providers/aiProvider.interface";
 import { logger } from "../utils/logger";
 import { classifyAIError, getFriendlyAIErrorReply, isRetryableAIError } from "../utils/aiError";
+import { buildLocalAIReply } from "../utils/localAIFallback";
 
 const aiEngine: IAIProvider = new OpenAIProvider();
 
@@ -44,11 +45,14 @@ export const askAI = async (prompt: string, retries = 3) => {
       const result = { reply: replyText };
       await safeSet(cacheKey, JSON.stringify(result), { EX: 86400 });
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorCode = classifyAIError(error);
+      const status = typeof (error as { status?: unknown })?.status === "number"
+        ? Number((error as { status?: number }).status)
+        : undefined;
       logger.error("AI engine error", {
-        message: error?.message,
-        status: error?.status,
+        message: error instanceof Error ? error.message : String(error),
+        status,
         errorCode,
         attempt,
         maxRetries: retries,
@@ -57,6 +61,19 @@ export const askAI = async (prompt: string, retries = 3) => {
       if (!isRetryableAIError(error) || attempt === retries) {
         if (attempt === retries) {
           logger.error("AI engine exhausted all retries. Falling back.");
+        }
+
+        const localReply = buildLocalAIReply(prompt);
+        if (localReply.trim()) {
+          logger.warn("AI engine using local fallback reply", {
+            errorCode,
+            attempt,
+            hash,
+          });
+
+          return {
+            reply: localReply,
+          };
         }
 
         return {

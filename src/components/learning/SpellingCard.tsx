@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Type, Loader2 } from "lucide-react";
+import { Loader2, Type } from "lucide-react";
+
+import { useToast } from "@hooks/use-toast";
 import { apiService as api } from "@services/apiService";
 import type { SpellingIssue } from "@services/aiService";
-import { useToast } from "@hooks/use-toast";
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message.trim() ? error.message : fallback;
 
 const SpellingCard = () => {
   const { toast } = useToast();
@@ -13,16 +17,19 @@ const SpellingCard = () => {
   const [loading, setLoading] = useState(false);
 
   const handleCheck = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const parsed = await api.checkSpelling(input);
       setResults(Array.isArray(parsed) ? parsed : []);
       setChecked(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
-        title: "Spelling Check Failed",
-        description: error?.message || "The AI spelling helper is temporarily unavailable.",
+        title: "Spelling check failed",
+        description: getErrorMessage(error, "The AI spelling helper is temporarily unavailable."),
         variant: "destructive",
       });
       setResults([]);
@@ -34,44 +41,62 @@ const SpellingCard = () => {
 
   return (
     <motion.div
-      className="glass-card p-6 flex flex-col gap-4 h-full relative group transition-colors hover:border-violet-500/50"
+      className="glass-card group relative flex h-full flex-col gap-3.5 p-5 transition-colors hover:border-cyan-300/40"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
-      <div className="flex items-center justify-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-          <Type className="w-5 h-5 text-violet-bright" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-cyan-400/6 to-orange-400/6 opacity-0 transition-opacity group-hover:opacity-100" />
+
+      <div className="flex items-center justify-center gap-2.5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20">
+          <Type className="h-5 w-5 text-cyan-100" />
         </div>
-        <h2 className="font-display text-xl font-semibold glow-text text-center">Spelling Check</h2>
+        <h2 className="text-center font-display text-lg font-semibold glow-text">Spelling sweep</h2>
       </div>
 
       <textarea
-        className="glass-input min-h-[100px] flex-1 resize-none"
-        placeholder="Enter text to check spelling..."
+        className="glass-input min-h-[88px] flex-1 resize-none"
+        placeholder="Enter text to catch spelling mistakes and quick fixes..."
         value={input}
-        onChange={(e) => { setInput(e.target.value); setChecked(false); }}
+        onChange={(event) => {
+          setInput(event.target.value);
+          setChecked(false);
+        }}
       />
 
-      <button className="violet-button w-full flex items-center justify-center gap-2" onClick={handleCheck} disabled={loading}>
-        {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Checking...</> : "Check Spelling"}
+      <button
+        type="button"
+        className="violet-button flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={handleCheck}
+        disabled={loading || !input.trim()}
+      >
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Checking...
+          </>
+        ) : (
+          "Check spelling"
+        )}
       </button>
 
-      {checked && (
+      {checked ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-2">
-          {results.length > 0 ? results.map((r, i) => (
-            <div key={i} className="output-area flex items-center gap-3 text-xs">
-              <span className="highlight-error px-1">{r.word}</span>
-              <span className="text-muted-foreground">→</span>
-              <span className="highlight-suggestion px-1 text-accent">{r.suggestion}</span>
-            </div>
-          )) : (
-            <div className="output-area text-xs text-center">✅ No spelling errors found!</div>
+          {results.length > 0 ? (
+            results.map((result, index) => (
+              <div key={index} className="output-area flex items-center gap-3 text-xs">
+                <span className="highlight-error px-1">{result.word}</span>
+                <span className="text-muted-foreground">-&gt;</span>
+                <span className="highlight-suggestion px-1 text-cyan-100">{result.suggestion}</span>
+              </div>
+            ))
+          ) : (
+            <div className="output-area text-center text-xs">No spelling errors found.</div>
           )}
         </motion.div>
-      )}
+      ) : null}
     </motion.div>
   );
 };

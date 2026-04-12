@@ -5,6 +5,7 @@ import { aiService } from "@services/aiService";
 import { adminService } from "@services/adminService";
 import { finalTestService } from "@services/finalTestService";
 import { learningContentService } from "@services/learningContentService";
+import { notificationService } from "@services/notificationService";
 import { apiClient, API_BASE_URL } from "@services/apiClient";
 
 export const apiService = {
@@ -15,6 +16,7 @@ export const apiService = {
   ...adminService,
   ...finalTestService,
   ...learningContentService,
+  ...notificationService,
   fetch: <T>(endpoint: string, options?: RequestInit): Promise<T> => {
     return apiClient<T>(endpoint, options);
   }

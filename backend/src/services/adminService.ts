@@ -5,6 +5,7 @@ import DailyTask from "../models/DailyTask";
 import FinalTestSubmission from "../models/FinalTestSubmission";
 import Leaderboard from "../models/Leaderboard";
 import LearningVideo from "../models/LearningVideo";
+import Notification from "../models/Notification";
 import Question from "../models/Question";
 import Task from "../models/Task";
 import TaskSubmission from "../models/TaskSubmission";
@@ -16,6 +17,7 @@ import { buildSearchRegex, getPagination } from "../utils/query";
 import { getLeaderboardSnapshot } from "./userService";
 import { getRecentAdminActivity, recordAdminActivity } from "./adminActivityService";
 import { safeDel } from "../config/redis";
+import { getRecentAdminNotifications } from "./notificationService";
 
 const LEADERBOARD_CACHE_KEY = "leaderboard";
 
@@ -29,6 +31,15 @@ const invalidateLeaderboard = async () => {
     logger.warn("Failed to refresh leaderboard snapshot", serializeError(error));
   }
 };
+
+const serializeAdminUser = (user: Record<string, unknown>) => ({
+  ...user,
+  role: user.role === "admin" ? "admin" : "user",
+  status: user.status === "suspended" ? "suspended" : "active",
+  score: Math.max(0, Number(user.score || 0)),
+  level: Math.max(1, Number(user.level || 1)),
+  streak: Math.max(0, Number(user.streak || 0)),
+});
 
 const ensureObjectIdExists = (value?: string) => {
   if (value && !mongoose.Types.ObjectId.isValid(value)) {
@@ -47,11 +58,13 @@ export const getAdminDashboardOverview = async (recentActivityLimit = 8) => {
     totalTasks,
     totalDailyTasks,
     totalLearningVideos,
+    totalNotifications,
     totalFinalTestSubmissions,
     pendingFinalTestReviews,
     certificatesIssued,
     leaderboardSummary,
     recentActivity,
+    recentNotifications,
   ] = await Promise.all([
     User.countDocuments(),
     User.countDocuments({ status: "active", lastActive: { $gte: sevenDaysAgo } }),
@@ -60,11 +73,13 @@ export const getAdminDashboardOverview = async (recentActivityLimit = 8) => {
     Task.countDocuments(),
     DailyTask.countDocuments(),
     LearningVideo.countDocuments(),
+    Notification.countDocuments(),
     FinalTestSubmission.countDocuments(),
     FinalTestSubmission.countDocuments({ reviewStatus: "pending" }),
     Certificate.countDocuments({ status: "issued" }),
     getLeaderboardSnapshot(),
     getRecentAdminActivity(recentActivityLimit),
+    getRecentAdminNotifications(Math.min(recentActivityLimit, 5)),
   ]);
 
   return {
@@ -75,6 +90,7 @@ export const getAdminDashboardOverview = async (recentActivityLimit = 8) => {
     totalTasks,
     totalDailyTasks,
     totalLearningVideos,
+    totalNotifications,
     totalFinalTestSubmissions,
     pendingFinalTestReviews,
     certificatesIssued,
@@ -84,6 +100,7 @@ export const getAdminDashboardOverview = async (recentActivityLimit = 8) => {
       updatedAt: leaderboardSummary.updatedAt,
     },
     recentActivity,
+    recentNotifications,
   };
 };
 
@@ -119,7 +136,7 @@ export const listAdminUsers = async (filters: AdminUserFilters) => {
   ]);
 
   return {
-    items,
+    items: items.map((user) => serializeAdminUser(user as unknown as Record<string, unknown>)),
     pagination: {
       page,
       limit,
@@ -142,7 +159,7 @@ export const getAdminUserById = async (userId: string) => {
   }
 
   return {
-    ...user,
+    ...serializeAdminUser(user as unknown as Record<string, unknown>),
     taskSubmissions: submissionSummary,
     certificateCount,
     finalTestCount,
@@ -174,7 +191,8 @@ export const updateAdminUserRole = async (userId: string, role: "user" | "admin"
     description: `Updated role for ${user.email} to ${role}`,
   });
 
-  return User.findById(userId).select("-password").lean();
+  const updatedUser = await User.findById(userId).select("-password").lean();
+  return updatedUser ? serializeAdminUser(updatedUser as unknown as Record<string, unknown>) : updatedUser;
 };
 
 export const updateAdminUserStatus = async (userId: string, status: "active" | "suspended", actorId: string) => {
@@ -202,7 +220,8 @@ export const updateAdminUserStatus = async (userId: string, status: "active" | "
     description: `Updated status for ${user.email} to ${status}`,
   });
 
-  return User.findById(userId).select("-password").lean();
+  const updatedUser = await User.findById(userId).select("-password").lean();
+  return updatedUser ? serializeAdminUser(updatedUser as unknown as Record<string, unknown>) : updatedUser;
 };
 
 type LeaderboardFilters = {
@@ -322,7 +341,8 @@ export const adjustAdminUserPoints = async (
     metadata: payload.reason ? { reason: payload.reason } : undefined,
   });
 
-  return User.findById(userId).select("-password").lean();
+  const updatedUser = await User.findById(userId).select("-password").lean();
+  return updatedUser ? serializeAdminUser(updatedUser as unknown as Record<string, unknown>) : updatedUser;
 };
 
 type FinalTestFilters = {

@@ -1,6 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
+
 import User from "../models/User";
 import { logger } from "../utils/logger";
 import { serializeError } from "../utils/logging";
@@ -9,9 +10,36 @@ let io: Server;
 
 type AuthenticatedSocketUser = {
   id: string;
+  role: "user" | "admin";
+  status: "active" | "suspended";
+  dept?: string;
 };
 
-const socketUsers = new Map<string, string>();
+type SocketBroadcastTarget = {
+  emit: (...args: unknown[]) => void;
+};
+
+type SocketTransport = Server | {
+  emit: (...args: unknown[]) => void;
+  on: (...args: unknown[]) => void;
+  off: (...args: unknown[]) => void;
+  to: (...args: unknown[]) => SocketBroadcastTarget;
+  in: (...args: unknown[]) => SocketBroadcastTarget;
+};
+
+type RealtimeActionPayload = {
+  action: string;
+  payload?: unknown;
+  occurredAt: string;
+};
+
+type NotificationAudience = {
+  scope: "all" | "users" | "admins" | "dept" | "status";
+  dept?: string;
+  status?: "active" | "suspended";
+};
+
+const socketUsers = new Map<string, AuthenticatedSocketUser>();
 const userSockets = new Map<string, Set<string>>();
 const socketActivities = new Map<string, Set<string>>();
 
@@ -38,28 +66,34 @@ const normalizeActivityName = (activity?: string | null) => {
   return normalized || "practice";
 };
 
-const addSocketForUser = (userId: string, socketId: string) => {
-  socketUsers.set(socketId, userId);
-  const sockets = userSockets.get(userId) ?? new Set<string>();
+const normalizeDept = (dept?: string | null) => String(dept || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+const getUserRoom = (userId: string) => `user:${userId}`;
+const getRoleRoom = (role: "user" | "admin") => `role:${role}`;
+const getStatusRoom = (status: "active" | "suspended") => `status:${status}`;
+const getDeptRoom = (dept?: string | null) => `dept:${normalizeDept(dept)}`;
+
+const addSocketForUser = (user: AuthenticatedSocketUser, socketId: string) => {
+  socketUsers.set(socketId, user);
+  const sockets = userSockets.get(user.id) ?? new Set<string>();
   sockets.add(socketId);
-  userSockets.set(userId, sockets);
+  userSockets.set(user.id, sockets);
 };
 
 const removeSocketForUser = (socketId: string) => {
-  const userId = socketUsers.get(socketId);
-  if (!userId) {
+  const user = socketUsers.get(socketId);
+  if (!user) {
     return;
   }
 
   socketUsers.delete(socketId);
-  const sockets = userSockets.get(userId);
+  const sockets = userSockets.get(user.id);
   if (!sockets) {
     return;
   }
 
   sockets.delete(socketId);
   if (sockets.size === 0) {
-    userSockets.delete(userId);
+    userSockets.delete(user.id);
   }
 };
 
@@ -91,6 +125,46 @@ const stopSocketActivity = (socketId: string, activity?: string | null) => {
   }
 };
 
+const emitAdminRealtimeEvent = (resource: string, action: string, payload?: unknown) => {
+  if (!io) {
+    return;
+  }
+
+  io.to(getRoleRoom("admin")).emit("admin:event", {
+    resource,
+    action,
+    payload,
+    occurredAt: new Date().toISOString(),
+  });
+};
+
+const emitRoomRealtimeEvent = (room: string, eventName: string, payload?: unknown) => {
+  if (!io) {
+    return;
+  }
+
+  io.to(room).emit(eventName, payload);
+};
+
+const emitBroadcastRealtimeEvent = (eventName: string, payload?: unknown) => {
+  if (!io) {
+    return;
+  }
+
+  io.emit(eventName, payload);
+};
+
+const emitRealtimeChange = (resource: string, action: string, eventName: string, payload?: unknown) => {
+  const nextPayload: RealtimeActionPayload = {
+    action,
+    payload,
+    occurredAt: new Date().toISOString(),
+  };
+
+  emitAdminRealtimeEvent(resource, action, payload);
+  emitBroadcastRealtimeEvent(eventName, nextPayload);
+};
+
 export const getActiveParticipantIds = () => {
   const activeIds = new Set<string>();
 
@@ -99,9 +173,9 @@ export const getActiveParticipantIds = () => {
       continue;
     }
 
-    const userId = socketUsers.get(socketId);
-    if (userId) {
-      activeIds.add(userId);
+    const user = socketUsers.get(socketId);
+    if (user?.id) {
+      activeIds.add(user.id);
     }
   }
 
@@ -116,16 +190,16 @@ export const getActiveParticipantModules = () => {
       continue;
     }
 
-    const userId = socketUsers.get(socketId);
-    if (!userId) {
+    const user = socketUsers.get(socketId);
+    if (!user) {
       continue;
     }
 
-    const userActivities = activityMap.get(userId) ?? new Set<string>();
+    const userActivities = activityMap.get(user.id) ?? new Set<string>();
     for (const activity of activities) {
       userActivities.add(activity);
     }
-    activityMap.set(userId, userActivities);
+    activityMap.set(user.id, userActivities);
   }
 
   return Object.fromEntries(
@@ -148,8 +222,63 @@ export const emitLeaderboardSnapshot = async (target?: Socket) => {
     }
 
     io.emit("leaderboard:snapshot", snapshot);
+    emitAdminRealtimeEvent("leaderboard", "snapshot", snapshot);
   } catch (error) {
     logger.warn("Failed to emit leaderboard snapshot", serializeError(error));
+  }
+};
+
+export const emitTaskRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("task", action, "tasks:changed", payload);
+};
+
+export const emitDailyTaskRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("daily-task", action, "daily-tasks:changed", payload);
+};
+
+export const emitQuestionRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("question", action, "questions:changed", payload);
+};
+
+export const emitVideoRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("video", action, "videos:changed", payload);
+};
+
+export const emitFinalTestConfigRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("final-test-config", action, "final-test-config:changed", payload);
+};
+
+export const emitFinalTestSubmissionRealtimeEvent = (action: string, payload?: unknown) => {
+  emitRealtimeChange("final-test-submission", action, "final-test-submissions:changed", payload);
+};
+
+export const emitNotificationRealtimeEvent = (
+  audience: NotificationAudience,
+  payload?: unknown,
+) => {
+  if (!io) {
+    return;
+  }
+
+  emitAdminRealtimeEvent("notification", "created", payload);
+
+  switch (audience.scope) {
+    case "users":
+      emitRoomRealtimeEvent(getRoleRoom("user"), "notifications:new", payload);
+      break;
+    case "admins":
+      emitRoomRealtimeEvent(getRoleRoom("admin"), "notifications:new", payload);
+      break;
+    case "dept":
+      emitRoomRealtimeEvent(getDeptRoom(audience.dept), "notifications:new", payload);
+      break;
+    case "status":
+      emitRoomRealtimeEvent(getStatusRoom(audience.status || "active"), "notifications:new", payload);
+      break;
+    case "all":
+    default:
+      emitBroadcastRealtimeEvent("notifications:new", payload);
+      break;
   }
 };
 
@@ -176,9 +305,14 @@ export const initSocket = (httpServer: HttpServer) => {
         return;
       }
 
-      const user = await User.findById(userId).select("_id");
+      const user = await User.findById(userId).select("_id role status dept").lean();
       if (user) {
-        socket.data.user = { id: user._id.toString() } satisfies AuthenticatedSocketUser;
+        socket.data.user = {
+          id: user._id.toString(),
+          role: user.role || "user",
+          status: user.status || "active",
+          dept: typeof user.dept === "string" ? user.dept : undefined,
+        } satisfies AuthenticatedSocketUser;
       }
     } catch (error) {
       logger.warn("Socket authentication failed", serializeError(error));
@@ -190,7 +324,13 @@ export const initSocket = (httpServer: HttpServer) => {
   io.on("connection", (socket) => {
     const authenticatedUser = socket.data.user as AuthenticatedSocketUser | undefined;
     if (authenticatedUser?.id) {
-      addSocketForUser(authenticatedUser.id, socket.id);
+      addSocketForUser(authenticatedUser, socket.id);
+      socket.join(getUserRoom(authenticatedUser.id));
+      socket.join(getRoleRoom(authenticatedUser.role));
+      socket.join(getStatusRoom(authenticatedUser.status));
+      if (normalizeDept(authenticatedUser.dept)) {
+        socket.join(getDeptRoom(authenticatedUser.dept));
+      }
     }
 
     logger.debug("Client connected", { socketId: socket.id });
@@ -228,7 +368,7 @@ export const initSocket = (httpServer: HttpServer) => {
   return io;
 };
 
-export const getIO = () => {
+export const getIO = (): SocketTransport => {
   if (!io) {
     logger.warn("Socket.io not initialized. Returning mock transport.");
     return {
@@ -237,7 +377,7 @@ export const getIO = () => {
       off: () => {},
       to: () => ({ emit: () => {} }),
       in: () => ({ emit: () => {} }),
-    } as any;
+    };
   }
   return io;
 };

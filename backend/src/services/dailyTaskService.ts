@@ -2,8 +2,9 @@ import DailyTask from "../models/DailyTask";
 import Question from "../models/Question";
 import TaskSubmission from "../models/TaskSubmission";
 import ApiError from "../utils/ApiError";
+import { logBestEffortFailure } from "../utils/bestEffort";
 import { buildSearchRegex, getPagination } from "../utils/query";
-import { answersMatch } from "../utils/scoring";
+import { answerMatchesQuestion } from "../utils/scoring";
 import { updateUserProgress } from "./userService";
 import { recordAdminActivity } from "./adminActivityService";
 
@@ -132,6 +133,12 @@ export const createAdminDailyTask = async (payload: DailyTaskPayload, userId: st
     targetId: dailyTask._id.toString(),
     description: `Created daily task ${dailyTask.title}`,
   });
+  try {
+    const { emitDailyTaskRealtimeEvent } = await import("./socketService");
+    emitDailyTaskRealtimeEvent("created", { id: dailyTask._id.toString() });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit daily-task created realtime event", error);
+  }
 
   return populateDailyTaskDocument(dailyTask._id.toString());
 };
@@ -165,6 +172,12 @@ export const updateAdminDailyTask = async (dailyTaskId: string, payload: DailyTa
     targetId: dailyTaskId,
     description: `Updated daily task ${dailyTask.title}`,
   });
+  try {
+    const { emitDailyTaskRealtimeEvent } = await import("./socketService");
+    emitDailyTaskRealtimeEvent("updated", { id: dailyTaskId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit daily-task updated realtime event", error);
+  }
 
   return populateDailyTaskDocument(dailyTaskId);
 };
@@ -184,6 +197,12 @@ export const deleteAdminDailyTask = async (dailyTaskId: string, userId: string) 
     targetId: dailyTaskId,
     description: `Deleted daily task ${dailyTask.title}`,
   });
+  try {
+    const { emitDailyTaskRealtimeEvent } = await import("./socketService");
+    emitDailyTaskRealtimeEvent("deleted", { id: dailyTaskId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit daily-task deleted realtime event", error);
+  }
 };
 
 export const publishAdminDailyTask = async (dailyTaskId: string, userId: string) => {
@@ -296,10 +315,9 @@ export const submitDailyTaskForUser = async (dailyTaskId: string, userId: string
   const answers = assignedQuestions.map((item) => {
     const question = item.questionId as unknown as Record<string, unknown>;
     const questionId = String(question._id);
-    const expectedAnswer = question.correctAnswer;
     const receivedAnswer = answerMap.get(questionId);
     const points = Number(question.points || 1);
-    const isCorrect = receivedAnswer !== undefined && answersMatch(expectedAnswer, receivedAnswer);
+    const isCorrect = receivedAnswer !== undefined && answerMatchesQuestion(question, receivedAnswer);
 
     maxScore += points;
     if (isCorrect) {

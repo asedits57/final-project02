@@ -22,6 +22,7 @@ const errorConverter = (err: unknown, req: Request, res: Response, next: NextFun
 };
 
 const errorHandler = (err: ApiError | ZodError, req: Request, res: Response, next: NextFunction) => {
+  void next;
   let statusCode = err instanceof ApiError ? err.statusCode : 400;
   let message = err.message;
   const stack = err instanceof Error ? err.stack : undefined;

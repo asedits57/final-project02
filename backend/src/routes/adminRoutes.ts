@@ -57,6 +57,16 @@ import {
   unpublishVideo,
   updateVideo,
 } from "../controllers/videoController";
+import {
+  getFinalTestConfig,
+  publishFinalTestConfig,
+  unpublishFinalTestConfig,
+  upsertFinalTestConfig,
+} from "../controllers/finalTestConfigController";
+import {
+  createNotification,
+  listNotifications,
+} from "../controllers/notificationController";
 
 const router = express.Router();
 
@@ -102,10 +112,18 @@ router.delete("/videos/:id", removeVideo);
 router.patch("/videos/:id/publish", publishVideo);
 router.patch("/videos/:id/unpublish", unpublishVideo);
 
+router.get("/notifications", listNotifications);
+router.post("/notifications", createNotification);
+
 router.get("/leaderboard", getLeaderboard);
 router.post("/leaderboard/recalculate", recalculateLeaderboard);
 router.post("/leaderboard/reset", resetLeaderboard);
 router.patch("/leaderboard/users/:userId/points", adjustLeaderboardPoints);
+
+router.get("/final-test-config", getFinalTestConfig);
+router.put("/final-test-config", upsertFinalTestConfig);
+router.patch("/final-test-config/publish", publishFinalTestConfig);
+router.patch("/final-test-config/unpublish", unpublishFinalTestConfig);
 
 router.get("/final-tests", listFinalTests);
 router.get("/final-tests/:id", getFinalTest);

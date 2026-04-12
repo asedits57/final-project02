@@ -19,6 +19,7 @@ import dailyTaskRoutes from "./routes/dailyTaskRoutes";
 import videoRoutes from "./routes/videoRoutes";
 import learningRoutes from "./routes/learningRoutes";
 import finalTestRoutes from "./routes/finalTestRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import ApiError from "./utils/ApiError";
 import { sanitizationMiddleware } from "./middleware/sanitizationMiddleware";
 import { ensureDatabaseReady } from "./middleware/databaseMiddleware";
@@ -67,6 +68,7 @@ app.use("/api/v1", dailyTaskRoutes);
 app.use("/api/v1", videoRoutes);
 app.use("/api/v1", learningRoutes);
 app.use("/api/v1", finalTestRoutes);
+app.use("/api/v1", notificationRoutes);
 
 
 // ✅ SETUP PRODUCTION STATIC SERVE

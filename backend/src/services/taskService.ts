@@ -2,8 +2,9 @@ import Question from "../models/Question";
 import Task from "../models/Task";
 import TaskSubmission from "../models/TaskSubmission";
 import ApiError from "../utils/ApiError";
+import { logBestEffortFailure } from "../utils/bestEffort";
 import { buildSearchRegex, getPagination } from "../utils/query";
-import { answersMatch } from "../utils/scoring";
+import { answerMatchesQuestion } from "../utils/scoring";
 import { updateUserProgress } from "./userService";
 import { recordAdminActivity } from "./adminActivityService";
 
@@ -100,7 +101,7 @@ const listAutoAssignedQuestionBankQuestions = async (
   const uniqueExcludedQuestionIds = Array.from(new Set(excludedQuestionIds.filter(Boolean)));
   const baseQuery: Record<string, unknown> = {
     status: "published",
-    targetType: { $in: ["task", "both"] },
+    targetType: { $in: ["task", "both", "all"] },
     category: new RegExp(`^${escapeRegex(normalizedCategory)}$`, "i"),
     ...(uniqueExcludedQuestionIds.length ? { _id: { $nin: uniqueExcludedQuestionIds } } : {}),
   };
@@ -316,6 +317,12 @@ export const createAdminTask = async (payload: TaskPayload, userId: string) => {
     targetId: task._id.toString(),
     description: `Created task ${task.title}`,
   });
+  try {
+    const { emitTaskRealtimeEvent } = await import("./socketService");
+    emitTaskRealtimeEvent("created", { id: task._id.toString() });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit task created realtime event", error);
+  }
 
   return populateTaskDocument(task._id.toString());
 };
@@ -375,6 +382,12 @@ export const updateAdminTask = async (taskId: string, payload: TaskPayload, user
     targetId: taskId,
     description: `Updated task ${task.title}`,
   });
+  try {
+    const { emitTaskRealtimeEvent } = await import("./socketService");
+    emitTaskRealtimeEvent("updated", { id: taskId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit task updated realtime event", error);
+  }
 
   return populateTaskDocument(taskId);
 };
@@ -395,6 +408,12 @@ export const deleteAdminTask = async (taskId: string, userId: string) => {
     targetId: taskId,
     description: `Deleted task ${task.title}`,
   });
+  try {
+    const { emitTaskRealtimeEvent } = await import("./socketService");
+    emitTaskRealtimeEvent("deleted", { id: taskId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit task deleted realtime event", error);
+  }
 };
 
 export const publishAdminTask = async (taskId: string, userId: string) => {
@@ -481,7 +500,7 @@ export const submitUserTask = async (taskId: string, userId: string, payload: Su
     const receivedAnswer = answerMap.get(questionId);
     const points = Number(question.points || 1);
     const isGradable = expectedAnswer !== undefined && expectedAnswer !== null && !(typeof expectedAnswer === "string" && expectedAnswer.trim() === "");
-    const isCorrect = isGradable && receivedAnswer !== undefined && answersMatch(expectedAnswer, receivedAnswer);
+    const isCorrect = isGradable && receivedAnswer !== undefined && answerMatchesQuestion(question, receivedAnswer);
 
     if (isGradable) {
       maxScore += points;

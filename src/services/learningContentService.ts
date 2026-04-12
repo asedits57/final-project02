@@ -64,6 +64,25 @@ export type LearningTaskRecord = {
   } | null;
 };
 
+export type LearnerTaskQuestionRecord = {
+  order: number;
+  question: {
+    _id: string;
+    title: string;
+    questionText: string;
+    questionType: "multiple_choice" | "true_false" | "short_answer" | "fill_blank";
+    options?: string[];
+    difficulty?: "easy" | "medium" | "hard";
+    category?: string;
+    points?: number;
+    explanation?: string;
+  };
+};
+
+export type LearnerTaskDetailRecord = LearningTaskRecord & {
+  assignedQuestions: LearnerTaskQuestionRecord[];
+};
+
 export type LearningCompletionRecord = {
   _id: string;
   contentType: "guide" | "video";
@@ -102,6 +121,20 @@ export type DailyTaskSubmissionResult = {
   user: ProgressUserSnapshot;
 };
 
+export type LearnerTaskSubmissionResult = {
+  submission: {
+    _id: string;
+    score: number;
+    maxScore: number;
+    earnedPoints: number;
+    submittedAt?: string;
+  };
+  score: number;
+  maxScore: number;
+  earnedPoints: number;
+  user: ProgressUserSnapshot;
+};
+
 export type LearningCompletionResult = {
   completion: LearningCompletionRecord;
   alreadyCompleted: boolean;
@@ -121,6 +154,20 @@ export const learningContentService = {
 
   listLearnerTasks(): Promise<DataResponse<LearningTaskRecord[]>> {
     return apiClient<DataResponse<LearningTaskRecord[]>>("/tasks");
+  },
+
+  getLearnerTask(taskId: string): Promise<DataResponse<LearnerTaskDetailRecord>> {
+    return apiClient<DataResponse<LearnerTaskDetailRecord>>(`/tasks/${taskId}`);
+  },
+
+  submitLearnerTask(
+    taskId: string,
+    answers: Array<{ questionId: string; answer: string | number | boolean | string[] }>,
+  ): Promise<DataResponse<LearnerTaskSubmissionResult>> {
+    return apiClient<DataResponse<LearnerTaskSubmissionResult>>(`/tasks/${taskId}/submit`, {
+      method: "POST",
+      body: JSON.stringify({ answers }),
+    });
   },
 
   getActiveDailyTask(): Promise<DataResponse<ActiveDailyTaskRecord | null>> {

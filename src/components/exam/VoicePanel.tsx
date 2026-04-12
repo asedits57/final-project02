@@ -1,6 +1,6 @@
-import { Mic, MicOff } from "lucide-react";
+import { Mic } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 
 const VoicePanel = () => {
   const { pushEvent } = useProctoring();

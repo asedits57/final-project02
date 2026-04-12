@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 
 const AlertsPanel = () => {
   const { alerts } = useProctoring();

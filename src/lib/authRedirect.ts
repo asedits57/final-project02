@@ -3,7 +3,7 @@ type AuthRedirectUser = {
 };
 
 export const getPostLoginPath = (user?: AuthRedirectUser | null) => (
-  user?.role === "admin" ? "/admin" : "/"
+  user?.role === "admin" ? "/admin" : "/home"
 );
 
 export const preloadPostLoginRoute = async (user?: AuthRedirectUser | null) => {

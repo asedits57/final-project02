@@ -257,15 +257,21 @@ export const getAllQuestions = async () => {
     return JSON.parse(cached) as QuestionPayload;
   }
 
-  const seededQuestions = loadSeededQuestions();
-  if (seededQuestions) {
-    await safeSet(cacheKey, JSON.stringify(seededQuestions), {
-      EX: 86400,
-    });
-    return seededQuestions;
+  const databaseQuestions = await Question.find({
+    status: "published",
+    targetType: { $in: ["both", "all"] },
+  }).lean();
+
+  if (databaseQuestions.length === 0) {
+    const seededQuestions = loadSeededQuestions();
+    if (seededQuestions) {
+      await safeSet(cacheKey, JSON.stringify(seededQuestions), {
+        EX: 86400,
+      });
+      return seededQuestions;
+    }
   }
 
-  const databaseQuestions = await Question.find({ status: "published" }).lean();
   const payload = transformQuestionsFromDatabase(databaseQuestions as LooseQuestionRecord[]);
 
   await safeSet(cacheKey, JSON.stringify(payload), {

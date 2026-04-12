@@ -41,12 +41,6 @@ export function estimateGaze(landmarks: { x: number; y: number }[]): GazeResult 
   const horizontalRatio = (leftHRatio + rightHRatio) / 2;
 
   // Vertical ratio: position within eye height
-  const leftEyeHeight = leftEyeBottom.y - leftEyeTop.y;
-  const rightEyeHeight = rightEyeBottom.y - rightEyeTop.y;
-  const leftVRatio = leftEyeHeight > 2 ? (leftEyeCenter.y - leftEyeTop.y) / leftEyeHeight : 0.5;
-  const rightVRatio = rightEyeHeight > 2 ? (rightEyeCenter.y - rightEyeTop.y) / rightEyeHeight : 0.5;
-  const verticalRatio = (leftVRatio + rightVRatio) / 2;
-
   // Also use nose-to-face-center ratio for head pose estimation
   const noseTip = landmarks[30];
   const faceLeft = landmarks[0];
@@ -63,7 +57,6 @@ export function estimateGaze(landmarks: { x: number; y: number }[]): GazeResult 
   else if (combinedH > 0.62) direction = "left"; // mirrored
   
   // Vertical: use nose tip relative to eye line for head tilt
-  const eyeLineY = (leftEyeCenter.y + rightEyeCenter.y) / 2;
   const chin = landmarks[8];
   const forehead = midpoint(landmarks[19], landmarks[24]);
   const faceHeight = chin.y - forehead.y;

@@ -17,20 +17,26 @@ describe("AITutorPage Integration", () => {
     });
 
     it("should send a message and receive an AI response", async () => {
-        (api.askAI as any).mockResolvedValue({
+        vi.mocked(api.askAI).mockResolvedValue({
             reply: "This is a mock AI response about grammar.",
         });
 
         render(<AITutorPage />);
 
         const textarea = screen.getByPlaceholderText(/Ask me anything about English/i);
-        const sendButton = screen.getByRole("button", { name: /Send message/i });
 
         fireEvent.change(textarea, { target: { value: "Tell me about verbs" } });
-        fireEvent.click(sendButton);
+
+        await waitFor(() => {
+            expect(screen.getByRole("button", { name: /Send message/i })).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByRole("button", { name: /Send message/i }));
 
         // Verify user message displays
-        expect(await screen.findByText(/Tell me about verbs/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/Tell me about verbs/i)).toBeInTheDocument();
+        });
 
         // Verify typing indicator or wait for response
         await waitFor(() => {
@@ -41,18 +47,25 @@ describe("AITutorPage Integration", () => {
     });
 
     it("should handle AI service errors", async () => {
-        (api.askAI as any).mockRejectedValue(new Error("Service error"));
+        const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        vi.mocked(api.askAI).mockRejectedValue(new Error("Service error"));
 
         render(<AITutorPage />);
 
         const textarea = screen.getByPlaceholderText(/Ask me anything about English/i);
-        const sendButton = screen.getByRole("button", { name: /Send message/i });
 
         fireEvent.change(textarea, { target: { value: "Fail me" } });
-        fireEvent.click(sendButton);
+
+        await waitFor(() => {
+            expect(screen.getByRole("button", { name: /Send message/i })).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByRole("button", { name: /Send message/i }));
 
         await waitFor(() => {
             expect(screen.getByText(/I'm sorry, I'm having trouble connecting to my brain right now/i)).toBeInTheDocument();
         });
+
+        consoleErrorSpy.mockRestore();
     });
 });

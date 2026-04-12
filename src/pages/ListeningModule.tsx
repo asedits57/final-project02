@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Play, Pause, RotateCcw, Send, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,18 +14,7 @@ import { useQuestions } from "@hooks/useQuestions";
 const ListeningModule = () => {
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
-    const exercises = questionData?.listening || [];
-
-    if (isError) {
-        return (
-            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
-                <ErrorMessage 
-                    message={(error as Error)?.message || "Failed to load listening materials. Please try again."} 
-                    onRetry={() => refetch()} 
-                />
-            </div>
-        );
-    }
+    const exercises = useMemo(() => questionData?.listening ?? [], [questionData?.listening]);
 
     const [currentIdx, setCurrentIdx] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -62,6 +51,8 @@ const ListeningModule = () => {
     }, []);
 
     const handlePlayPause = () => {
+        if (!current) return;
+
         if (isPlaying) {
             clearInterval(intervalRef.current!);
             setIsPlaying(false);
@@ -137,6 +128,8 @@ const ListeningModule = () => {
     };
 
     const handleSubmit = async () => {
+        if (!current) return;
+
         window.speechSynthesis.cancel();
         
         let correctCount = 0;
@@ -207,6 +200,17 @@ const ListeningModule = () => {
             navigate("/task");
         }
     };
+
+    if (isError) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message={(error as Error)?.message || "Failed to load listening materials. Please try again."} 
+                    onRetry={() => refetch()} 
+                />
+            </div>
+        );
+    }
 
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center bg-[#0F0A1E]"><Spinner /></div>;

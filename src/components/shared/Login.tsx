@@ -5,7 +5,7 @@ export default function Login(): JSX.Element {
     const [password, setPassword] = useState<string>("");
 
     const handleLogin = async (): Promise<void> => {
-        alert("Login success!");
+        alert(`Login success for ${email || "user"} with password length ${password.length}`);
     };
 
     return (
@@ -13,12 +13,14 @@ export default function Login(): JSX.Element {
             <input
                 type="email"
                 placeholder="Enter email"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
             />
 
             <input
                 type="password"
                 placeholder="Enter password"
+                value={password}
                 onChange={(e) => setPassword(e.target.value)}
             />
 

@@ -57,11 +57,22 @@ const recordingAssetSchema = new mongoose.Schema({
 }, { _id: false });
 
 const finalTestSubmissionSchema = new mongoose.Schema({
+  config: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FinalTestConfig",
+    required: false,
+    index: true,
+  },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
     index: true,
+  },
+  clientRequestId: {
+    type: String,
+    trim: true,
+    required: false,
   },
   testTitle: {
     type: String,
@@ -86,6 +97,26 @@ const finalTestSubmissionSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     index: true,
+  },
+  rawScore: {
+    type: Number,
+    default: 0,
+  },
+  maxScore: {
+    type: Number,
+    default: 0,
+  },
+  passingScore: {
+    type: Number,
+    default: 0,
+  },
+  passed: {
+    type: Boolean,
+    default: false,
+  },
+  questionCount: {
+    type: Number,
+    default: 0,
   },
   flags: {
     type: [String],
@@ -145,5 +176,14 @@ const finalTestSubmissionSchema = new mongoose.Schema({
 
 finalTestSubmissionSchema.index({ reviewStatus: 1, createdAt: -1 });
 finalTestSubmissionSchema.index({ testCategory: 1, score: -1 });
+finalTestSubmissionSchema.index(
+  { user: 1, clientRequestId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      clientRequestId: { $type: "string" },
+    },
+  },
+);
 
 export default mongoose.model("FinalTestSubmission", finalTestSubmissionSchema);

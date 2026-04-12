@@ -1,7 +1,6 @@
 import { ArrowRight, BookOpen, Headphones, Mic, PenTool, Zap, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useStore } from "@store/useAuthStore";
 
 const features = [
     { icon: BookOpen, label: "Reading", desc: "Passage comprehension & fill-in-the-blank", color: "#7f5af0" },
@@ -12,7 +11,6 @@ const features = [
 
 const HeroSection = () => {
     const navigate = useNavigate();
-    const user = useStore(s => s.user);
 
     return (
         <section className="relative py-20 md:py-28 overflow-hidden">
@@ -60,11 +58,11 @@ const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.1 }}
-                        className="font-poppins text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight mb-6 tracking-tight"
+                        className="font-display text-5xl md:text-7xl lg:text-[5.25rem] font-semibold leading-[0.95] mb-6 tracking-[0.04em]"
                     >
                         Master English with{" "}
                         <span
-                            className="relative inline-block"
+                            className="font-script relative inline-block text-[1.08em] font-normal tracking-normal"
                             style={{
                                 background: "linear-gradient(135deg, #a78bfa 0%, #7f5af0 50%, #8b5cf6 100%)",
                                 WebkitBackgroundClip: "text",

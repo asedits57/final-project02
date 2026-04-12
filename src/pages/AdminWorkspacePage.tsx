@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BookOpenText, Camera, Eye, FileText, Loader2, Mic, PlusCircle, RefreshCcw, Search, Shield, ShieldAlert, Trophy, Users, Video } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, BookOpenText, Camera, Eye, FileText, Loader2, Mic, PlusCircle, RefreshCcw, Save, Search, Settings2, Shield, ShieldAlert, Trophy, Users, Video } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { apiService as api } from "@services/apiService";
-import type { AdminDashboardOverview, AdminDailyTaskRecord, AdminFinalTestRecord, AdminQuestionRecord, AdminTaskRecord, AdminUserRecord, AdminVideoRecord } from "@services/adminService";
+import { adminService as adminApi } from "@services/adminService";
+import type { AdminDashboardOverview, AdminDailyTaskRecord, AdminFinalTestRecord, AdminQuestionRecord, AdminTaskRecord, AdminUserRecord, AdminVideoRecord, FinalTestConfigRecord } from "@services/adminService";
 import { useAuthStore } from "@store/useAuthStore";
 import { useToast } from "@hooks/use-toast";
 import { cn } from "@lib/utils";
@@ -32,7 +33,27 @@ const userTone: Record<AdminUserRecord["status"], string> = { active: "border-em
 const questionTone: Record<AdminQuestionRecord["difficulty"], string> = { easy: "border-emerald-400/25 bg-emerald-500/12 text-emerald-200", medium: "border-violet-400/25 bg-violet-500/12 text-violet-200", hard: "border-fuchsia-400/25 bg-fuchsia-500/12 text-fuchsia-200" };
 const n = (v: number) => new Intl.NumberFormat("en-US").format(v);
 const d = (v?: string) => (v ? new Date(v).toLocaleString() : "Not available");
-const rs = (v: AdminFinalTestRecord["reviewStatus"]) => v.replaceAll("_", " ");
+const rs = (v: AdminFinalTestRecord["reviewStatus"]) => v.replace(/_/g, " ");
+const normalizeAssignedQuestions = (assignedQuestions: FinalTestConfigRecord["assignedQuestions"]) =>
+  [...assignedQuestions]
+    .sort((left, right) => left.order - right.order)
+    .map((item, index) => ({
+      questionId: item.questionId,
+      order: index,
+    }));
+
+const buildFinalTestConfigPayload = (config: FinalTestConfigRecord) => ({
+  title: config.title,
+  enabled: config.enabled,
+  status: config.status,
+  questionCount: config.questionCount,
+  assignedQuestions: normalizeAssignedQuestions(config.assignedQuestions),
+  filters: config.filters,
+  timeLimitMinutes: config.timeLimitMinutes,
+  passingScore: config.passingScore,
+  instructions: config.instructions,
+  allowRetake: config.allowRetake,
+});
 
 export default function AdminWorkspacePage() {
   const navigate = useNavigate();
@@ -49,6 +70,7 @@ export default function AdminWorkspacePage() {
   const [dailyTasks, setDailyTasks] = useState<AdminDailyTaskRecord[]>([]);
   const [videos, setVideos] = useState<AdminVideoRecord[]>([]);
   const [finalTests, setFinalTests] = useState<AdminFinalTestRecord[]>([]);
+  const [finalTestConfig, setFinalTestConfig] = useState<FinalTestConfigRecord | null>(null);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "user" | "admin">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended">("all");
@@ -61,6 +83,7 @@ export default function AdminWorkspacePage() {
   const [reviewStatus, setReviewStatus] = useState<AdminFinalTestRecord["reviewStatus"]>("reviewed");
   const [reviewNotes, setReviewNotes] = useState("");
   const [reviewBusy, setReviewBusy] = useState(false);
+  const [configBusy, setConfigBusy] = useState(false);
 
   const load = useCallback(async (silent = false) => {
     try {
@@ -68,23 +91,25 @@ export default function AdminWorkspacePage() {
       setError(null);
       setLoadWarning(null);
 
-      const entries = [
-        ["dashboard", api.getDashboard()],
-        ["users", api.listUsers({ page: 1, limit: 50 })],
-        ["questions", api.listQuestions({ page: 1, limit: 100 })],
-        ["tasks", api.listTasks({ page: 1, limit: 20 })],
-        ["daily tasks", api.listDailyTasks({ page: 1, limit: 20 })],
-        ["videos", api.listVideos({ page: 1, limit: 20 })],
-        ["final tests", api.listFinalTests({ page: 1, limit: 20 })],
+      const labels = ["dashboard", "users", "questions", "tasks", "daily tasks", "videos", "final tests", "final test config"] as const;
+      const requests = [
+        api.getDashboard(),
+        api.listUsers({ page: 1, limit: 100 }),
+        api.listQuestions({ page: 1, limit: 100 }),
+        api.listTasks({ page: 1, limit: 100 }),
+        api.listDailyTasks({ page: 1, limit: 100 }),
+        api.listVideos({ page: 1, limit: 100 }),
+        api.listFinalTests({ page: 1, limit: 50 }),
+        adminApi.getFinalTestConfig(),
       ] as const;
 
-      const settled = await Promise.allSettled(entries.map(([, request]) => request));
+      const settled = await Promise.allSettled(requests);
       const failures = settled
-        .map((result, index) => ({ result, label: entries[index][0] }))
-        .filter((entry): entry is { result: PromiseRejectedResult; label: string } => entry.result.status === "rejected");
+        .map((result, index) => ({ result, label: labels[index] }))
+        .filter((entry): entry is { result: PromiseRejectedResult; label: (typeof labels)[number] } => entry.result.status === "rejected");
 
       const firstFailure = failures[0]?.result.reason;
-      const allFailed = failures.length === entries.length;
+      const allFailed = failures.length === labels.length;
 
       if (allFailed) {
         throw firstFailure instanceof Error ? firstFailure : new Error("Failed to load admin data.");
@@ -98,6 +123,7 @@ export default function AdminWorkspacePage() {
         dailyTasksResult,
         videosResult,
         finalTestsResult,
+        finalTestConfigResult,
       ] = settled;
 
       if (dashboardResult.status === "fulfilled") setDashboard(dashboardResult.value.data);
@@ -107,6 +133,7 @@ export default function AdminWorkspacePage() {
       if (dailyTasksResult.status === "fulfilled") setDailyTasks(dailyTasksResult.value.items);
       if (videosResult.status === "fulfilled") setVideos(videosResult.value.items);
       if (finalTestsResult.status === "fulfilled") setFinalTests(finalTestsResult.value.items);
+      if (finalTestConfigResult.status === "fulfilled") setFinalTestConfig(finalTestConfigResult.value.data);
 
       if (failures.length > 0) {
         setLoadWarning(`Some admin sections could not load: ${failures.map((failure) => failure.label).join(", ")}.`);
@@ -120,6 +147,28 @@ export default function AdminWorkspacePage() {
 
   useEffect(() => { void load(); }, [load]);
 
+  useEffect(() => {
+    const handleRealtimeRefresh = () => {
+      void load(true);
+    };
+
+    window.addEventListener("app:questions-changed", handleRealtimeRefresh);
+    window.addEventListener("app:tasks-changed", handleRealtimeRefresh);
+    window.addEventListener("app:daily-tasks-changed", handleRealtimeRefresh);
+    window.addEventListener("app:videos-changed", handleRealtimeRefresh);
+    window.addEventListener("app:final-test-config-changed", handleRealtimeRefresh);
+    window.addEventListener("app:admin-event", handleRealtimeRefresh);
+
+    return () => {
+      window.removeEventListener("app:questions-changed", handleRealtimeRefresh);
+      window.removeEventListener("app:tasks-changed", handleRealtimeRefresh);
+      window.removeEventListener("app:daily-tasks-changed", handleRealtimeRefresh);
+      window.removeEventListener("app:videos-changed", handleRealtimeRefresh);
+      window.removeEventListener("app:final-test-config-changed", handleRealtimeRefresh);
+      window.removeEventListener("app:admin-event", handleRealtimeRefresh);
+    };
+  }, [load]);
+
   const q = search.trim().toLowerCase();
   const filteredUsers = useMemo(() => users.filter((u) => (!q || `${u.fullName || ""} ${u.email} ${u.dept || ""}`.toLowerCase().includes(q)) && (roleFilter === "all" || u.role === roleFilter) && (statusFilter === "all" || u.status === statusFilter)), [q, roleFilter, statusFilter, users]);
   const filteredQuestions = useMemo(() => questions.filter((x) => (!q || `${x.title} ${x.questionText} ${x.category} ${x.tags.join(" ")}`.toLowerCase().includes(q)) && (difficultyFilter === "all" || x.difficulty === difficultyFilter)), [difficultyFilter, q, questions]);
@@ -127,11 +176,135 @@ export default function AdminWorkspacePage() {
   const reviewChart = useMemo(() => Object.entries(finalTests.reduce<Record<string, number>>((acc, item) => ({ ...acc, [item.reviewStatus]: (acc[item.reviewStatus] || 0) + 1 }), {})).map(([label, value]) => ({ label: rs(label as AdminFinalTestRecord["reviewStatus"]), value })), [finalTests]);
   const contentChart = useMemo(() => [{ label: "Questions", value: dashboard?.totalQuestions || 0 }, { label: "Tasks", value: dashboard?.totalTasks || 0 }, { label: "Daily", value: dashboard?.totalDailyTasks || 0 }, { label: "Videos", value: dashboard?.totalLearningVideos || 0 }, { label: "Tests", value: dashboard?.totalFinalTestSubmissions || 0 }, { label: "Certs", value: dashboard?.certificatesIssued || 0 }], [dashboard]);
   const openTaskDialog = () => setTaskOpenRequest((current) => current + 1);
+  const finalTestQuestionPool = useMemo(
+    () => questions.filter((question) => question.status === "published" && ["final-test", "both", "all"].includes(question.targetType)),
+    [questions],
+  );
+  const assignedFinalTestQuestionIds = useMemo(
+    () => new Set((finalTestConfig?.assignedQuestions || []).map((item) => item.questionId)),
+    [finalTestConfig],
+  );
+  const assignedFinalTestQuestions = useMemo(
+    () => normalizeAssignedQuestions(finalTestConfig?.assignedQuestions || [])
+      .map((item) => ({
+        ...item,
+        question: finalTestQuestionPool.find((question) => question._id === item.questionId) || questions.find((question) => question._id === item.questionId),
+      }))
+      .filter((item) => item.question),
+    [finalTestConfig, finalTestQuestionPool, questions],
+  );
 
   const handleRole = async (user: AdminUserRecord, role: "user" | "admin") => { setBusyUserId(user._id); try { const res = await api.updateUserRole(user._id, role); setUsers((cur) => cur.map((item) => item._id === user._id ? res.data : item)); await load(true); toast({ title: "Role updated", description: `${user.email} is now ${role}.` }); } catch (e) { toast({ title: "Role update failed", description: e instanceof Error ? e.message : "Could not update role.", variant: "destructive" }); } finally { setBusyUserId(null); } };
   const handleStatus = async (user: AdminUserRecord, status: "active" | "suspended") => { setBusyUserId(user._id); try { const res = await api.updateUserStatus(user._id, status); setUsers((cur) => cur.map((item) => item._id === user._id ? res.data : item)); await load(true); toast({ title: "Status updated", description: `${user.email} is now ${status}.` }); } catch (e) { toast({ title: "Status update failed", description: e instanceof Error ? e.message : "Could not update status.", variant: "destructive" }); } finally { setBusyUserId(null); } };
   const openFinalTest = async (id: string) => { setDialogOpen(true); setDetailLoading(true); try { const res = await api.getFinalTest(id); setSelectedFinalTest(res.data); setReviewStatus(res.data.reviewStatus); setReviewNotes(res.data.adminNotes || ""); } catch (e) { toast({ title: "Could not open submission", description: e instanceof Error ? e.message : "Failed to load final test.", variant: "destructive" }); setDialogOpen(false); } finally { setDetailLoading(false); } };
   const saveReview = async () => { if (!selectedFinalTest) return; setReviewBusy(true); try { const res = await api.reviewFinalTest(selectedFinalTest._id, { reviewStatus, adminNotes: reviewNotes.trim() || undefined }); setSelectedFinalTest(res.data); setFinalTests((cur) => cur.map((item) => item._id === res.data._id ? res.data : item)); await load(true); toast({ title: "Review saved", description: `Marked as ${rs(res.data.reviewStatus)}.` }); } catch (e) { toast({ title: "Review failed", description: e instanceof Error ? e.message : "Could not save review.", variant: "destructive" }); } finally { setReviewBusy(false); } };
+  const toggleFinalTestQuestion = (questionId: string) => setFinalTestConfig((current) => {
+    if (!current) {
+      return current;
+    }
+
+    const exists = current.assignedQuestions.some((item) => item.questionId === questionId);
+    const assignedQuestions = exists
+      ? current.assignedQuestions.filter((item) => item.questionId !== questionId)
+      : [...current.assignedQuestions, { questionId, order: current.assignedQuestions.length }];
+
+    return {
+      ...current,
+      assignedQuestions: normalizeAssignedQuestions(assignedQuestions),
+    };
+  });
+  const moveFinalTestQuestion = (questionId: string, direction: "up" | "down") => setFinalTestConfig((current) => {
+    if (!current) {
+      return current;
+    }
+
+    const items = normalizeAssignedQuestions(current.assignedQuestions);
+    const index = items.findIndex((item) => item.questionId === questionId);
+    if (index === -1) {
+      return current;
+    }
+
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) {
+      return current;
+    }
+
+    const nextItems = [...items];
+    [nextItems[index], nextItems[targetIndex]] = [nextItems[targetIndex], nextItems[index]];
+
+    return {
+      ...current,
+      assignedQuestions: normalizeAssignedQuestions(nextItems),
+    };
+  });
+  const saveFinalTestConfig = async () => {
+    if (!finalTestConfig) {
+      return;
+    }
+
+    setConfigBusy(true);
+    try {
+      const response = await adminApi.updateFinalTestConfig(buildFinalTestConfigPayload(finalTestConfig));
+      setFinalTestConfig(response.data);
+      await load(true);
+      toast({
+        title: "Final test config saved",
+        description: "The final test setup is now updated in the backend.",
+      });
+    } catch (e) {
+      toast({
+        title: "Could not save final test config",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConfigBusy(false);
+    }
+  };
+  const publishFinalTestConfig = async () => {
+    if (!finalTestConfig) {
+      return;
+    }
+
+    setConfigBusy(true);
+    try {
+      const response = await adminApi.publishFinalTestConfig(true);
+      setFinalTestConfig(response.data);
+      await load(true);
+      toast({
+        title: "Final test published",
+        description: "Learners can now open the final test page.",
+      });
+    } catch (e) {
+      toast({
+        title: "Could not publish final test",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConfigBusy(false);
+    }
+  };
+  const unpublishFinalTestConfig = async () => {
+    setConfigBusy(true);
+    try {
+      const response = await adminApi.unpublishFinalTestConfig();
+      setFinalTestConfig(response.data);
+      await load(true);
+      toast({
+        title: "Final test moved back to draft",
+        description: "The learner final-test page is now disabled until you publish again.",
+      });
+    } catch (e) {
+      toast({
+        title: "Could not unpublish final test",
+        description: e instanceof Error ? e.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setConfigBusy(false);
+    }
+  };
 
   const stats = dashboard ? [{ label: "Total Users", value: n(dashboard.totalUsers), help: `${n(dashboard.activeUsers)} active`, progress: dashboard.totalUsers ? (dashboard.activeUsers / dashboard.totalUsers) * 100 : 0, icon: Users }, { label: "Question Bank", value: n(dashboard.totalQuestions), help: `${n(dashboard.publishedQuestions)} published`, progress: dashboard.totalQuestions ? (dashboard.publishedQuestions / dashboard.totalQuestions) * 100 : 0, icon: BookOpenText }, { label: "Tasks", value: n(dashboard.totalTasks), help: `${n(dashboard.totalDailyTasks)} daily tasks`, progress: Math.min(100, dashboard.totalDailyTasks * 10), icon: FileText }, { label: "Videos", value: n(dashboard.totalLearningVideos), help: "Live learning content", progress: Math.min(100, dashboard.totalLearningVideos * 12), icon: Video }, { label: "Final Tests", value: n(dashboard.totalFinalTestSubmissions), help: `${n(dashboard.pendingFinalTestReviews)} pending`, progress: dashboard.totalFinalTestSubmissions ? ((dashboard.totalFinalTestSubmissions - dashboard.pendingFinalTestReviews) / dashboard.totalFinalTestSubmissions) * 100 : 0, icon: ShieldAlert }, { label: "Certificates", value: n(dashboard.certificatesIssued), help: `${n(dashboard.leaderboard.activeUsers)} on leaderboard`, progress: Math.min(100, dashboard.certificatesIssued * 8), icon: Trophy }] : [];
 
@@ -160,9 +333,9 @@ export default function AdminWorkspacePage() {
         <div className="absolute right-[-8rem] top-1/3 h-[24rem] w-[24rem] rounded-full bg-fuchsia-500/12 blur-3xl" />
       </div>
       <div className="relative z-10 px-4 py-6 md:px-6 xl:px-8">
-        <div className={cn(glass, "mx-auto mb-6 flex max-w-[1680px] flex-col gap-4 px-5 py-4 md:flex-row md:items-center md:justify-between")}>
+        <div className={cn(glass, "mx-auto mb-6 flex max-w-[1680px] flex-col gap-4 px-4 py-4 sm:px-5 md:flex-row md:items-center md:justify-between")}>
           <div className="flex items-center gap-4">
-            <Button variant="outline" className="h-10 rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]" onClick={() => navigate("/")}>
+            <Button variant="outline" className="h-10 rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]" onClick={() => navigate("/home")}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to App
             </Button>
@@ -173,15 +346,15 @@ export default function AdminWorkspacePage() {
             </div>
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative min-w-[280px]">
+            <div className="relative w-full md:min-w-[280px] md:max-w-sm">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search users, content, and submissions" className={cn("h-11 rounded-2xl pl-10", control)} />
             </div>
-            <Button onClick={openTaskDialog} className="h-11 rounded-2xl bg-fuchsia-600 text-white hover:bg-fuchsia-500">
+            <Button onClick={openTaskDialog} className="h-11 w-full rounded-2xl bg-fuchsia-600 text-white hover:bg-fuchsia-500 md:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Task
             </Button>
-            <Button onClick={() => void load(true)} className="h-11 rounded-2xl bg-violet-600 text-white hover:bg-violet-500" disabled={refreshing}>
+            <Button onClick={() => void load(true)} className="h-11 w-full rounded-2xl bg-violet-600 text-white hover:bg-violet-500 md:w-auto" disabled={refreshing}>
               {refreshing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCcw className="mr-2 h-4 w-4" />}
               Refresh
             </Button>
@@ -197,7 +370,7 @@ export default function AdminWorkspacePage() {
                   {loadWarning}
                 </div>
               ) : null}
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {stats.map((card) => (
                   <Card key={card.label} className={glass}>
                     <CardContent className="p-5">
@@ -229,11 +402,14 @@ export default function AdminWorkspacePage() {
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                       <div>
                         <CardTitle className="text-white">User Management</CardTitle>
-                        <CardDescription className="text-slate-400">Live authenticated users with real role and status actions.</CardDescription>
+                        <CardDescription className="text-slate-400">Live authenticated users with real role, status, and last-active details.</CardDescription>
                       </div>
-                      <div className="flex gap-3">
+                      <div className="grid gap-3 sm:flex sm:items-center">
+                        <Badge className="h-10 rounded-2xl border-white/10 bg-white/[0.05] px-4 text-slate-200">
+                          {filteredUsers.length} visible users
+                        </Badge>
                         <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as typeof roleFilter)}>
-                          <SelectTrigger className={cn("h-10 w-[140px] rounded-2xl", control)}><SelectValue /></SelectTrigger>
+                          <SelectTrigger className={cn("h-10 w-full rounded-2xl sm:w-[140px]", control)}><SelectValue /></SelectTrigger>
                           <SelectContent className="border-white/10 bg-slate-950 text-slate-100">
                             <SelectItem value="all">All roles</SelectItem>
                             <SelectItem value="user">Users</SelectItem>
@@ -241,7 +417,7 @@ export default function AdminWorkspacePage() {
                           </SelectContent>
                         </Select>
                         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
-                          <SelectTrigger className={cn("h-10 w-[150px] rounded-2xl", control)}><SelectValue /></SelectTrigger>
+                          <SelectTrigger className={cn("h-10 w-full rounded-2xl sm:w-[150px]", control)}><SelectValue /></SelectTrigger>
                           <SelectContent className="border-white/10 bg-slate-950 text-slate-100">
                             <SelectItem value="all">All statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
@@ -255,8 +431,8 @@ export default function AdminWorkspacePage() {
                     {filteredUsers.length === 0 ? (
                       <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No users matched the current filters.</div>
                     ) : (
-                      <div className="overflow-hidden rounded-3xl border border-white/10">
-                        <Table>
+                      <div className="overflow-x-auto rounded-3xl border border-white/10">
+                        <Table className="min-w-[720px]">
                           <TableHeader>
                             <TableRow className="border-white/10 bg-white/[0.03] hover:bg-white/[0.03]">
                               <TableHead className="text-slate-300">User</TableHead>
@@ -266,7 +442,7 @@ export default function AdminWorkspacePage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {filteredUsers.slice(0, 10).map((u) => (
+                            {filteredUsers.map((u) => (
                               <TableRow key={u._id} className="border-white/10 hover:bg-white/[0.03]">
                                 <TableCell>
                                   <div className="flex items-center gap-3">
@@ -274,6 +450,9 @@ export default function AdminWorkspacePage() {
                                     <div>
                                       <p className="font-medium text-white">{u.fullName || u.email}</p>
                                       <p className="text-xs text-slate-400">{u.email}</p>
+                                      <p className="mt-1 text-[11px] text-slate-500">
+                                        {u.dept ? `Dept ${u.dept}` : "No department"} / Last active {d(u.lastActive)}
+                                      </p>
                                     </div>
                                   </div>
                                 </TableCell>
@@ -288,10 +467,10 @@ export default function AdminWorkspacePage() {
                                   <p className="text-xs text-slate-400">Level {u.level || 1} • Streak {u.streak || 0}</p>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
-                                    <Button size="sm" className="rounded-2xl bg-violet-600 text-white hover:bg-violet-500" disabled={busyUserId === u._id} onClick={() => void handleRole(u, u.role === "admin" ? "user" : "admin")}>{busyUserId === u._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="mr-2 h-4 w-4" />}{u.role === "admin" ? "Remove Admin" : "Make Admin"}</Button>
-                                    <Button variant="outline" size="sm" className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]" disabled={busyUserId === u._id} onClick={() => void handleStatus(u, u.status === "active" ? "suspended" : "active")}>{u.status === "active" ? "Suspend" : "Activate"}</Button>
-                                  </div>
+                                   <div className="flex flex-col justify-end gap-2 sm:flex-row">
+                                     <Button size="sm" className="rounded-2xl bg-violet-600 text-white hover:bg-violet-500" disabled={busyUserId === u._id} onClick={() => void handleRole(u, u.role === "admin" ? "user" : "admin")}>{busyUserId === u._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="mr-2 h-4 w-4" />}{u.role === "admin" ? "Remove Admin" : "Make Admin"}</Button>
+                                     <Button variant="outline" size="sm" className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]" disabled={busyUserId === u._id} onClick={() => void handleStatus(u, u.status === "active" ? "suspended" : "active")}>{u.status === "active" ? "Suspend" : "Activate"}</Button>
+                                   </div>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -303,6 +482,210 @@ export default function AdminWorkspacePage() {
                 </Card>
 
                 <div className="grid gap-6">
+                  <Card className={glass}>
+                    <CardHeader className="gap-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2 text-white">
+                            <Settings2 className="h-5 w-5 text-violet-200" />
+                            Final Test Control
+                          </CardTitle>
+                          <CardDescription className="text-slate-400">
+                            Save the final-test setup here, assign published questions, then publish to make the learner exam page work.
+                          </CardDescription>
+                        </div>
+                        {finalTestConfig ? (
+                          <div className="flex flex-wrap gap-2">
+                            <Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">
+                              {finalTestConfig.status}
+                            </Badge>
+                            <Badge className={cn(finalTestConfig.enabled ? "border-emerald-400/25 bg-emerald-500/12 text-emerald-200" : "border-amber-400/25 bg-amber-500/12 text-amber-200")}>
+                              {finalTestConfig.enabled ? "Enabled" : "Disabled"}
+                            </Badge>
+                          </div>
+                        ) : null}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {!finalTestConfig ? (
+                        <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">
+                          Final-test configuration could not be loaded yet.
+                        </div>
+                      ) : (
+                        <>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <Input
+                              value={finalTestConfig.title}
+                              onChange={(event) => setFinalTestConfig((current) => current ? ({ ...current, title: event.target.value }) : current)}
+                              placeholder="Final test title"
+                              className={cn("rounded-2xl", control)}
+                            />
+                            <Input
+                              type="number"
+                              min={1}
+                              max={100}
+                              value={finalTestConfig.questionCount}
+                              onChange={(event) => setFinalTestConfig((current) => current ? ({ ...current, questionCount: Math.max(1, Number(event.target.value || 1)) }) : current)}
+                              placeholder="Question count"
+                              className={cn("rounded-2xl", control)}
+                            />
+                            <Input
+                              type="number"
+                              min={1}
+                              max={240}
+                              value={finalTestConfig.timeLimitMinutes}
+                              onChange={(event) => setFinalTestConfig((current) => current ? ({ ...current, timeLimitMinutes: Math.max(1, Number(event.target.value || 1)) }) : current)}
+                              placeholder="Time limit"
+                              className={cn("rounded-2xl", control)}
+                            />
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              value={finalTestConfig.passingScore}
+                              onChange={(event) => setFinalTestConfig((current) => current ? ({ ...current, passingScore: Math.max(0, Math.min(100, Number(event.target.value || 0))) }) : current)}
+                              placeholder="Passing score"
+                              className={cn("rounded-2xl", control)}
+                            />
+                            <Select value={finalTestConfig.allowRetake ? "yes" : "no"} onValueChange={(value) => setFinalTestConfig((current) => current ? ({ ...current, allowRetake: value === "yes" }) : current)}>
+                              <SelectTrigger className={cn("rounded-2xl", control)}><SelectValue /></SelectTrigger>
+                              <SelectContent className="border-white/10 bg-slate-950 text-slate-100">
+                                <SelectItem value="yes">Retakes allowed</SelectItem>
+                                <SelectItem value="no">Retakes disabled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+                              {assignedFinalTestQuestions.length} assigned / {finalTestQuestionPool.length} eligible questions
+                            </div>
+                          </div>
+
+                          <Textarea
+                            value={finalTestConfig.instructions}
+                            onChange={(event) => setFinalTestConfig((current) => current ? ({ ...current, instructions: event.target.value }) : current)}
+                            placeholder="Instructions shown to learners before they start the final test"
+                            className={cn("min-h-[120px] rounded-3xl border-white/10 bg-white/[0.05] text-slate-100 placeholder:text-slate-500", control)}
+                          />
+
+                          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-white">Eligible question bank items</p>
+                                <p className="text-xs text-slate-400">
+                                  Published questions with target type `final-test`, `both`, or `all` can be assigned here.
+                                </p>
+                              </div>
+                              <Badge className="w-fit border-white/10 bg-white/[0.05] text-slate-200">
+                                {assignedFinalTestQuestions.length} selected
+                              </Badge>
+                            </div>
+                            {finalTestQuestionPool.length ? (
+                              <ScrollArea className="mt-3 h-[320px] pr-4">
+                                <div className="grid gap-2">
+                                  {finalTestQuestionPool.map((question) => {
+                                    const selected = assignedFinalTestQuestionIds.has(question._id);
+                                    return (
+                                      <button
+                                        key={question._id}
+                                        type="button"
+                                        onClick={() => toggleFinalTestQuestion(question._id)}
+                                        className={cn(
+                                          "rounded-2xl border px-4 py-3 text-left transition",
+                                          selected
+                                            ? "border-violet-400/35 bg-violet-500/12"
+                                            : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]",
+                                        )}
+                                      >
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <p className="font-medium text-white">{question.title}</p>
+                                          <Badge className={cn("capitalize", questionTone[question.difficulty])}>{question.difficulty}</Badge>
+                                          <Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{question.targetType}</Badge>
+                                          {selected ? (
+                                            <Badge className="border-violet-300/20 bg-violet-500/12 text-violet-100">
+                                              Selected
+                                            </Badge>
+                                          ) : null}
+                                        </div>
+                                        <p className="mt-2 text-sm text-slate-400">{question.questionText}</p>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </ScrollArea>
+                            ) : (
+                              <div className="mt-3 rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-4 py-6 text-sm text-slate-400">
+                                Create and publish at least one question for the final test first, then assign it here.
+                              </div>
+                            )}
+                          </div>
+
+                          {assignedFinalTestQuestions.length ? (
+                            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                              <p className="text-sm font-medium text-white">Assigned order</p>
+                              <div className="mt-3 space-y-2">
+                                {assignedFinalTestQuestions.map((item, index) => (
+                                  <div key={item.questionId} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-white">
+                                        {index + 1}. {item.question?.title}
+                                      </p>
+                                      <p className="mt-1 text-xs text-slate-400">
+                                        {item.question?.category} / {item.question?.questionType.replace(/_/g, " ")} / {item.question?.points} pts
+                                      </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                                        onClick={() => moveFinalTestQuestion(item.questionId, "up")}
+                                        disabled={index === 0}
+                                      >
+                                        <ArrowUp className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                                        onClick={() => moveFinalTestQuestion(item.questionId, "down")}
+                                        disabled={index === assignedFinalTestQuestions.length - 1}
+                                      >
+                                        <ArrowDown className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                                        onClick={() => toggleFinalTestQuestion(item.questionId)}
+                                      >
+                                        Remove
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+                            <Button className="rounded-2xl bg-violet-600 text-white hover:bg-violet-500" onClick={() => void saveFinalTestConfig()} disabled={configBusy}>
+                              {configBusy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                              Save config
+                            </Button>
+                            <Button className="rounded-2xl bg-emerald-600 text-white hover:bg-emerald-500" onClick={() => void publishFinalTestConfig()} disabled={configBusy || assignedFinalTestQuestions.length === 0}>
+                              Publish and enable
+                            </Button>
+                            <Button variant="outline" className="rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]" onClick={() => void unpublishFinalTestConfig()} disabled={configBusy}>
+                              Move to draft
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   <Card className={glass}>
                     <CardHeader>
                       <CardTitle className="text-white">Final Test Review Queue</CardTitle>
@@ -365,16 +748,16 @@ export default function AdminWorkspacePage() {
                     <CardDescription className="text-slate-400">Questions, tasks, daily tasks, and videos are now loaded from the backend.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Tabs defaultValue="questions" className="space-y-4">
-                      <TabsList className="grid w-full grid-cols-4 rounded-2xl bg-white/[0.04]">
+                      <Tabs defaultValue="questions" className="space-y-4">
+                      <TabsList className="grid h-auto w-full grid-cols-2 rounded-2xl bg-white/[0.04] sm:grid-cols-4">
                         <TabsTrigger value="questions">Questions</TabsTrigger>
                         <TabsTrigger value="tasks">Tasks</TabsTrigger>
                         <TabsTrigger value="daily">Daily</TabsTrigger>
                         <TabsTrigger value="videos">Videos</TabsTrigger>
                       </TabsList>
-                      <TabsContent value="questions" className="space-y-4">
+                        <TabsContent value="questions" className="space-y-4">
                         <Select value={difficultyFilter} onValueChange={(v) => setDifficultyFilter(v as typeof difficultyFilter)}>
-                          <SelectTrigger className={cn("h-10 w-[180px] rounded-2xl", control)}><SelectValue /></SelectTrigger>
+                          <SelectTrigger className={cn("h-10 w-full rounded-2xl sm:w-[180px]", control)}><SelectValue /></SelectTrigger>
                           <SelectContent className="border-white/10 bg-slate-950 text-slate-100">
                             <SelectItem value="all">All difficulties</SelectItem>
                             <SelectItem value="easy">Easy</SelectItem>
@@ -395,10 +778,10 @@ export default function AdminWorkspacePage() {
                             Add Task
                           </Button>
                         </div>
-                        {tasks.length ? <div className="grid gap-3">{tasks.slice(0, 8).map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Category {x.category} • Reward {x.rewardPoints} • Due {x.dueDate ? d(x.dueDate) : "Open"}</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No tasks have been created yet.</div>}
+                        {tasks.length ? <div className="grid gap-3">{tasks.map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Category {x.category} • Reward {x.rewardPoints} • Due {x.dueDate ? d(x.dueDate) : "Open"}</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No tasks have been created yet.</div>}
                       </TabsContent>
-                      <TabsContent value="daily">{dailyTasks.length ? <div className="grid gap-3">{dailyTasks.slice(0, 8).map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Active {d(x.activeDate)} • Expires {d(x.expiryDate)} • Reward {x.rewardPoints}</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No daily tasks are scheduled yet.</div>}</TabsContent>
-                      <TabsContent value="videos">{videos.length ? <div className="grid gap-3">{videos.slice(0, 8).map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.visibility}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Level {x.level} • Category {x.category} • Duration {x.duration || 0}s</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No videos are available yet.</div>}</TabsContent>
+                      <TabsContent value="daily">{dailyTasks.length ? <div className="grid gap-3">{dailyTasks.map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Active {d(x.activeDate)} • Expires {d(x.expiryDate)} • Reward {x.rewardPoints}</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No daily tasks are scheduled yet.</div>}</TabsContent>
+                      <TabsContent value="videos">{videos.length ? <div className="grid gap-3">{videos.map((x) => <div key={x._id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex flex-wrap items-center gap-2"><p className="font-medium text-white">{x.title}</p><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.status}</Badge><Badge className="border-white/10 bg-white/[0.05] text-slate-200 capitalize">{x.visibility}</Badge></div><p className="mt-2 text-sm text-slate-400">{x.description}</p><p className="mt-3 text-xs text-slate-500">Level {x.level} • Category {x.category} • Duration {x.duration || 0}s</p></div>)}</div> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No videos are available yet.</div>}</TabsContent>
                     </Tabs>
                   </CardContent>
                 </Card>
@@ -406,7 +789,7 @@ export default function AdminWorkspacePage() {
                 <div className="grid gap-6">
                   <Card className={glass}><CardHeader><CardTitle className="text-white">Platform Analytics</CardTitle><CardDescription className="text-slate-400">Live collection counts from the current backend state.</CardDescription></CardHeader><CardContent className="h-64"><ResponsiveContainer width="100%" height="100%"><BarChart data={contentChart}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" /><XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "rgba(15,23,42,0.95)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16 }} /><Bar dataKey="value" fill="#8b5cf6" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer></CardContent></Card>
                   <Card className={glass}><CardHeader><CardTitle className="text-white">Review Status Mix</CardTitle><CardDescription className="text-slate-400">Current final-test review distribution.</CardDescription></CardHeader><CardContent className="h-56">{reviewChart.length ? <ResponsiveContainer width="100%" height="100%"><BarChart data={reviewChart}><CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" /><XAxis dataKey="label" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "rgba(15,23,42,0.95)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16 }} /><Bar dataKey="value" fill="#c026d3" radius={[8, 8, 0, 0]} /></BarChart></ResponsiveContainer> : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No review data yet.</div>}</CardContent></Card>
-                  <Card className={glass}><CardHeader><CardTitle className="text-white">Leaderboard Snapshot</CardTitle><CardDescription className="text-slate-400">Top learners from the current leaderboard cache.</CardDescription></CardHeader><CardContent className="space-y-3">{dashboard?.leaderboard.topUsers.length ? dashboard.leaderboard.topUsers.map((entry, i) => <div key={`${entry.email}-${i}`} className="flex items-center justify-between rounded-3xl border border-white/10 bg-white/[0.03] p-4"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-sm font-semibold text-white">#{i + 1}</div><div><p className="text-sm font-medium text-white">{entry.email}</p><p className="text-xs text-slate-400">Level {entry.level} • Streak {entry.streak}</p></div></div><Badge className="border-white/10 bg-white/[0.05] text-slate-200">{n(entry.score)}</Badge></div>) : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No leaderboard entries yet.</div>}</CardContent></Card>
+                  <Card className={glass}><CardHeader><CardTitle className="text-white">Leaderboard Snapshot</CardTitle><CardDescription className="text-slate-400">Top learners from the current leaderboard cache.</CardDescription></CardHeader><CardContent className="space-y-3">{dashboard?.leaderboard.topUsers.length ? dashboard.leaderboard.topUsers.map((entry, i) => <div key={`${entry.email}-${i}`} className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-sm font-semibold text-white">#{i + 1}</div><div><p className="break-all text-sm font-medium text-white">{entry.email}</p><p className="text-xs text-slate-400">Level {entry.level} • Streak {entry.streak}</p></div></div><Badge className="w-fit border-white/10 bg-white/[0.05] text-slate-200">{n(entry.score)}</Badge></div>) : <div className="rounded-3xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm text-slate-400">No leaderboard entries yet.</div>}</CardContent></Card>
                 </div>
               </div>
             </>
@@ -414,7 +797,7 @@ export default function AdminWorkspacePage() {
         </div>
       </div>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl border-white/10 bg-[#090c18] text-slate-100">
+        <DialogContent className="max-h-[90vh] w-[calc(100vw-1rem)] max-w-5xl overflow-y-auto border-white/10 bg-[#090c18] text-slate-100 sm:w-full">
           <DialogHeader>
             <DialogTitle>Final Test Review</DialogTitle>
             <DialogDescription className="text-slate-400">Inspect transcript, flags, proctoring events, and saved media evidence.</DialogDescription>

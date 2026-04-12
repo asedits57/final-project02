@@ -18,7 +18,7 @@ const Navbar = () => {
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 glow-border-cyan">
                         <Zap className="h-5 w-5 text-primary" />
                     </div>
-                    <span className="font-display text-xl font-bold text-glow">FluentAI</span>
+                    <span className="font-script text-3xl font-normal leading-none tracking-[0.04em] text-glow">FluentAI</span>
                 </div>
 
                 <div className="hidden items-center gap-1 md:flex">

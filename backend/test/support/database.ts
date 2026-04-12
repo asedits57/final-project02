@@ -11,7 +11,6 @@ type MongoTestAvailability = {
 };
 
 const canDownloadMongoBinary = () => process.env.MONGO_MEMORY_ALLOW_DOWNLOAD === "true";
-const hasExplicitMongoBinary = () => !!process.env.MONGO_MEMORY_BINARY?.trim();
 
 export const getMongoTestAvailability = (): MongoTestAvailability => {
   const externalMongoUri = process.env.TEST_MONGO_URI?.trim();
@@ -19,7 +18,7 @@ export const getMongoTestAvailability = (): MongoTestAvailability => {
     return { enabled: true };
   }
 
-  if (hasExplicitMongoBinary() && resolveMongoMemoryBinary()) {
+  if (resolveMongoMemoryBinary()) {
     return { enabled: true };
   }
 
@@ -30,7 +29,7 @@ export const getMongoTestAvailability = (): MongoTestAvailability => {
   return {
     enabled: false,
     reason:
-      "Mongo-backed integration tests require TEST_MONGO_URI, an explicit MONGO_MEMORY_BINARY, or MONGO_MEMORY_ALLOW_DOWNLOAD=true.",
+      "Mongo-backed integration tests require TEST_MONGO_URI, an available Mongo memory binary, or MONGO_MEMORY_ALLOW_DOWNLOAD=true.",
   };
 };
 

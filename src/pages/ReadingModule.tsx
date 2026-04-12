@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle, XCircle, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -11,24 +11,11 @@ import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";
 
 import { useQuestions } from "@hooks/useQuestions";
 
-import { ReadingPassage } from "@services/questionService";
-
 const ReadingModule = () => {
     useLiveModuleActivity("reading");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
-    const readingPassages = questionData?.reading || [];
-
-    if (isError) {
-        return (
-            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
-                <ErrorMessage 
-                    message={(error as Error)?.message || "Failed to load reading database. Please try again."} 
-                    onRetry={() => refetch()} 
-                />
-            </div>
-        );
-    }
+    const readingPassages = useMemo(() => questionData?.reading ?? [], [questionData?.reading]);
 
     // State management
     const [currentPassageIndex, setCurrentPassageIndex] = useState(0);
@@ -122,6 +109,17 @@ const ReadingModule = () => {
         const xpAwarded = Math.round((score / totalQuestions) * 100);
         api.updateProgress(xpAwarded).catch(console.error);
     }, [isFinished, score, totalQuestions]);
+
+    if (isError) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message={(error as Error)?.message || "Failed to load reading database. Please try again."} 
+                    onRetry={() => refetch()} 
+                />
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (

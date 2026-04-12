@@ -61,13 +61,14 @@ export const askAI = async (prompt: string, retries = 3) => {
       await safeSet(cacheKey, JSON.stringify(result), { EX: 86400 });
       return result;
 
-    } catch (error: any) {
+    } catch (caughtError: unknown) {
+      const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
       logger.error(`AI Engine Error ❌`, { message: error.message, attempt, maxRetries: retries });
       
       if (attempt === retries) {
         logger.error("AI Engine exhausted all retries. Falling back.");
         return {
-          reply: "I'm having a little trouble thinking of an answer right now. Could you please check your internet connection or try asking again in a few moments?",
+          reply: getFriendlyAIErrorReply(error),
         };
       }
       

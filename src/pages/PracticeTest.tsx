@@ -1,13 +1,13 @@
-import React, { useReducer, useRef, useCallback, useEffect } from "react";
-import { Zap, RotateCcw, Home, Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, Volume2, Trophy } from "lucide-react";
+import { useReducer, useRef, useCallback, useEffect } from "react";
+import { Zap, RotateCcw, Clock, CheckCircle, XCircle, ArrowLeft, ArrowRight, Volume2, Trophy } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthStore as useStore } from "@store/useAuthStore";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 
 
 import { apiService as api } from "@services/apiService";
 import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
+import type { PracticeQuestion } from "@services/questionService";
 
 const difficultyColor: Record<string, string> = {
     Beginner: "text-glow-cyan",
@@ -27,7 +27,7 @@ const levelLabels: Record<string, string> = {
 // State Types & Reducer
 // ------------------------------------------------------------------
 interface PracticeState {
-    questions: any[];
+    questions: PracticeQuestion[];
     loading: boolean;
     currentIdx: number;
     answers: Record<number, string>;
@@ -40,7 +40,7 @@ interface PracticeState {
 }
 
 type PracticeAction =
-    | { type: "SET_QUESTIONS"; payload: any[] }
+    | { type: "SET_QUESTIONS"; payload: PracticeQuestion[] }
     | { type: "SET_LOADING"; payload: boolean }
     | { type: "SET_CURRENT_IDX"; payload: number }
     | { type: "SUBMIT_ANSWER"; qId: number; answer: string }
@@ -92,7 +92,11 @@ function practiceReducer(state: PracticeState, action: PracticeAction): Practice
         case "SET_ERROR":
             return { ...state, error: action.payload, loading: false };
         case "RESET":
-            return initialState(900);
+            return {
+                ...initialState(900),
+                questions: state.questions,
+                loading: false,
+            };
         default:
             return state;
     }
@@ -107,17 +111,18 @@ const PracticeTest = () => {
     const [state, dispatch] = useReducer(practiceReducer, initialState(900));
     const { 
         questions, loading, error, currentIdx, answers, 
-        showResult, fillInput, isPlaying, timeLeft, isFinished 
+        showResult, fillInput, isPlaying, timeLeft
     } = state;
 
     const synthRef = useRef(window.speechSynthesis);
+    const awardedXpRef = useRef(false);
 
     useEffect(() => {
         const loadQuestions = async () => {
             try {
                 const data = await api.fetchQuestions();
                 if (data && data.practice) {
-                    const filtered = data.practice.filter((q: any) => q.difficulty === levelLabel);
+                    const filtered = data.practice.filter((question) => question.difficulty === levelLabel);
                     dispatch({ type: "SET_QUESTIONS", payload: filtered });
                 }
             } catch (err) {
@@ -150,8 +155,17 @@ const PracticeTest = () => {
     const q = questions[currentIdx];
     const totalAnswered = Object.keys(answers).length;
     const correctCount = Object.entries(answers).filter(
-        ([id, ans]) => questions.find((qq) => qq.id === Number(id))?.correctAnswer === ans
+        ([id, answer]) => questions.find((question) => String(question.id) === id)?.correctAnswer === answer
     ).length;
+
+    useEffect(() => {
+        if (questions.length === 0 || totalAnswered !== questions.length || awardedXpRef.current) {
+            return;
+        }
+
+        awardedXpRef.current = true;
+        void api.updateProgress(correctCount * 10).catch(console.error);
+    }, [correctCount, questions.length, totalAnswered]);
 
     const submitAnswer = useCallback(
         (ans: string) => {
@@ -459,23 +473,8 @@ const PracticeTest = () => {
                 {/* Score summary when all done */}
                 {totalAnswered === questions.length && (
                     <div className="mt-10 glass rounded-2xl p-8 glow-border-violet text-center animate-fade-in">
-                        {(() => {
-                           const user = useStore.getState().user;
-                           // Award 10 XP per correct answer
-                           const xpAwarded = correctCount * 10;
-                           if (user?.id) {
-                               // XP update logic removed
-                           }
-                           return null;
-                        })()}
                         <Zap className="h-10 w-10 text-primary mx-auto mb-4" />
                         <h3 className="font-display text-2xl font-bold mb-2">Test Complete!</h3>
-                        {(() => {
-                           // AWARD XP
-                           const xpAwarded = correctCount * 10;
-                           api.updateProgress(xpAwarded).catch(console.error);
-                           return null;
-                        })()}
                         <p className="text-4xl font-display font-bold text-glow mb-2">
                             {correctCount} / {questions.length}
                         </p>
@@ -485,10 +484,8 @@ const PracticeTest = () => {
                         <div className="flex justify-center gap-4">
                             <button
                                 onClick={() => {
-                                    setAnswers({});
-                                    setShowResult({});
-                                    setCurrentIdx(0);
-                                    setFillInput("");
+                                    awardedXpRef.current = false;
+                                    dispatch({ type: "RESET" });
                                 }}
                                 className="flex items-center gap-2 glass glow-border-cyan rounded-xl px-5 py-3 text-sm font-medium transition-all hover:scale-105"
                             >

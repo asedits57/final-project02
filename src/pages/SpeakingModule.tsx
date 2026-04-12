@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef, useReducer } from "react";
+import { useEffect, useRef, useReducer, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Mic, MicOff, Star, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiService as api } from "@services/apiService";
-import { useAuthStore as useStore } from "@store/useAuthStore";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 
@@ -148,18 +147,7 @@ const SpeakingModule = () => {
     useLiveModuleActivity("speaking");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
-    const speakingPrompts = questionData?.speaking || [];
-
-    if (isError) {
-        return (
-            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
-                <ErrorMessage 
-                    message={(error as Error)?.message || "Failed to load speaking database. Please try again."} 
-                    onRetry={() => refetch()} 
-                />
-            </div>
-        );
-    }
+    const speakingPrompts = useMemo(() => questionData?.speaking ?? [], [questionData?.speaking]);
 
     const [state, dispatch] = useReducer(speakingReducer, initialSpeakingState);
     const { 
@@ -186,29 +174,20 @@ const SpeakingModule = () => {
         localStorage.setItem("speaking_progress_count", currentIndex.toString());
     }, [currentIndex]);
 
-    const clearTimer = () => {
+    const clearTimer = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current);
-    };
+    }, []);
 
-    const startPrep = () => {
+    const startPrep = useCallback(() => {
         dispatch({ type: "START_PREP" });
         timerRef.current = setInterval(() => {
             dispatch({ type: "TICK_PREP" });
         }, 1000);
-    };
+    }, []);
 
-    // Auto-transition from prep to recording
-    useEffect(() => {
-        if (phase === "prep" && prepLeft === 0) {
-            clearTimer();
-            startRecording();
-        }
-    }, [phase, prepLeft]);
-
-    const startRecording = () => {
+    const startRecording = useCallback(() => {
         dispatch({ type: "START_RECORDING" });
         
-        // Setup Speech Recognition
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
@@ -238,16 +217,13 @@ const SpeakingModule = () => {
         timerRef.current = setInterval(() => {
             dispatch({ type: "TICK_RECORDING" });
         }, 1000);
-    };
+    }, []);
 
-    // Auto-stop recording at max time
-    useEffect(() => {
-        if (phase === "recording" && elapsed >= SPEAK_TIME) {
-            stopRecording();
+    const stopRecording = useCallback(async () => {
+        if (!currentPrompt) {
+            return;
         }
-    }, [phase, elapsed]);
 
-    const stopRecording = async () => {
         clearTimer();
         if (recognitionRef.current) {
             recognitionRef.current.stop();
@@ -265,9 +241,8 @@ const SpeakingModule = () => {
             if (parsedFeedback?.overall) {
                 await api.updateProgress(parsedFeedback.overall);
             }
-        } catch (error) {
-            console.error("AI Evaluation Error:", error);
-            // Fallback
+        } catch (evaluationError) {
+            console.error("AI Evaluation Error:", evaluationError);
             const overall = Math.floor(Math.random() * 20 + 70);
             const fallbackFeedback = {
                 overall,
@@ -284,13 +259,28 @@ const SpeakingModule = () => {
         } finally {
             dispatch({ type: "SET_EVALUATING", payload: false });
         }
-    };
+    }, [clearTimer, currentPrompt, transcript]);
+
+    // Auto-transition from prep to recording
+    useEffect(() => {
+        if (phase === "prep" && prepLeft === 0) {
+            clearTimer();
+            startRecording();
+        }
+    }, [clearTimer, phase, prepLeft, startRecording]);
+
+    // Auto-stop recording at max time
+    useEffect(() => {
+        if (phase === "recording" && elapsed >= SPEAK_TIME) {
+            void stopRecording();
+        }
+    }, [elapsed, phase, stopRecording]);
 
     const handleMic = () => {
         if (phase === "idle") {
             startPrep();
         } else if (phase === "recording") {
-            stopRecording();
+            void stopRecording();
         }
     };
 
@@ -327,6 +317,17 @@ const SpeakingModule = () => {
             </div>
         </div>
     );
+
+    if (isError) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <ErrorMessage 
+                    message={(error as Error)?.message || "Failed to load speaking database. Please try again."} 
+                    onRetry={() => refetch()} 
+                />
+            </div>
+        );
+    }
 
     if (isLoading) {
         return <div className="min-h-screen flex items-center justify-center bg-[#0F0A1E]"><Spinner /></div>;

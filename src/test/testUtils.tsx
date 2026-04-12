@@ -1,33 +1,12 @@
-import React, { ReactElement } from "react";
-import { render, RenderOptions } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter } from "react-router-dom";
-import { TooltipProvider } from "@components/ui/tooltip";
+import type { ReactElement } from "react";
+import { fireEvent, render as rtlRender, screen, waitFor, type RenderOptions } from "@testing-library/react";
 
-const createTestQueryClient = () =>
-  new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
-    },
-  });
-
-const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
-  const testQueryClient = createTestQueryClient();
-  return (
-    <QueryClientProvider client={testQueryClient}>
-      <TooltipProvider>
-        <MemoryRouter>{children}</MemoryRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
-};
+import { TestProviders } from "./TestProviders";
 
 const customRender = (
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper">
-) => render(ui, { wrapper: AllTheProviders, ...options });
+) => rtlRender(ui, { wrapper: TestProviders, ...options });
 
-export * from "@testing-library/react";
+export { fireEvent, screen, waitFor };
 export { customRender as render };

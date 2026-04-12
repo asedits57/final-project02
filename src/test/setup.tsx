@@ -2,7 +2,6 @@ import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import React from "react";
 
-// Mock matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: (query: string) => ({
@@ -17,30 +16,51 @@ Object.defineProperty(window, "matchMedia", {
   }),
 });
 
-// Mock ResizeObserver
 class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
 }
-// @ts-ignore
+
 window.ResizeObserver = ResizeObserver;
 
-// Mock scrollIntoView
-window.HTMLElement.prototype.scrollIntoView = function() {};
+window.HTMLElement.prototype.scrollIntoView = function scrollIntoView() {};
 
-// Stub framer-motion to avoid animation-related failures in tests
-vi.mock("framer-motion", async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
-  return {
-    ...actual,
-    motion: {
-      ...actual.motion,
-      div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-      button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-      span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-      nav: ({ children, ...props }: any) => <nav {...props}>{children}</nav>,
+const MOTION_ONLY_PROPS = new Set([
+  "animate",
+  "drag",
+  "dragConstraints",
+  "exit",
+  "initial",
+  "layout",
+  "layoutId",
+  "transition",
+  "variants",
+  "whileHover",
+  "whileTap",
+]);
+
+const createMotionComponent = <T extends keyof JSX.IntrinsicElements>(tag: T) => {
+  return ({ children, ...props }: JSX.IntrinsicElements[T]) => {
+    const sanitizedProps = Object.fromEntries(
+      Object.entries(props).filter(([key]) => !MOTION_ONLY_PROPS.has(key)),
+    );
+
+    return React.createElement(tag, sanitizedProps, children);
+  };
+};
+
+vi.mock("framer-motion", () => {
+  const motion = new Proxy({} as Record<string, React.ComponentType<object>>, {
+    get: (target, property) => {
+      void target;
+      const tag = typeof property === "string" ? property : "div";
+      return createMotionComponent(tag as keyof JSX.IntrinsicElements);
     },
-    AnimatePresence: ({ children }: any) => <>{children}</>,
+  });
+
+  return {
+    motion,
+    AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   };
 });

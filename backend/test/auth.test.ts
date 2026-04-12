@@ -17,7 +17,7 @@ describeMongo('Auth API', () => {
   });
 
   afterAll(async () => {
-    await database.stop();
+    await database?.stop();
   });
 
   beforeEach(async () => {

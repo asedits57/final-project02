@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Languages, Mic, Loader2 } from "lucide-react";
-import { apiService as api } from "@services/apiService";
-import { useToast } from "@hooks/use-toast";
+import { Languages, Loader2, Mic } from "lucide-react";
+
 import { Skeleton } from "@components/ui/skeleton";
+import { useToast } from "@hooks/use-toast";
+import { apiService as api } from "@services/apiService";
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message.trim() ? error.message : fallback;
 
 const TranslateCard = () => {
   const { toast } = useToast();
@@ -16,16 +20,19 @@ const TranslateCard = () => {
   const toLang = mode === "tamil-to-english" ? "English" : "Tamil";
 
   const handleTranslate = async () => {
-    if (!input.trim()) return;
+    if (!input.trim()) {
+      return;
+    }
+
     setLoading(true);
     try {
       const translated = await api.translateText(input, fromLang, toLang);
       setOutput(translated);
-    } catch (err: any) {
-      console.error("Translation Error:", err);
+    } catch (error: unknown) {
+      console.error("Translation error:", error);
       toast({
-        title: "Translation Failed",
-        description: err?.message || "We couldn't reach the AI translator. Please try again.",
+        title: "Translation failed",
+        description: getErrorMessage(error, "We could not reach the AI translator. Please try again."),
         variant: "destructive",
       });
       setOutput("");
@@ -34,68 +41,69 @@ const TranslateCard = () => {
     }
   };
 
-
-
   return (
     <motion.div
-      className="glass-card p-6 flex flex-col gap-4 h-full relative group transition-colors hover:border-violet-500/50"
+      className="glass-card group relative flex h-full flex-col gap-3.5 p-5 transition-colors hover:border-cyan-300/40"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
-      <div className="flex items-center justify-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-          <Languages className="w-5 h-5 text-violet-bright" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-cyan-400/6 to-orange-400/6 opacity-0 transition-opacity group-hover:opacity-100" />
+
+      <div className="flex items-center justify-center gap-2.5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20">
+          <Languages className="h-5 w-5 text-cyan-100" />
         </div>
-        <h2 className="font-display text-xl font-semibold glow-text text-center">Translate</h2>
+        <h2 className="text-center font-display text-lg font-semibold glow-text">Translation desk</h2>
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] text-muted-foreground uppercase font-black tracking-widest ml-1">Selection</label>
+        <label className="ml-1 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Direction</label>
         <select
           value={mode}
-          onChange={(e) => {
-            setMode(e.target.value as "tamil-to-english" | "english-to-tamil");
+          onChange={(event) => {
+            setMode(event.target.value as "tamil-to-english" | "english-to-tamil");
             setInput("");
             setOutput("");
           }}
-          className="glass-input !rounded-xl !py-3 w-full appearance-none cursor-pointer text-sm font-bold text-violet-400 text-center"
+          className="glass-input !rounded-xl !py-2.5 w-full appearance-none cursor-pointer text-center text-sm font-bold text-cyan-100"
         >
-          <option value="tamil-to-english" className="bg-card text-foreground">Tamil → English</option>
-          <option value="english-to-tamil" className="bg-card text-foreground">English → Tamil</option>
+          <option value="tamil-to-english" className="bg-card text-foreground">Tamil -&gt; English</option>
+          <option value="english-to-tamil" className="bg-card text-foreground">English -&gt; Tamil</option>
         </select>
       </div>
 
-      <div className="relative flex-1 flex flex-col">
+      <div className="relative flex flex-1 flex-col">
         <textarea
-          className="glass-input min-h-[100px] text-sm flex-1 resize-none"
+          className="glass-input min-h-[88px] flex-1 resize-none text-sm"
           placeholder={mode === "tamil-to-english" ? "Paste Tamil text here..." : "Paste English text here..."}
           value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
+          onChange={(event) => {
+            setInput(event.target.value);
             setOutput("");
           }}
         />
         <motion.button
-          className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center"
+          type="button"
+          className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-primary/20"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
+          aria-label="Voice input coming soon"
         >
-          <Mic className="w-4 h-4 text-violet-bright" />
+          <Mic className="h-4 w-4 text-cyan-100" />
         </motion.button>
       </div>
 
       <button
         type="button"
-        className="violet-button w-full flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="violet-button flex w-full items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
         onClick={handleTranslate}
         disabled={loading || !input.trim()}
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" />
             Translating...
           </>
         ) : (
@@ -103,22 +111,24 @@ const TranslateCard = () => {
         )}
       </button>
 
-      {loading && (
-        <div className="space-y-2 py-4 px-4 bg-white/5 rounded-2xl border border-white/10">
-          <Skeleton className="h-3 w-full bg-white/10" />
-          <Skeleton className="h-3 w-4/5 bg-white/10" />
+      {loading ? (
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-3.5 py-3.5">
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-full bg-white/10" />
+            <Skeleton className="h-3 w-4/5 bg-white/10" />
+          </div>
         </div>
-      )}
+      ) : null}
 
-      {output && !loading && (
+      {output && !loading ? (
         <motion.div
-          className="output-area text-sm leading-relaxed whitespace-pre-wrap p-4 bg-white/5 rounded-2xl border border-white/10"
+          className="output-area rounded-2xl border border-white/10 bg-white/5 p-3.5 text-sm leading-relaxed whitespace-pre-wrap"
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
         >
           {output}
         </motion.div>
-      )}
+      ) : null}
     </motion.div>
   );
 };

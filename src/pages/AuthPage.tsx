@@ -302,7 +302,7 @@ const AuthPage = () => {
         <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-foreground relative perspective-1000 overflow-hidden">
             <AnimatedBackground />
 
-            {/* Ambient Background Orbs */}
+            [Legacy comment removed: Ambient Background Orbs]
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px] animate-pulse" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-600/10 blur-[120px] animate-pulse [animation-delay:2s]" />
@@ -314,7 +314,7 @@ const AuthPage = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 className="w-full max-w-md relative z-10"
             >
-                {/* Logo & Header */}
+                [Legacy comment removed: Logo & Header]
                 <div className="text-center mb-8">
                     <motion.div
                         initial={{ scale: 0 }}
@@ -583,7 +583,7 @@ const AuthPage = () => {
                     </div>
                 </motion.div>
 
-                {/* Floating Words for aesthetic */}
+                [Legacy comment removed: Floating Words for aesthetic]
                 <FloatingWord word="Grammar" className="top-10 -left-20 opacity-20" />
                 <FloatingWord word="Vocabulary" className="bottom-20 -right-24 opacity-20" />
                 <FloatingWord word="Fluency" className="top-1/2 -right-16 opacity-10" />

@@ -1,14 +1,24 @@
 import { useTheme } from "next-themes";
-import { Toaster as Sonner, toast } from "sonner";
+import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { theme = "dark", resolvedTheme } = useTheme();
+  const surfaceTone =
+    typeof document !== "undefined"
+      ? document.documentElement.dataset.surfaceTone
+      : undefined;
+  const sonnerTheme =
+    theme === "custom"
+      ? (surfaceTone === "light" ? "light" : "dark")
+      : theme === "system"
+        ? (resolvedTheme || "dark")
+        : theme;
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={sonnerTheme as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
         classNames: {
@@ -24,4 +34,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
-export { Toaster, toast };
+export { Toaster };

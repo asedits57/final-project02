@@ -2,22 +2,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft, Shield, ChevronDown, Eye, Lock,
     Database, Trash2, Download, Globe,
-    Home, CheckSquare, Trophy, User, X, Check, BookOpen, RefreshCw
+    X, Check, RefreshCw
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
-import AppBottomNav from "@components/shared/AppBottomNav";
 
 /* ── Nav ── */
-const navItems = [
-    { label: "Home", icon: Home, path: "/" },
-    { label: "Task", icon: CheckSquare, path: "/task" },
-    { label: "Learn", icon: BookOpen, path: "/learning" },
-    { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
-    { label: "Profile", icon: User, path: "/profile" },
-];
-
 /* ── Section data ── */
 const privacySections = [
     {
@@ -73,7 +64,6 @@ type ExportState = "idle" | "preparing" | "ready";
 
 export default function PrivacyPage() {
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [openSection, setOpenSection] = useState<string | null>("data");
     const [toggles, setToggles] = useState<ToggleItem[]>(initialToggles);
@@ -165,7 +155,7 @@ export default function PrivacyPage() {
             </div>
             <AnimatedBackground />
 
-            <div className="relative z-10 max-w-2xl mx-auto px-4 py-10 pb-28">
+            <div className="relative z-10 mx-auto max-w-[84rem] px-4 py-10 pb-10 sm:px-6 lg:px-8">
 
                 {/* TOP BAR */}
                 <motion.div className="flex items-center gap-4 mb-8"
@@ -188,6 +178,8 @@ export default function PrivacyPage() {
                     </div>
                 </motion.div>
 
+                <div className="grid gap-6 lg:grid-cols-[1.04fr,0.96fr]">
+                    <div>
                 {/* PRIVACY ACCORDIONS */}
                 <motion.div className="space-y-2 mb-5"
                     initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.06 }}>
@@ -331,6 +323,81 @@ export default function PrivacyPage() {
             </div>
 
             {/* DELETE CONFIRM MODAL */}
+                    </div>
+
+                    <div className="space-y-4">
+                        <motion.div
+                            className="app-surface app-grid px-6 py-6"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.08 }}
+                        >
+                            <span className="app-kicker">Privacy Promise</span>
+                            <h2 className="mt-4 text-2xl font-bold text-white">Clear controls, clear boundaries</h2>
+                            <p className="mt-3 text-sm leading-relaxed text-slate-300/76">
+                                This screen should make your protections easy to scan. Review the policy details on the left, then use the side status cards to understand what is active right now.
+                            </p>
+
+                            <div className="mt-5 space-y-3">
+                                {[
+                                    "Voice processing stays local and is discarded immediately after analysis.",
+                                    "Account-level progress stays linked only so learning can follow you across sessions.",
+                                    "Exports and deletion remain visible so critical controls never feel hidden.",
+                                ].map((item) => (
+                                    <div key={item} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="app-surface-soft p-5"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.14 }}
+                        >
+                            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Security Snapshot</p>
+                            <div className="mt-4 space-y-3">
+                                {toggles.map((toggle) => (
+                                    <div key={toggle.label} className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                                        <p className="text-sm font-semibold text-white">{toggle.label}</p>
+                                        <p className="mt-1 text-xs text-slate-300/72">{toggle.sub}</p>
+                                        <p className={`mt-3 text-xs font-semibold uppercase tracking-[0.16em] ${toggle.enabled ? "text-emerald-200" : "text-slate-400"}`}>
+                                            {toggle.enabled ? "Enabled" : "Disabled"}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="app-surface-soft p-5"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.18 }}
+                        >
+                            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Data Actions Status</p>
+                            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                                    <p className="text-sm font-semibold text-white">Export readiness</p>
+                                    <p className="mt-1 text-xs text-slate-300/72">
+                                        {exportState === "idle"
+                                            ? "Ready to prepare a fresh export."
+                                            : exportState === "preparing"
+                                                ? `Preparing now: ${exportProgress}%`
+                                                : "Prepared and ready for download."}
+                                    </p>
+                                </div>
+                                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                                    <p className="text-sm font-semibold text-white">Deletion workflow</p>
+                                    <p className="mt-1 text-xs text-slate-300/72">A typed confirmation is required before permanent removal can be requested.</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+
             <AnimatePresence>
                 {confirmDelete && (
                     <>
@@ -401,7 +468,6 @@ export default function PrivacyPage() {
             </AnimatePresence>
 
             {/* BOTTOM NAV */}
-            <AppBottomNav />
         </div>
     );
 }

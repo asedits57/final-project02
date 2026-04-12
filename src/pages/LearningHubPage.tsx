@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Brain, CheckCircle2, Clock3, GraduationCap, Lightbulb, Loader2, PlayCircle, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +21,7 @@ const resources = [
     title: "Grammar Masterclass",
     description: "Study the foundational rules of English grammar with clear examples and focused revision.",
     icon: Brain,
-    color: "hsl(270, 80%, 75%)",
+    color: "hsl(188 94% 68%)",
     rewardPoints: 25,
     items: ["Parts of speech", "Tense usage", "Passive voice", "Conditionals"],
     prompt: "Teach me the foundations of English grammar with examples for parts of speech, tense usage, passive voice, and conditionals.",
@@ -31,7 +31,7 @@ const resources = [
     title: "Vocabulary Builder",
     description: "Expand your word bank with context-based learning and strong academic phrases.",
     icon: Lightbulb,
-    color: "hsl(230, 80%, 75%)",
+    color: "hsl(205 84% 68%)",
     rewardPoints: 25,
     items: ["Academic words", "Phrasal verbs", "Idioms", "Collocations"],
     prompt: "Help me build stronger English vocabulary using academic words, phrasal verbs, idioms, and collocations.",
@@ -41,7 +41,7 @@ const resources = [
     title: "Exam Strategies",
     description: "Review how to approach each task type before your next attempt.",
     icon: GraduationCap,
-    color: "hsl(140, 80%, 75%)",
+    color: "hsl(148 72% 68%)",
     rewardPoints: 30,
     items: ["Reading tips", "Listening shortcuts", "Speaking fluency", "Writing structure"],
     prompt: "Give me practical English test strategies for reading, listening, speaking, and writing tasks.",
@@ -51,7 +51,7 @@ const resources = [
     title: "Daily Tips",
     description: "Use short high-value lessons to keep the journey moving between practice sessions.",
     icon: Sparkles,
-    color: "hsl(40, 90%, 70%)",
+    color: "hsl(28 94% 70%)",
     rewardPoints: 20,
     items: ["Common mistakes", "Pronunciation hacks", "Spelling rules", "Punctuation"],
     prompt: "Give me a short daily English lesson covering common mistakes, pronunciation hacks, spelling rules, and punctuation.",
@@ -106,45 +106,50 @@ const LearningHubPage = () => {
     context: buildGuideContext(resources[0]),
   });
 
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      try {
+  const loadLearningContent = useCallback(async (options?: { silent?: boolean }) => {
+    try {
+      if (!options?.silent) {
         setLoading(true);
-        setError(null);
-        const [videoResponse, taskResponse, progressResponse] = await Promise.all([
-          api.listLearningVideos(),
-          api.listLearnerTasks(),
-          api.getLearningProgress(),
-        ]);
-
-        if (!active) {
-          return;
-        }
-
-        setVideos(videoResponse.data);
-        setTasks(taskResponse.data);
-        setProgress(progressResponse.data);
-      } catch (loadError) {
-        if (!active) {
-          return;
-        }
-
-        setError(loadError instanceof Error ? loadError.message : "Could not load learning content.");
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
       }
+      setError(null);
+      const [videoResponse, taskResponse, progressResponse] = await Promise.all([
+        api.listLearningVideos(),
+        api.listLearnerTasks(),
+        api.getLearningProgress(),
+      ]);
+
+      setVideos(videoResponse.data);
+      setTasks(taskResponse.data);
+      setProgress(progressResponse.data);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Could not load learning content.");
+    } finally {
+      if (!options?.silent) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadLearningContent();
+  }, [loadLearningContent]);
+
+  useEffect(() => {
+    const handleTasksChanged = () => {
+      void loadLearningContent({ silent: true });
+    };
+    const handleVideosChanged = () => {
+      void loadLearningContent({ silent: true });
     };
 
-    void load();
+    window.addEventListener("app:tasks-changed", handleTasksChanged);
+    window.addEventListener("app:videos-changed", handleVideosChanged);
 
     return () => {
-      active = false;
+      window.removeEventListener("app:tasks-changed", handleTasksChanged);
+      window.removeEventListener("app:videos-changed", handleVideosChanged);
     };
-  }, []);
+  }, [loadLearningContent]);
 
   const completedGuideMap = useMemo(
     () => new Map(progress.completedGuides.map((item) => [item.contentKey, item])),
@@ -223,7 +228,7 @@ const LearningHubPage = () => {
   };
 
   const featuredTasks = useMemo(
-    () => [...tasks].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()).slice(0, 4),
+    () => [...tasks].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()),
     [tasks],
   );
 
@@ -237,7 +242,7 @@ const LearningHubPage = () => {
   }, [tasks]);
 
   const featuredVideos = useMemo(
-    () => videos.slice(0, 6),
+    () => [...videos].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()),
     [videos],
   );
 
@@ -245,106 +250,153 @@ const LearningHubPage = () => {
     <UnifiedPageShell
       eyebrow="Step 3 / Study"
       title="Learning hub that follows your practice"
-      description="This page now feels like the next stop after tasks. Review concepts, open admin-published videos, then jump back into practice or move forward to the live leaderboard."
+      description="This page now feels like the natural next stop after practice. Review concepts, open admin-published videos, then jump back into guided work or forward into the live leaderboard."
     >
       <JourneyStrip
         items={[
-          { label: "Home", detail: "Start in the main workspace.", path: "/", state: "done" },
+          { label: "Home", detail: "Start in the main workspace.", path: "/home", state: "done" },
           { label: "Task", detail: "Practice before studying.", path: "/task", state: "done" },
           { label: "Learn", detail: "Use guides and strategy refreshers.", path: "/learning", state: "current" },
           { label: "Leaderboard", detail: "Track performance after the cycle.", path: "/leaderboard", state: "next" },
         ]}
       />
 
-      <motion.section
-        className="app-surface app-grid mt-6 px-6 py-7 sm:px-8"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-      >
-        <span className="app-kicker">Study Between Practice Sessions</span>
-        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white sm:text-3xl">
-              Review what you need, then continue to the next page
-            </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300/78">
-              The learning hub now sits in the same journey as home and task pages, and it can surface admin-published videos alongside the built-in study guides.
-            </p>
+      <div className="mt-4 grid gap-3.5 xl:grid-cols-[minmax(0,1.2fr),20rem]">
+        <motion.section
+          className="app-surface px-4 py-4 sm:px-5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <span className="app-kicker">Study between practice sessions</span>
+              <h2 className="mt-2.5 text-3xl font-semibold text-white sm:text-4xl">
+                Review only what you need, then move on
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300/78">
+                This page is now a calmer review space. Use it to close the gap you noticed in practice,
+                then continue into the next guided session or the live leaderboard.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap lg:justify-end">
+              <button
+                type="button"
+                onClick={() => navigate("/task")}
+                className="brand-button-secondary w-full sm:w-auto"
+              >
+                Back to practice
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/leaderboard")}
+                className="brand-button-primary w-full sm:w-auto"
+              >
+                Next: Leaderboard
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => navigate("/task")}
-              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Back to task page
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/leaderboard")}
-              className="inline-flex items-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)] transition hover:bg-violet-400"
-            >
-              Next: Leaderboard
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </motion.section>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {[
-          { label: "Learning XP claimed", value: `${progress.totalLearningPoints} XP` },
-          { label: "Guides completed", value: `${progress.completedGuides.length}` },
-          { label: "Videos completed", value: `${progress.completedVideos.length}` },
-        ].map((item, index) => (
-          <motion.div
-            key={item.label}
-            className="app-surface-soft p-5"
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.04 * (index + 1) }}
-          >
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">{item.label}</p>
-            <p className="mt-3 text-2xl font-bold text-white">{item.value}</p>
-          </motion.div>
-        ))}
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
+            {[
+              { label: "Learning XP claimed", value: `${progress.totalLearningPoints} XP` },
+              { label: "Guides completed", value: `${progress.completedGuides.length}` },
+              { label: "Videos completed", value: `${progress.completedVideos.length}` },
+            ].map((item, index) => (
+              <motion.div
+                key={item.label}
+                className="app-surface-soft p-3"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.04 * (index + 1) }}
+              >
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">{item.label}</p>
+                <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        <motion.section
+          className="app-surface-soft p-4"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.08 }}
+        >
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Study rhythm</p>
+          <div className="mt-3 space-y-2.5">
+            <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-3.5 py-2.5">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Current AI focus</p>
+              <p className="mt-1.5 text-sm font-semibold text-white">{selectedAiContext.title}</p>
+            </div>
+            <div className="rounded-[1.35rem] border border-white/10 bg-white/5 px-3.5 py-2.5">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Top categories</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {taskCategorySummary.slice(0, 4).map(([category, count]) => (
+                  <span key={category} className="rounded-full border border-cyan-300/16 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100">
+                    {category} / {count}
+                  </span>
+                ))}
+                {!taskCategorySummary.length ? (
+                  <span className="text-xs text-slate-400">Categories will appear once tasks are available.</span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </motion.section>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+      <motion.section
+        className="app-surface mt-4 px-5 py-5 sm:px-6"
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, delay: 0.06 }}
+      >
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="app-kicker">Core guides</span>
+            <h3 className="mt-3 text-2xl font-bold text-white">Study guides for the next improvement step</h3>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-300/76">
+              Choose a guide, review the key topics, and keep the AI coach anchored to that lesson while you work.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3.5 lg:grid-cols-2">
         {resources.map((resource, index) => (
           <motion.div
             key={resource.key}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: index * 0.06 }}
-            className="app-surface-soft group p-6 transition-all duration-300 hover:border-violet-300/24 hover:bg-white/8"
+            className="app-surface-soft group p-4 transition-all duration-300 hover:border-cyan-300/24 hover:bg-white/8"
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-3">
               <div
-                className="rounded-2xl border p-3"
+                className="rounded-2xl border p-2.5"
                 style={{ background: `${resource.color}20`, borderColor: `${resource.color}33` }}
               >
-                <resource.icon className="h-6 w-6" style={{ color: resource.color }} />
+                <resource.icon className="h-5 w-5" style={{ color: resource.color }} />
               </div>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-300/72">
                 {completedGuideMap.has(resource.key) ? "Completed" : "Guide"}
               </span>
             </div>
 
-            <h3 className="mt-5 text-2xl font-semibold text-white">{resource.title}</h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300/72">{resource.description}</p>
+            <h3 className="mt-4 text-xl font-semibold text-white">{resource.title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-slate-300/72">{resource.description}</p>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               {resource.items.map((item) => (
                 <div key={item} className="flex items-center gap-2 text-xs text-slate-200/72">
-                  <div className="h-1.5 w-1.5 rounded-full bg-violet-300" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-200" />
                   {item}
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedAiContext({
@@ -352,7 +404,7 @@ const LearningHubPage = () => {
                   title: resource.title,
                   context: buildGuideContext(resource),
                 })}
-                className="inline-flex items-center gap-2 rounded-2xl border border-violet-300/18 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/16"
+                className="brand-button-secondary w-full sm:w-auto"
               >
                 Study with AI
                 <ArrowRight className="h-4 w-4" />
@@ -361,7 +413,7 @@ const LearningHubPage = () => {
                 type="button"
                 onClick={() => void handleCompleteGuide(resource.key)}
                 disabled={guideBusyKey === resource.key || completedGuideMap.has(resource.key)}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {guideBusyKey === resource.key ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                 {completedGuideMap.has(resource.key) ? "Completed" : `Claim ${resource.rewardPoints} XP`}
@@ -369,10 +421,11 @@ const LearningHubPage = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+        </div>
+      </motion.section>
 
       <motion.section
-        className="app-surface mt-6 px-6 py-7 sm:px-8"
+        className="app-surface mt-4 px-5 py-5 sm:px-6"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.08 }}
@@ -380,8 +433,8 @@ const LearningHubPage = () => {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="app-kicker">Admin Published Content</span>
-            <h3 className="mt-4 text-2xl font-bold text-white">Learning videos in the live section</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300/76">
+            <h3 className="mt-3 text-2xl font-bold text-white">Learning videos in the live section</h3>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-300/76">
               Videos added from the admin page show up here automatically when they are published.
             </p>
           </div>
@@ -398,29 +451,29 @@ const LearningHubPage = () => {
         ) : null}
 
         {loading ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="h-56 rounded-[2rem] border border-white/10 bg-white/[0.03] animate-pulse" />
             ))}
           </div>
         ) : featuredVideos.length ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-3">
             {featuredVideos.map((video, index) => (
               <motion.div
                 key={video._id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="app-surface-soft group overflow-hidden p-5 transition-all duration-300 hover:border-violet-300/24 hover:bg-white/8"
+                className="app-surface-soft group overflow-hidden p-4 transition-all duration-300 hover:border-cyan-300/24 hover:bg-white/8"
               >
                 {(() => {
                   const completedVideo = completedVideoMap.get(video._id);
                   return (
                     <>
-                <div className="aspect-[16/9] rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(76,29,149,0.35),rgba(30,41,59,0.85))] p-5">
+                <div className="aspect-[16/9] rounded-[1.25rem] border border-white/10 bg-[linear-gradient(135deg,rgba(34,211,238,0.18),rgba(15,23,42,0.92))] p-4 sm:rounded-[1.5rem]">
                   <div className="flex h-full flex-col justify-between">
                     <div className="flex items-start justify-between gap-3">
-                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-violet-100">
+                      <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-100">
                         {video.category}
                       </span>
                       <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-200">
@@ -430,7 +483,7 @@ const LearningHubPage = () => {
                     <button
                       type="button"
                       onClick={() => window.open(new URL(video.videoUrl, window.location.origin).toString(), "_blank", "noopener,noreferrer")}
-                      className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:scale-105 hover:bg-white/15"
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition hover:scale-105 hover:bg-white/15 sm:h-14 sm:w-14"
                       aria-label={`Open ${video.title}`}
                     >
                       <PlayCircle className="h-7 w-7" />
@@ -438,10 +491,10 @@ const LearningHubPage = () => {
                   </div>
                 </div>
 
-                <h4 className="mt-5 text-lg font-semibold text-white">{video.title}</h4>
-                <p className="mt-2 text-sm leading-relaxed text-slate-300/72">{video.description}</p>
+                <h4 className="mt-4 text-lg font-semibold text-white">{video.title}</h4>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-300/72">{video.description}</p>
 
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-300/70">
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-300/70">
                   <div className="inline-flex items-center gap-1.5">
                     <Clock3 className="h-3.5 w-3.5" />
                     {formatDuration(video.duration)}
@@ -451,19 +504,19 @@ const LearningHubPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   {video.tags.slice(0, 4).map((tag) => (
-                    <span key={tag} className="rounded-full border border-violet-300/14 bg-violet-500/10 px-3 py-1 text-[11px] text-violet-100">
+                    <span key={tag} className="rounded-full border border-cyan-300/14 bg-cyan-500/10 px-3 py-1 text-[11px] text-cyan-100">
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => window.open(new URL(video.videoUrl, window.location.origin).toString(), "_blank", "noopener,noreferrer")}
-                    className="inline-flex items-center gap-2 rounded-2xl bg-violet-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-400"
+                    className="brand-button-primary w-full sm:w-auto"
                   >
                     <PlayCircle className="h-4 w-4" />
                     Watch lesson
@@ -475,7 +528,7 @@ const LearningHubPage = () => {
                       title: video.title,
                       context: buildVideoContext(video),
                     })}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
                   >
                     Ask AI
                   </button>
@@ -483,7 +536,7 @@ const LearningHubPage = () => {
                     type="button"
                     onClick={() => void handleCompleteVideo(video._id)}
                     disabled={videoBusyId === video._id || completedVideoMap.has(video._id)}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-violet-300/18 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/16 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="brand-button-secondary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                   >
                     {videoBusyId === video._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     {completedVideo
@@ -505,54 +558,46 @@ const LearningHubPage = () => {
       </motion.section>
 
       <motion.section
-        className="app-surface mt-6 px-6 py-7 sm:px-8"
+        className="app-surface mt-4 px-5 py-5 sm:px-6"
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, delay: 0.12 }}
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-3">
           <div>
             <span className="app-kicker">Practice Queue</span>
-            <h3 className="mt-4 text-2xl font-bold text-white">Tasks currently available for learners</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300/76">
+            <h3 className="mt-3 text-2xl font-bold text-white">Tasks currently available for learners</h3>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-300/76">
               Tasks created in the admin console are now visible from the live backend with their linked question-bank content.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => navigate("/task")}
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-          >
-            Open Task Hub
-            <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
 
         {taskCategorySummary.length ? (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {taskCategorySummary.slice(0, 8).map(([category, count]) => (
-              <span key={category} className="rounded-full border border-violet-300/16 bg-violet-500/10 px-3 py-1 text-xs text-violet-100">
-                {category} • {count}
+              <span key={category} className="rounded-full border border-cyan-300/16 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-100">
+                {category} / {count}
               </span>
             ))}
           </div>
         ) : null}
 
         {loading ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid gap-3.5 lg:grid-cols-2">
             {Array.from({ length: 2 }).map((_, index) => (
               <div key={index} className="h-44 rounded-[2rem] border border-white/10 bg-white/[0.03] animate-pulse" />
             ))}
           </div>
         ) : featuredTasks.length ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid gap-3.5 lg:grid-cols-2">
             {featuredTasks.map((task, index) => (
               <motion.div
                 key={task._id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="app-surface-soft p-5 transition-all duration-300 hover:border-violet-300/24 hover:bg-white/8"
+                className="app-surface-soft p-4 transition-all duration-300 hover:border-cyan-300/24 hover:bg-white/8"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -571,11 +616,11 @@ const LearningHubPage = () => {
                   )}
                 </div>
 
-                <div className="mt-5 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200">{task.category}</span>
-                  <span className="rounded-full border border-violet-300/14 bg-violet-500/10 px-3 py-1 text-violet-100">{task.difficulty}</span>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 capitalize">{task.category}</span>
+                  <span className="rounded-full border border-cyan-300/14 bg-cyan-500/10 px-3 py-1 text-cyan-100 capitalize">{task.difficulty}</span>
                   {typeof task.questionCount === "number" ? (
-                    <span className="rounded-full border border-violet-300/14 bg-violet-500/10 px-3 py-1 text-violet-100">
+                    <span className="rounded-full border border-cyan-300/14 bg-cyan-500/10 px-3 py-1 text-cyan-100">
                       {task.questionCount} questions
                     </span>
                   ) : null}
@@ -585,6 +630,17 @@ const LearningHubPage = () => {
                       Due {new Date(task.dueDate).toLocaleDateString()}
                     </span>
                   ) : null}
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/task/live/${task._id}`)}
+                    className="brand-button-primary w-full sm:w-auto"
+                  >
+                    {task.submission ? "Review task" : "Open task"}
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               </motion.div>
             ))}
@@ -596,7 +652,7 @@ const LearningHubPage = () => {
         )}
       </motion.section>
 
-      <div className="mt-6">
+      <div className="mt-4 grid gap-3.5 xl:grid-cols-[minmax(0,1fr),20rem]">
         <ContextualAIAssistant
           title={`${selectedAiContext.title} coach`}
           description="Keep the learning page conversational by asking follow-up questions about the guide or video you are working through right now."
@@ -609,31 +665,29 @@ const LearningHubPage = () => {
           ]}
           onAsk={(question) => api.askLearningCoach(selectedAiContext.area, selectedAiContext.context, question)}
         />
-      </div>
 
-      <motion.section
-        className="app-surface mt-6 flex flex-col gap-5 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.16 }}
-      >
-        <div>
-          <span className="app-kicker">Need more support?</span>
-          <h3 className="mt-4 text-2xl font-bold text-white">Ask the AI tutor without leaving the flow</h3>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-300/76">
-            Keep the same learning journey going by opening the AI tutor directly from here.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => navigate("/ai-tutor", { state: { initialPrompt: "Help me choose what to study next based on grammar, vocabulary, listening, speaking, and writing." } })}
-          className="inline-flex items-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)] transition hover:bg-violet-400"
+        <motion.section
+          className="app-surface-soft p-4"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.16 }}
         >
-          Open AI tutor
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      </motion.section>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Need more support?</p>
+          <h3 className="mt-2.5 text-xl font-semibold text-white">Open the full AI tutor</h3>
+          <p className="mt-2 text-sm leading-relaxed text-slate-300/74">
+            Use the full tutor when you want a longer study conversation or help planning the next session.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/ai-tutor", { state: { initialPrompt: "Help me choose what to study next based on grammar, vocabulary, listening, speaking, and writing." } })}
+            className="brand-button-primary mt-3.5 w-full"
+          >
+            Open AI tutor
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </motion.section>
+      </div>
     </UnifiedPageShell>
   );
 };

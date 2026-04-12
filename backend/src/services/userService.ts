@@ -15,6 +15,17 @@ type LeaderboardRecord = {
   score: number;
 };
 
+type PopulatedLeaderboardEntry = {
+  userId?: {
+    _id?: { toString(): string };
+    email?: string;
+    streak?: number;
+    level?: number;
+    score?: number;
+  } | null;
+  score?: number;
+};
+
 export type LeaderboardSnapshotUser = LeaderboardRecord & {
   isLive: boolean;
   liveModules: string[];
@@ -132,15 +143,18 @@ export const getLeaderboardCached = async (): Promise<LeaderboardRecord[]> => {
     .limit(10);
 
   // Map to frontend expected format
-  const users = lbEntries
-    .filter((entry: any) => !!entry.userId)
-    .map((entry: any) => toLeaderboardRecord({
-      _id: entry.userId._id,
-      email: entry.userId.email,
-      streak: entry.userId.streak,
-      level: entry.userId.level,
-      score: entry.score,
-    }));
+  const users = (lbEntries as PopulatedLeaderboardEntry[])
+    .filter((entry) => !!entry.userId)
+    .map((entry) => {
+      const user = entry.userId!;
+      return toLeaderboardRecord({
+        _id: user._id,
+        email: user.email,
+        streak: user.streak,
+        level: user.level,
+        score: entry.score ?? user.score,
+      });
+    });
 
   // Cache in Redis (60 seconds)
   await safeSet(cacheKey, JSON.stringify(users), {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, MailX, ShieldCheck, ShieldX } from "lucide-react";
+import { CheckCircle2, Loader2, MailX, ShieldCheck, ShieldX, Sparkles, UserRound } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import AnimatedBackground from "@components/shared/AnimatedBackground";
@@ -24,6 +24,27 @@ type InviteDecisionState =
       status: "error";
       message: string;
     };
+
+const inviteHighlights = [
+  {
+    title: "Single access route",
+    detail: "Accept once, then continue with the same email so the approved role attaches to the correct account.",
+    icon: Sparkles,
+    tone: "text-violet-200",
+  },
+  {
+    title: "Role-safe onboarding",
+    detail: "The screen tells the invited person whether admin access is active immediately or still waiting for sign-in.",
+    icon: ShieldCheck,
+    tone: "text-emerald-200",
+  },
+  {
+    title: "Clear next action",
+    detail: "Move to sign in, create an account, or return to login without leaving a wide page feeling unfinished.",
+    icon: UserRound,
+    tone: "text-cyan-200",
+  },
+];
 
 export default function AdminInviteResponsePage() {
   const navigate = useNavigate();
@@ -108,104 +129,162 @@ export default function AdminInviteResponsePage() {
       </div>
       <AnimatedBackground />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4 py-10 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="w-full"
-        >
-          <Card className="rounded-[2rem] border border-white/10 bg-[rgba(10,12,25,0.88)] shadow-[0_20px_80px_rgba(2,6,23,0.45)] backdrop-blur-2xl">
-            <CardHeader className="items-center text-center">
-              {state.status === "loading" ? (
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
-                  <Loader2 className="h-6 w-6 animate-spin text-violet-200" />
-                </div>
-              ) : state.status === "error" ? (
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-500/10">
-                  <MailX className="h-6 w-6 text-rose-200" />
-                </div>
-              ) : summary ? (
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
-                  <summary.icon className={`h-6 w-6 ${summary.tone}`} />
-                </div>
-              ) : null}
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-[84rem] items-center px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid w-full gap-6 lg:grid-cols-[0.92fr,1.08fr] lg:items-center">
+          <motion.section
+            className="space-y-6"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <div className="app-surface app-grid px-6 py-7 sm:px-8 sm:py-9">
+              <span className="app-kicker">Admin Invitation</span>
+              <h1 className="mt-4 text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+                Keep access decisions clear and professional
+              </h1>
+              <p className="mt-4 text-sm leading-relaxed text-slate-300/78 sm:text-base">
+                This handoff screen explains what happened, what access state is active, and what the invited user should do next without leaving a desktop page empty.
+              </p>
 
-              <CardTitle className="mt-4 text-2xl text-white">
-                {state.status === "loading"
-                  ? "Processing Invitation"
-                  : state.status === "error"
-                    ? "Invitation Unavailable"
-                    : summary?.title}
-              </CardTitle>
-              <CardDescription className="max-w-xl text-slate-400">
-                {state.status === "loading"
-                  ? "Please wait while we process your admin invitation."
-                  : state.status === "error"
-                    ? state.message
-                    : state.message}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {state.status === "ready" && summary ? (
-                <>
-                  <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.16em] text-slate-200">
-                        {summary.badge}
-                      </span>
-                      <span className="rounded-full border border-violet-300/14 bg-violet-500/10 px-3 py-1 text-xs text-violet-100">
-                        {state.email}
-                      </span>
-                    </div>
-                    <p className="mt-4 text-sm leading-relaxed text-slate-300/76">
-                      {state.action === "accept"
-                        ? state.roleGrantedNow
-                          ? "You can go straight to sign in with this email and open the admin console."
-                          : "Use the same invited email address when you sign up or sign in so the approved invitation can activate admin access."
-                        : "This invitation has been cancelled for this email address. No admin access was applied."}
-                    </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {[
+                  { label: "Decision", value: action === "accept" ? "Accept" : "Decline" },
+                  { label: "Invite token", value: token ? "Detected" : "Missing" },
+                  {
+                    label: "Status",
+                    value:
+                      state.status === "ready"
+                        ? "Resolved"
+                        : state.status === "error"
+                          ? "Needs attention"
+                          : "Processing",
+                  },
+                ].map((item) => (
+                  <div key={item.label} className="app-surface-soft p-4">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{item.value}</p>
                   </div>
+                ))}
+              </div>
+            </div>
 
-                  {state.action === "accept" ? (
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <Button
-                        className="h-12 flex-1 rounded-2xl bg-violet-600 text-white hover:bg-violet-500"
-                        onClick={() => navigate(`/login?email=${encodeURIComponent(state.email)}`)}
-                      >
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Continue to Sign In
-                      </Button>
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {inviteHighlights.map(({ title, detail, icon: Icon, tone }, index) => (
+                <motion.div
+                  key={title}
+                  className="app-surface-soft p-5"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.08 + index * 0.05 }}
+                >
+                  <div className="w-fit rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                    <Icon className={`h-5 w-5 ${tone}`} />
+                  </div>
+                  <p className="mt-4 text-sm font-semibold text-white">{title}</p>
+                  <p className="mt-2 text-xs leading-relaxed text-slate-300/72">{detail}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.06 }}
+            className="w-full"
+          >
+            <Card className="rounded-[2rem] border border-white/10 bg-[rgba(10,12,25,0.88)] shadow-[0_20px_80px_rgba(2,6,23,0.45)] backdrop-blur-2xl">
+              <CardHeader className="items-center text-center">
+                {state.status === "loading" ? (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
+                    <Loader2 className="h-6 w-6 animate-spin text-violet-200" />
+                  </div>
+                ) : state.status === "error" ? (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-rose-400/20 bg-rose-500/10">
+                    <MailX className="h-6 w-6 text-rose-200" />
+                  </div>
+                ) : summary ? (
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05]">
+                    <summary.icon className={`h-6 w-6 ${summary.tone}`} />
+                  </div>
+                ) : null}
+
+                <CardTitle className="mt-4 text-2xl text-white">
+                  {state.status === "loading"
+                    ? "Processing Invitation"
+                    : state.status === "error"
+                      ? "Invitation Unavailable"
+                      : summary?.title}
+                </CardTitle>
+                <CardDescription className="max-w-xl text-slate-400">
+                  {state.status === "loading"
+                    ? "Please wait while we process your admin invitation."
+                    : state.status === "error"
+                      ? state.message
+                      : state.message}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {state.status === "ready" && summary ? (
+                  <>
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.16em] text-slate-200">
+                          {summary.badge}
+                        </span>
+                        <span className="rounded-full border border-violet-300/14 bg-violet-500/10 px-3 py-1 text-xs text-violet-100">
+                          {state.email}
+                        </span>
+                      </div>
+                      <p className="mt-4 text-sm leading-relaxed text-slate-300/76">
+                        {state.action === "accept"
+                          ? state.roleGrantedNow
+                            ? "You can go straight to sign in with this email and open the admin console."
+                            : "Use the same invited email address when you sign up or sign in so the approved invitation can activate admin access."
+                          : "This invitation has been cancelled for this email address. No admin access was applied."}
+                      </p>
+                    </div>
+
+                    {state.action === "accept" ? (
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <Button
+                          className="h-12 flex-1 rounded-2xl bg-violet-600 text-white hover:bg-violet-500"
+                          onClick={() => navigate(`/login?email=${encodeURIComponent(state.email)}`)}
+                        >
+                          <CheckCircle2 className="mr-2 h-4 w-4" />
+                          Continue to Sign In
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-12 flex-1 rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                          onClick={() => navigate(`/login?email=${encodeURIComponent(state.email)}&mode=signup`)}
+                        >
+                          Create Account
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         variant="outline"
-                        className="h-12 flex-1 rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
-                        onClick={() => navigate(`/login?email=${encodeURIComponent(state.email)}&mode=signup`)}
+                        className="h-12 w-full rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                        onClick={() => navigate("/login")}
                       >
-                        Create Account
+                        Back to Login
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      className="h-12 w-full rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
-                      onClick={() => navigate("/login")}
-                    >
-                      Back to Login
-                    </Button>
-                  )}
-                </>
-              ) : state.status === "error" ? (
-                <Button
-                  variant="outline"
-                  className="h-12 w-full rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
-                  onClick={() => navigate("/login")}
-                >
-                  Open Login
-                </Button>
-              ) : null}
-            </CardContent>
-          </Card>
-        </motion.div>
+                    )}
+                  </>
+                ) : state.status === "error" ? (
+                  <Button
+                    variant="outline"
+                    className="h-12 w-full rounded-2xl border-white/10 bg-white/[0.04] text-slate-100 hover:bg-white/[0.08]"
+                    onClick={() => navigate("/login")}
+                  >
+                    Open Login
+                  </Button>
+                ) : null}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -20,11 +20,11 @@ export function FloatingWord({ word, delay = 0, className = "" }: FloatingWordPr
     return (
         <motion.div
             className={`absolute text-white/10 font-display font-bold select-none pointer-events-none ${className}`}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.8, x: position.x, y: position.y }}
             animate={{
                 opacity: [0.1, 0.3, 0.1],
-                y: [0, -30, 0],
-                x: [0, 20, 0],
+                y: [position.y, position.y - 30, position.y],
+                x: [position.x, position.x + 20, position.x],
                 scale: [1, 1.1, 1],
             }}
             transition={{

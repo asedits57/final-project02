@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { getAccessToken } from "@services/apiClient";
-import { disconnectRealtimeSocket, getRealtimeSocket } from "@lib/socket";
+import { acquireRealtimeSocket, releaseRealtimeSocket } from "@lib/socket";
 
 export const useLiveModuleActivity = (moduleName: string) => {
   useEffect(() => {
     const token = getAccessToken();
-    const socket = getRealtimeSocket(token);
+    const socket = acquireRealtimeSocket(token);
     if (!socket) {
       return;
     }
@@ -30,7 +30,7 @@ export const useLiveModuleActivity = (moduleName: string) => {
       window.removeEventListener("beforeunload", stopActivity);
       socket.off("connect", startActivity);
       stopActivity();
-      disconnectRealtimeSocket();
+      releaseRealtimeSocket();
     };
   }, [moduleName]);
 };

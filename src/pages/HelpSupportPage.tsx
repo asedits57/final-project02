@@ -2,24 +2,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ArrowLeft, HelpCircle, Search, ChevronDown,
     Mic, RefreshCw, AlertCircle, Zap,
-    Mail, MessageCircle, Home, CheckSquare, Trophy, User, X, BookOpen
+    Mail, MessageCircle, X
 } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AnimatedBackground from "@components/shared/AnimatedBackground";
-import AppBottomNav from "@components/shared/AppBottomNav";
 import { apiService as api } from "@services/apiService";
 import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";
 
 /* ── Nav ── */
-const navItems = [
-    { label: "Home", icon: Home, path: "/" },
-    { label: "Task", icon: CheckSquare, path: "/task" },
-    { label: "Learn", icon: BookOpen, path: "/learning" },
-    { label: "Leaderboard", icon: Trophy, path: "/leaderboard" },
-    { label: "Profile", icon: User, path: "/profile" },
-];
-
 /* ── FAQ data ── */
 const faqs = [
     {
@@ -90,7 +81,6 @@ interface ContactModal { type: "email" | "chat" | null }
 
 export default function HelpSupportPage() {
     const navigate = useNavigate();
-    const location = useLocation();
 
     /* search */
     const [query, setQuery] = useState("");
@@ -164,7 +154,7 @@ export default function HelpSupportPage() {
             </div>
             <AnimatedBackground />
 
-            <div className="relative z-10 max-w-2xl mx-auto px-4 py-10 pb-28">
+            <div className="relative z-10 mx-auto max-w-[84rem] px-4 py-10 pb-10 sm:px-6 lg:px-8">
 
                 {/* TOP BAR */}
                 <motion.div className="flex items-center gap-4 mb-8"
@@ -188,6 +178,8 @@ export default function HelpSupportPage() {
                 </motion.div>
 
                 {/* SEARCH */}
+                <div className="grid gap-6 lg:grid-cols-[1.06fr,0.94fr]">
+                    <div>
                 <motion.div className="relative mb-4"
                     initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.32, delay: 0.06 }}>
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -343,6 +335,96 @@ export default function HelpSupportPage() {
             </div>
 
             {/* ── MICRO-FLOW MODAL ── */}
+                    </div>
+
+                    <div className="space-y-4">
+                        <motion.div
+                            className="app-surface app-grid px-6 py-6"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.08 }}
+                        >
+                            <span className="app-kicker">Support Flow</span>
+                            <h2 className="mt-4 text-2xl font-bold text-white">Resolve issues without dead ends</h2>
+                            <p className="mt-3 text-sm leading-relaxed text-slate-300/76">
+                                Search first, run a quick diagnostic second, and use AI or direct support only when you still need help. The page should feel guided, not empty.
+                            </p>
+
+                            <div className="mt-5 space-y-3">
+                                {[
+                                    "Search by problem first to narrow the correct FAQ path.",
+                                    "Run diagnostics when the issue is tied to microphone, sync, or task state.",
+                                    "Escalate to AI support or contact options only after the self-check pass.",
+                                ].map((item) => (
+                                    <div key={item} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                                        {item}
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="app-surface-soft p-5"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.14 }}
+                        >
+                            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Diagnostics Map</p>
+                            <div className="mt-4 space-y-3">
+                                {actions.map((action) => (
+                                    <button
+                                        key={action.id}
+                                        type="button"
+                                        onClick={() => openFlow(action)}
+                                        className="flex w-full items-center gap-3 rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-left transition hover:bg-white/8"
+                                    >
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5 text-violet-200">
+                                            {action.icon}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">{action.label}</p>
+                                            <p className="mt-1 text-xs text-slate-300/72">{action.title}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="app-surface-soft p-5"
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.35, delay: 0.18 }}
+                        >
+                            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Support Channels</p>
+                            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                                            <Mail className="w-4 h-4 text-violet-200" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">Email support</p>
+                                            <p className="mt-1 text-xs text-slate-300/72">Typical reply window: within 24 hours.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                                            <MessageCircle className="w-4 h-4 text-cyan-200" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-semibold text-white">Live chat status</p>
+                                            <p className="mt-1 text-xs text-slate-300/72">Mon-Fri, 9 AM to 6 PM IST when online.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+
             <AnimatePresence>
                 {activeFlow && (
                     <>
@@ -457,7 +539,6 @@ export default function HelpSupportPage() {
             </AnimatePresence>
 
             {/* BOTTOM NAV */}
-            <AppBottomNav />
         </div>
     );
 }

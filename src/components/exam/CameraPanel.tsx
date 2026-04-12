@@ -1,26 +1,23 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Eye, AlertTriangle, User, VideoOff } from "lucide-react";
-import * as faceapi from "face-api.js";
+import { Eye, AlertTriangle, VideoOff } from "lucide-react";
 import { estimateGaze, type GazeDirection } from "./gazeUtils";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 import { blobToDataUrl, getSupportedMediaRecorderMimeType, type CapturedRecordingAsset } from "@lib/mediaRecorder";
 
 const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model";
-
-interface Detection {
-  box: { x: number; y: number; width: number; height: number };
-  landmarks: { x: number; y: number }[];
-}
 
 interface CameraPanelProps {
   recordingActive?: boolean;
   onRecordingComplete?: (recording?: CapturedRecordingAsset) => void;
 }
 
+type FaceApiModule = typeof import("face-api.js");
+
 const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPanelProps) => {
   const { pushEvent } = useProctoring();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const faceApiRef = useRef<FaceApiModule | null>(null);
   const [alert, setAlert] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [modelsLoaded, setModelsLoaded] = useState(false);
@@ -38,19 +35,32 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
 
   // Load face-api models
   useEffect(() => {
+    let mounted = true;
+
     const loadModels = async () => {
       try {
+        const faceapi = await import("face-api.js");
+        faceApiRef.current = faceapi;
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
         ]);
-        setModelsLoaded(true);
+        if (mounted) {
+          setModelsLoaded(true);
+        }
       } catch (err) {
         console.error("Failed to load face-api models:", err);
-        setCameraError("Failed to load AI models");
+        if (mounted) {
+          setCameraError("Failed to load AI models");
+        }
       }
     };
+
     loadModels();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // Start webcam
@@ -83,7 +93,8 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
 
   // Run face detection loop
   const detect = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current || !cameraActive) return;
+    const faceapi = faceApiRef.current;
+    if (!videoRef.current || !canvasRef.current || !cameraActive || !faceapi) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -158,7 +169,7 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
       ctx.fillStyle = count > 1 ? "hsla(0, 72%, 51%, 0.8)" : "hsla(263, 84%, 55%, 0.8)";
       ctx.fillRect(box.x, box.y - 20, 100, 20);
       ctx.fillStyle = "#fff";
-      ctx.font = "11px Inter, sans-serif";
+      ctx.font = "11px Nunito, sans-serif";
       ctx.fillText(count > 1 ? "⚠ Multiple" : "Face Detected", box.x + 4, box.y - 6);
 
       // Landmarks
@@ -255,7 +266,7 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
   }, [cameraActive, onRecordingComplete, recordingActive]);
 
   return (
-    <div className="glass neon-border p-4 flex flex-col">
+    <div className="glass neon-border flex flex-col p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-primary" />
@@ -309,7 +320,7 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
       </div>
 
       {/* Status */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
+      <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
         <StatusItem label="Face Detected" ok={faceDetected} />
         <StatusItem label={`Gaze: ${gazeDirection}`} ok={eyeFocused} />
         <StatusItem label="Single Person" ok={faceDetected && !multipleFaces} />
@@ -320,9 +331,9 @@ const CameraPanel = ({ recordingActive = false, onRecordingComplete }: CameraPan
 };
 
 const StatusItem = ({ label, ok }: { label: string; ok: boolean }) => (
-  <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-muted/50">
+  <div className="flex items-center gap-1.5 rounded bg-muted/50 px-2 py-1">
     <span className={`text-xs ${ok ? "text-success" : "text-danger"}`}>{ok ? "✔" : "✘"}</span>
-    <span className="text-muted-foreground">{label}</span>
+    <span className="min-w-0 truncate text-muted-foreground">{label}</span>
   </div>
 );
 

@@ -17,6 +17,9 @@ const listQueryBaseSchema = z.object({
   search: z.string().trim().optional(),
 });
 
+const notificationAudienceScopeSchema = z.enum(["all", "users", "admins", "dept", "status"]);
+const questionTargetTypeSchema = z.enum(["task", "daily-task", "final-test", "both", "all"]);
+
 const assignedQuestionSchema = z.object({
   questionId: objectIdSchema,
   order: z.coerce.number().int().min(0).default(0),
@@ -64,7 +67,7 @@ export const questionListQuerySchema = listQueryBaseSchema.extend({
   questionType: z.enum(["multiple_choice", "true_false", "short_answer", "fill_blank"]).optional(),
   difficulty: z.enum(["easy", "medium", "hard"]).optional(),
   category: z.string().trim().optional(),
-  targetType: z.enum(["task", "daily-task", "both"]).optional(),
+  targetType: questionTargetTypeSchema.optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
 });
 
@@ -80,7 +83,7 @@ export const createQuestionSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
   points: nonNegativeNumberSchema.default(1),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
-  targetType: z.enum(["task", "daily-task", "both"]).default("both"),
+  targetType: questionTargetTypeSchema.default("both"),
   timeLimit: nonNegativeNumberSchema.optional(),
   priority: z.coerce.number().int().default(0),
 });
@@ -188,6 +191,8 @@ export const reviewFinalTestSchema = z.object({
 });
 
 export const submitFinalTestSchema = z.object({
+  clientRequestId: z.string().trim().min(8).max(160).optional(),
+  configId: optionalObjectIdSchema,
   testTitle: z.string().trim().min(3).max(160),
   testCategory: z.string().trim().min(2).max(80).default("final-test"),
   answers: z.array(finalTestAnswerSchema).default([]),
@@ -204,6 +209,72 @@ export const submitFinalTestSchema = z.object({
     audio: recordingUploadSchema.optional(),
     video: recordingUploadSchema.optional(),
   }).default({}),
+});
+
+const finalTestConfigFilterSchema = z.object({
+  categories: z.array(z.string().trim().min(1)).default([]),
+  difficulties: z.array(z.enum(["easy", "medium", "hard"])).default([]),
+  questionTypes: z.array(z.enum(["multiple_choice", "true_false", "short_answer", "fill_blank"])).default([]),
+  tags: z.array(z.string().trim().min(1)).default([]),
+});
+
+export const upsertFinalTestConfigSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  enabled: z.coerce.boolean().default(false),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  questionCount: positiveIntSchema.max(100).default(10),
+  assignedQuestions: z.array(assignedQuestionSchema).default([]),
+  filters: finalTestConfigFilterSchema.default({
+    categories: [],
+    difficulties: [],
+    questionTypes: [],
+    tags: [],
+  }),
+  timeLimitMinutes: positiveIntSchema.max(240).default(30),
+  passingScore: z.coerce.number().min(0).max(100).default(60),
+  instructions: z.string().trim().min(3).max(5000).default("Answer all questions carefully before submitting the final test."),
+  allowRetake: z.coerce.boolean().default(true),
+});
+
+export const publishFinalTestConfigSchema = z.object({
+  enabled: z.coerce.boolean().default(true),
+});
+
+export const adminNotificationListQuerySchema = listQueryBaseSchema.extend({
+  type: z.enum(["info", "success", "warning", "critical"]).optional(),
+  audienceScope: notificationAudienceScopeSchema.optional(),
+});
+
+export const userNotificationListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  unreadOnly: z.coerce.boolean().default(false),
+});
+
+export const createAdminNotificationSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  message: z.string().trim().min(3).max(2000),
+  type: z.enum(["info", "success", "warning", "critical"]).default("info"),
+  actionLink: optionalString,
+  audience: z.object({
+    scope: notificationAudienceScopeSchema.default("all"),
+    dept: optionalString,
+    status: z.enum(["active", "suspended"]).optional(),
+  }).default({ scope: "all" }).superRefine((value, ctx) => {
+    if (value.scope === "dept" && !value.dept) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "dept is required when audience scope is dept",
+        path: ["dept"],
+      });
+    }
+    if (value.scope === "status" && !value.status) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "status is required when audience scope is status",
+        path: ["status"],
+      });
+    }
+  }),
 });
 
 export const certificateListQuerySchema = listQueryBaseSchema.extend({

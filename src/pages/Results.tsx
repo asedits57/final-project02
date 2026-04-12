@@ -1,22 +1,31 @@
+import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Download, RefreshCw, Eye, Shield, Trophy } from "lucide-react";
-import { EvaluationResult } from "@components/exam/QuestionPanel";
+import { Download, RefreshCw, Eye, Shield, Trophy, FileCheck2, Sparkles } from "lucide-react";
 import type { AdminFinalTestRecord } from "@services/adminService";
+import type { FinalTestConfigResponseRecord } from "@services/finalTestService";
 
 const Results = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const evaluation = location.state?.evaluation as EvaluationResult | undefined;
   const submission = location.state?.submission as AdminFinalTestRecord | undefined;
+  const config = location.state?.config as FinalTestConfigResponseRecord | undefined;
   
-  const overall = evaluation?.score || 0;
-  const feedback = evaluation?.feedback || "No feedback available.";
+  const overall = submission?.score || 0;
+  const rawScore = submission?.rawScore || 0;
+  const maxScore = submission?.maxScore || 0;
+  const feedback = submission?.recommendation || "No feedback available.";
   const reviewStatus = submission?.reviewStatus || "pending";
   const hasCertificate = reviewStatus === "approved" || reviewStatus === "reviewed";
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-6">
-      <div className="glass-strong neon-border p-8 max-w-2xl w-full space-y-8">
+    <div className="min-h-screen gradient-bg p-6">
+      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-[84rem] gap-6 lg:grid-cols-[1.04fr,0.96fr] lg:items-center">
+        <motion.section
+          className="glass-strong neon-border w-full space-y-8 p-8"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+        >
         <div className="text-center space-y-2">
           <Trophy className="w-12 h-12 text-primary mx-auto animate-float" />
           <h1 className="font-display text-3xl font-bold text-glow">Test Complete!</h1>
@@ -63,7 +72,14 @@ const Results = () => {
               Submission ID: {submission._id}
             </p>
             <p className="text-sm text-foreground">
-              Review status: <span className="font-semibold capitalize">{reviewStatus.replaceAll("_", " ")}</span>
+              Review status: <span className="font-semibold capitalize">{reviewStatus.replace(/_/g, " ")}</span>
+            </p>
+            <p className="text-sm text-foreground">
+              Result: <span className="font-semibold">{submission?.passed ? "Passed" : "Not passed yet"}</span>
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Marks: {rawScore} / {maxScore || config?.totalMarks || 0}
+              {submission?.passingScore ? ` • Passing score ${submission.passingScore}%` : ""}
             </p>
             <p className="text-xs text-muted-foreground">
               Your transcript, audio capture, video capture, and proctoring evidence are now available to admins for review.
@@ -92,12 +108,65 @@ const Results = () => {
             <Eye className="w-4 h-4" /> Review Answers
           </button>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
             className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/80 transition-all"
           >
-            <RefreshCw className="w-4 h-4" /> Retake Test
+            <RefreshCw className="w-4 h-4" /> Return Home
           </button>
         </div>
+        </motion.section>
+
+        <motion.aside
+          className="space-y-4"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.06 }}
+        >
+          <div className="app-surface app-grid px-6 py-6">
+            <span className="app-kicker">Performance Summary</span>
+            <h2 className="mt-4 text-2xl font-bold text-white">A finished results page should still feel active</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300/76">
+              This side panel keeps the results screen useful on large displays by surfacing the most important score signals and the next actions after review.
+            </p>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {[
+                { label: "Overall", value: `${overall}/100`, icon: Trophy, tone: "text-amber-200" },
+                { label: "Marks", value: `${rawScore}/${maxScore || config?.totalMarks || 0}`, icon: FileCheck2, tone: "text-cyan-200" },
+                { label: "Status", value: submission?.passed ? "Passed" : "Review pending", icon: Sparkles, tone: "text-violet-200" },
+              ].map(({ label, value, icon: Icon, tone }) => (
+                <div key={label} className="app-surface-soft p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
+                      <Icon className={`h-4 w-4 ${tone}`} />
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">{label}</p>
+                      <p className="mt-1 text-sm font-semibold text-white">{value}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="app-surface-soft p-5">
+            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">What Happens Next</p>
+            <div className="mt-4 space-y-3">
+              {[
+                "Admins can now review transcript, capture data, and proctoring evidence tied to this submission.",
+                hasCertificate
+                  ? "Certificate access is available because the review state already qualifies for release."
+                  : "Certificate access stays locked until the review status reaches an approved state.",
+                "Use Review Answers or return home to continue practicing while evaluation completes.",
+              ].map((item) => (
+                <div key={item} className="rounded-[1.5rem] border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.aside>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Headphones, PenTool, Mic, ChevronRight, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore as useStore } from "@store/useAuthStore";
+import { useExamStore } from "@store/useExamStore";
 import { apiService as api } from "@services/apiService";
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
 import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
+import type { MockQuestion } from "@services/questionService";
 
 
 const TOTAL_TIME = 1800; // 30 minutes
@@ -38,17 +39,6 @@ const MockTest = () => {
         loadQuestions, tick, handleSelect, nextQuestion, resetTest 
     } = useExamStore();
 
-    if (error) {
-        return (
-            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
-                <ErrorMessage 
-                    message={error} 
-                    onRetry={() => loadQuestions()} 
-                />
-            </div>
-        );
-    }
-
     // Use a ref to ensure we only load once or when needed
     const initialized = useRef(false);
 
@@ -66,7 +56,7 @@ const MockTest = () => {
     }, [loadQuestions, tick, resetTest]);
 
     // Data extraction
-    const mockQuestions = (questions as any).mock || [];
+    const mockQuestions = questions.mock ?? [];
     const usedQuestions = mockQuestions.slice(0, Math.min(TOTAL_QUESTIONS, mockQuestions.length));
     const q = usedQuestions[current];
     const totalQ = usedQuestions.length;
@@ -83,8 +73,8 @@ const MockTest = () => {
         nextQuestion(totalQ);
     };
 
-    const score = usedQuestions.reduce((acc, q, i) => {
-        return acc + (selected[i] === q.answer ? 1 : 0);
+    const score = usedQuestions.reduce((acc, question: MockQuestion, i) => {
+        return acc + (selected[i] === question.answer ? 1 : 0);
     }, 0);
 
     const pctScore = Math.round((score / totalQ) * 100);
@@ -96,6 +86,17 @@ const MockTest = () => {
             api.updateProgress(xpAwarded).catch(console.error);
         }
     }, [finished, score, usedQuestions.length]);
+
+    if (error) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6 text-white text-center">
+                <ErrorMessage 
+                    message={error} 
+                    onRetry={() => loadQuestions()} 
+                />
+            </div>
+        );
+    }
 
     if (loading) {
         return (

@@ -30,7 +30,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (location.pathname === "/verify-otp" && user.oauthProvider !== "google") {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   const requiresGoogleProfileCompletion =
@@ -43,7 +43,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (location.pathname === "/complete-profile" && !requiresGoogleProfileCompletion) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   // Query failed but we still have a cached user (transient network error) → show error UI

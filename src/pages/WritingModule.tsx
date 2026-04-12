@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, PenTool, ChevronRight, Trophy, Clock } from "lucide-react";
+import { ArrowLeft, PenTool, ChevronRight, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { apiService as api } from "@services/apiService";
 import Spinner from "@components/ui/Spinner";
@@ -26,20 +26,7 @@ const WritingModule = () => {
     useLiveModuleActivity("writing");
     const navigate = useNavigate();
     const { data: questionData, isLoading, isError, error, refetch } = useQuestions();
-    const writingTasks = questionData?.writing || [];
-
-    if (isError) {
-        return (
-            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
-                <div className="text-center">
-                    <ErrorMessage 
-                        message={(error as Error)?.message || "Failed to load writing tasks. Please try again."} 
-                        onRetry={() => refetch()} 
-                    />
-                </div>
-            </div>
-        );
-    }
+    const writingTasks = useMemo(() => questionData?.writing ?? [], [questionData?.writing]);
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [text, setText] = useState("");
@@ -111,7 +98,7 @@ const WritingModule = () => {
         } finally {
             setIsEvaluating(false);
         }
-    }, [currentTask?.prompt, text, wordCount]);
+    }, [currentTask, text, wordCount]);
 
     // Persist progress
     useEffect(() => {
@@ -160,6 +147,19 @@ const WritingModule = () => {
         localStorage.removeItem("writing_current_index");
         localStorage.removeItem("writing_progress_count");
     };
+
+    if (isError) {
+        return (
+            <div className="min-h-screen animated-bg flex items-center justify-center p-6">
+                <div className="text-center">
+                    <ErrorMessage 
+                        message={(error as Error)?.message || "Failed to load writing tasks. Please try again."} 
+                        onRetry={() => refetch()} 
+                    />
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (

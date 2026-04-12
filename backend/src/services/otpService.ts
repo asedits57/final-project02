@@ -30,6 +30,19 @@ type OtpIdentity = {
   userId?: string;
 };
 
+type OtpRecord = {
+  requestId: string;
+  email: string;
+  expiresAt: Date;
+  resendAvailableAt: Date;
+  attempts: number;
+  verified: boolean;
+  invalidatedAt?: Date | null;
+  contextHash: string;
+  otpHash: string;
+  save(): Promise<unknown>;
+};
+
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 const getUserId = (user: AuthUserLike) => {
@@ -145,7 +158,7 @@ const createOtpRequest = async (identity: OtpIdentity, context: RequestContext) 
   });
 };
 
-const assertOtpRecordBelongsToContext = (record: any, contextHash: string) => {
+const assertOtpRecordBelongsToContext = (record: OtpRecord | null, contextHash: string) => {
   if (!record || record.verified || record.invalidatedAt) {
     throw new ApiError(400, "Verification request not found");
   }
@@ -155,15 +168,20 @@ const assertOtpRecordBelongsToContext = (record: any, contextHash: string) => {
   }
 };
 
-const assertOtpRecordIsActive = (record: any, contextHash: string) => {
+const assertOtpRecordIsActive = (record: OtpRecord | null, contextHash: string) => {
   assertOtpRecordBelongsToContext(record, contextHash);
+  const ensuredRecord = record as OtpRecord;
 
-  if (record.expiresAt.getTime() <= Date.now()) {
+  if (ensuredRecord.expiresAt.getTime() <= Date.now()) {
     throw new ApiError(400, "Invalid or expired OTP");
   }
 };
 
-const validateOtpMatch = async (record: any, otp: string) => {
+const validateOtpMatch = async (record: OtpRecord | null, otp: string) => {
+  if (!record) {
+    throw new ApiError(400, "Invalid or expired OTP");
+  }
+
   if (record.attempts >= OTP_MAX_ATTEMPTS) {
     throw new ApiError(429, "Maximum verification attempts exceeded. Request a new code.");
   }
@@ -195,10 +213,11 @@ const validateOtpMatch = async (record: any, otp: string) => {
   throw new ApiError(400, "Invalid or expired OTP");
 };
 
-const validateResendAvailability = (record: any, contextHash: string) => {
+const validateResendAvailability = (record: OtpRecord | null, contextHash: string) => {
   assertOtpRecordBelongsToContext(record, contextHash);
+  const ensuredRecord = record as OtpRecord;
 
-  const secondsRemaining = Math.ceil((record.resendAvailableAt.getTime() - Date.now()) / 1000);
+  const secondsRemaining = Math.ceil((ensuredRecord.resendAvailableAt.getTime() - Date.now()) / 1000);
   if (secondsRemaining > 0) {
     throw new ApiError(429, `Please wait ${secondsRemaining} seconds before requesting a new code`);
   }
@@ -225,12 +244,13 @@ export const getOtpSessionForUser = async (user: AuthUserLike, requestId: string
   });
 
   assertOtpRecordBelongsToContext(record, createContextHash(userId, context));
+  const ensuredRecord = record as OtpRecord;
 
   return serializeOtpSession({
-    requestId: record!.requestId,
-    email: normalizeEmail(record!.email),
-    expiresAt: record!.expiresAt,
-    resendAvailableAt: record!.resendAvailableAt,
+    requestId: ensuredRecord.requestId,
+    email: normalizeEmail(ensuredRecord.email),
+    expiresAt: ensuredRecord.expiresAt,
+    resendAvailableAt: ensuredRecord.resendAvailableAt,
   });
 };
 
@@ -309,7 +329,11 @@ export const resendSignupOtp = async (requestId: string, context: RequestContext
     purpose: SIGNUP_OTP_PURPOSE,
   });
 
-  const email = normalizeEmail(record?.email || "");
+  if (!record) {
+    throw new ApiError(400, "Verification request not found");
+  }
+
+  const email = normalizeEmail(record.email);
   validateResendAvailability(record, createContextHash(email, context));
 
   return createOtpRequest({
@@ -324,12 +348,16 @@ export const verifySignupOtp = async (requestId: string, otp: string, context: R
     purpose: SIGNUP_OTP_PURPOSE,
   });
 
-  const email = normalizeEmail(record?.email || "");
+  if (!record) {
+    throw new ApiError(400, "Invalid or expired OTP");
+  }
+
+  const email = normalizeEmail(record.email);
   assertOtpRecordIsActive(record, createContextHash(email, context));
   await validateOtpMatch(record, otp);
 
   return {
-    requestId: record!.requestId,
+    requestId: record.requestId,
     email,
     verified: true,
   };

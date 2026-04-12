@@ -1,143 +1,109 @@
-# 🚀 Final Project 02: AI-Powered English Tutor
+# Atlas Fluency
 
-Welcome to **Sandysquad**, an elite, full-stack application designed to gamify English language learning. This platform features AI-driven tutoring, real-time massive multiplayer leaderboards, and enterprise-grade security.
+Atlas Fluency is a full-stack English performance studio built with React, Vite, Express, and MongoDB. The product combines AI-assisted language tools, guided practice modules, learning content, live leaderboard updates, admin publishing workflows, and proctored assessment flows in one workspace.
 
-Accurate project note:
-- The frontend is React + TypeScript + Vite.
-- The backend is Express + TypeScript + Mongoose.
-- Auth now uses one shared frontend token helper plus backend refresh cookies.
-- Google sign-in trusts Google's verified email and routes first-time Google users to `/complete-profile` instead of a second OTP gate.
-- Mongo-backed backend tests now require `TEST_MONGO_URI`, `MONGO_MEMORY_BINARY`, or `MONGO_MEMORY_ALLOW_DOWNLOAD=true`; otherwise those suites can skip cleanly in offline environments.
+## Stack
 
----
+- Frontend: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui, Framer Motion, Zustand, TanStack Query
+- Backend: Express 5, TypeScript, Mongoose, Socket.IO, Zod, JWT, Redis-ready caching, OpenAI integration
+- Testing: Vitest, Testing Library, Supertest
 
-## 🎯 Features
+## Product Areas
 
-This application goes beyond basic CRUD operations to demonstrate industry-grade software architecture:
+- Auth and onboarding with email or Google sign-in
+- Home workspace with AI language utility cards
+- Guided task hub for grammar, reading, listening, speaking, writing, and mock tests
+- Learning hub with admin-published videos and progress tracking
+- Live leaderboard and profile workspace
+- Admin workspace for questions, tasks, notifications, invites, and learning content
+- Final test and proctoring flows
 
-- **🤖 AI-Generated English Tutoring**: Dynamically leverages OpenAI (`gpt-4o-mini`) as a language tutor with intelligent caching (Redis) and exponential backoff retry systems.
-- **🏆 Live Leaderboard Updates**: Powered by heavily optimized WebSockets (`socket.io`), seamlessly updating stats in real-time instantly across all active clients.
-- **🔐 Enterprise Security**: Rock-solid JWT Authentication flow (Short-lived Access + Secure HttpOnly Refresh tokens), Bcrypt password hashing, and auto-sanitization of XSS payloads using custom middleware.
-- **📧 Google Email Verification**: Google OAuth logins now flow through a server-generated 6-digit email OTP with hashed storage, resend cooldowns, expiry handling, and verification gating before home-page access.
-- **🛡️ Traffic Shaping**: Dual-layer express rate limiters preventing DoS attacks globally, while specifically clamping down on Auth routes to block brute-force attempts.
-- **🎨 Elite UI/UX Design**: Masterfully animated using `framer-motion`, wrapped entirely in Tailwind CSS, `radix-ui`, and `shadcn` primitives—all supporting seamless Dark/Light Mode.
-- **🧪 Bulletproof Testing**: High-coverage endpoint testing using `Jest` & `Supertest`, actively guarding for failing states (400, 401, 429) against regressions.
+## Project Structure
 
----
-
-## 🧰 Tech Stack
-
-**Frontend:**
-- React 18 
-- TypeScript
-- Vite
-- Tailwind CSS + shadcn/ui
-- Framer Motion (Animations)
-- Zustand (Global Auth State Management)
-- TanStack Query (Server State Management)
-
-**Backend:**
-- Node.js & Express.js
-- TypeScript
-- MongoDB, Mongoose (In-Memory Fallback included)
-- Redis (For AI-response caching)
-- Socket.io
-- Zod (Input Validation)
-- JWT & Bcrypt (Authentication)
-- k6 (Load Testing)
-
----
-
-## ⚙️ Setup Instructions
-
-### 1. Prerequisites
-You must have Node.js and npm installed on your system.
-Redis is entirely optional; the API degrades gracefully if Redis is unavailable.
-
-### 2. Clone the repository
-```bash
-git clone https://github.com/asedits57/final-project02.git
-cd final-project02
+```text
+.
+|- src/                 Frontend application
+|- backend/src/         Express API, services, models, routes
+|- public/              Static assets
+|- k6/                  Load testing scripts
+|- scripts/             Repo utility scripts
+|- backend/docs/        OpenAPI documentation
 ```
 
-### 3. Install Dependencies
-```bash
-# This installs dependencies for the root frontend
-npm install
+## Local Setup
 
-# Installs dependencies for the backend
+### 1. Install dependencies
+
+```bash
+npm install
 cd backend
 npm install
 ```
 
-### 4. Boot up the Application!
-Our `package.json` relies on `concurrently`, so you only need to run one command in the root folder to boot both the Frontend and Backend simultaneously:
+### 2. Configure environment files
+
+- Copy `.env.example` to `.env` in the repo root if you need frontend variables
+- Copy `backend/.env.example` to `backend/.env` for the API
+- Redis is optional
+- OpenAI-backed features require valid backend environment variables
+
+### 3. Start the app
+
+From the repo root:
+
 ```bash
 npm run dev
 ```
-- **Frontend** will spin up at `http://localhost:8080/`
-- **Backend API Servers** will spin up at `http://localhost:5000/`
 
----
+Default local ports:
 
-## 🔐 Environment Variables
+- Frontend: `http://localhost:8080`
+- Backend: `http://localhost:5000`
 
-Do **NOT** commit your `.env` file! A sanitized clone has been provided for ease of use.
-To get the backend working, navigate to the `backend/` directory, duplicate `.env.example`, and rename it to `.env`:
+## Useful Scripts
 
-```bash
-cd backend
-cp .env.example .env
-```
-Fill out the variables inside if you intend to test OpenAI features locally.
-For OTP email delivery, the backend supports `EMAIL_PROVIDER=resend` and `EMAIL_PROVIDER=brevo`.
-If you use Resend's default `@resend.dev` sender, delivery is limited to the Resend account owner's email until you verify a domain.
+Root:
 
----
+- `npm run dev` starts frontend and backend together
+- `npm run build` builds the frontend
+- `npm run test` runs frontend tests
+- `npm run lint` runs ESLint
 
-## 📡 API Endpoints
+Backend:
 
-Our backend strictly follows `RESTful` conventions, versioned under `/api/v1/`.
+- `cd backend && npm run dev` starts the API in watch mode
+- `cd backend && npm run build` compiles the API
+- `cd backend && npm run test` runs backend tests
 
-| Method | Endpoint | Description | Guard |
-|--------|----------|-------------|-------|
-| **POST** | `/api/v1/auth/register` | Creates a new user account | Rate-Limited |
-| **POST** | `/api/v1/auth/login` | Authenticates User & Issues JWT | Rate-Limited |
-| **POST** | `/api/v1/auth/google/callback-handler` | Exchanges Google auth code, creates session, and starts OTP verification when required | Rate-Limited |
-| **POST** | `/api/v1/auth/otp/send` | Sends a verification OTP to the authenticated Google email | Protected + Rate-Limited |
-| **POST** | `/api/v1/auth/otp/resend` | Resends a verification OTP and invalidates the previous request | Protected + Rate-Limited |
-| **POST** | `/api/v1/auth/otp/verify` | Verifies the submitted OTP and marks the user as verified | Protected + Rate-Limited |
-| **POST** | `/api/v1/auth/logout` | Clears HttpOnly Refresh Cookie | Protected |
-| **GET** | `/api/v1/profile` | Fetches currently logged in user | Protected |
-| **POST** | `/api/v1/ai/generate` | Summons the AI English Tutor | Protected |
+## Auth Notes
 
-OpenAPI docs for the new auth flow live at `backend/docs/openapi.yaml`.
+- Frontend auth uses a shared access-token helper
+- Backend auth uses refresh cookies
+- Google sign-in trusts Google's verified email
+- First-time Google users who still need a password are routed to `/complete-profile`
+- Role-based admin access is enforced on backend admin routes
 
----
+## Testing Notes
 
-## 📸 Screenshots
+Some backend suites rely on MongoDB. Use one of the following when you want full database-backed coverage:
 
-*(Replace these placeholders with real screenshots once deployed!)*
+- `TEST_MONGO_URI`
+- `MONGO_MEMORY_BINARY`
+- `MONGO_MEMORY_ALLOW_DOWNLOAD=true`
 
-![Home Preview](https://via.placeholder.com/800x450.png?text=Home+Preview)
-![Dark Mode View](https://via.placeholder.com/800x450.png?text=Dark+Mode+Support)
+If none of those are available, the Mongo-backed suites can skip cleanly in offline environments.
 
----
-> Developed intentionally to easily pass any Senior Full-Stack Engineering technical assessments.
-# Sandysquad
+## API Reference
 
-This note supersedes the older marketing copy below.
+- OpenAPI spec: `backend/docs/openapi.yaml`
+- API base path: `/api/v1`
 
-- The frontend is React + TypeScript + Vite.
-- The backend is Express + TypeScript + Mongoose.
-- Auth now uses one shared access-token helper on the frontend plus refresh cookies on the backend.
-- Google sign-in trusts Google's verified email and sends first-time Google users to `/complete-profile` when they still need a password.
-- Admin access is role-based and enforced on backend admin routes.
-- Mongo-backed backend tests support `TEST_MONGO_URI`, `MONGO_MEMORY_BINARY`, or `MONGO_MEMORY_ALLOW_DOWNLOAD=true`; otherwise those suites can be skipped cleanly in offline environments.
+## Current Product Direction
 
-## Read This First
+This repo is set up as a single connected learning workspace rather than a collection of separate screens:
 
-1. Setup Instructions
-2. Environment Variables
-3. API Endpoints
-4. `backend/docs/openapi.yaml`
+- Home is the AI-powered warm-up studio
+- Task is the guided practice layer
+- Learning is the review and revision layer
+- Leaderboard is the live performance layer
+- Profile and settings keep identity and controls close to action

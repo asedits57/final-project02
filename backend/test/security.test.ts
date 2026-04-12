@@ -36,12 +36,6 @@ describeMongo("Backend Security Hardening", () => {
     // Using updateProfile as it's a prime target for XSS
     // Note: This requires a logged-in user, but we can test the sanitization logic independently or mock the auth
     
-    const maliciousInput = {
-      fullName: "John Doe <script>alert('XSS')</script>",
-      username: "johndoe",
-      dept: "Engineering"
-    };
-
     // We'll test the register endpoint as it's public and uses sanitization via Zod or middleware
     const res = await request(app)
       .post("/api/v1/auth/register")

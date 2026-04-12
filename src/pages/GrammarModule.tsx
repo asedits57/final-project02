@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import Spinner from "@components/ui/Spinner";
 import ErrorMessage from "@components/ui/ErrorMessage";
-import { GrammarQuestion, QuestionData } from "@services/questionService";
+import { GrammarQuestion } from "@services/questionService";
 import { apiService as api } from "@services/apiService";
 import { useLiveModuleActivity } from "@hooks/useLiveModuleActivity";
 import ContextualAIAssistant from "@components/shared/ContextualAIAssistant";

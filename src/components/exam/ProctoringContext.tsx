@@ -1,30 +1,6 @@
-import { createContext, useContext, useCallback, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
-export type EventType = "info" | "success" | "warning" | "danger";
-export type EventSource = "camera" | "voice" | "screen" | "system";
-
-export interface ProctoringEvent {
-  id: number;
-  time: string;
-  message: string;
-  type: EventType;
-  source: EventSource;
-}
-
-interface ProctoringContextValue {
-  events: ProctoringEvent[];
-  alerts: ProctoringEvent[];
-  riskScore: number;
-  pushEvent: (message: string, type: EventType, source: EventSource) => void;
-}
-
-const ProctoringCtx = createContext<ProctoringContextValue | null>(null);
-
-export const useProctoring = () => {
-  const ctx = useContext(ProctoringCtx);
-  if (!ctx) throw new Error("useProctoring must be used within ProctoringProvider");
-  return ctx;
-};
+import { ProctoringCtx, type EventSource, type EventType, type ProctoringEvent } from "./proctoring";
 
 const now = () =>
   new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
@@ -56,12 +32,12 @@ export const ProctoringProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   // Decay risk score over time
-  useState(() => {
+  useEffect(() => {
     const t = setInterval(() => {
       setRiskScore((prev) => Math.max(0, prev - 1));
     }, 3000);
     return () => clearInterval(t);
-  });
+  }, []);
 
   const alerts = events.filter((e) => e.type === "warning" || e.type === "danger");
 

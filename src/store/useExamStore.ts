@@ -1,8 +1,19 @@
 import { create } from "zustand";
 import { apiService as api } from "@services/apiService";
+import type { QuestionData } from "@services/questionService";
+
+const emptyQuestionData = (): QuestionData => ({
+    grammar: [],
+    reading: [],
+    listening: [],
+    writing: [],
+    speaking: [],
+    practice: [],
+    mock: [],
+});
 
 interface ExamState {
-    questions: any[];
+    questions: QuestionData;
     loading: boolean;
     current: number;
     selected: Record<number, string>;
@@ -11,18 +22,20 @@ interface ExamState {
     error: string | null;
 
     // Actions
-    setQuestions: (questions: any[]) => void;
+    setQuestions: (questions: QuestionData) => void;
     setLoading: (loading: boolean) => void;
     setCurrent: (index: number) => void;
     handleSelect: (index: number, option: string) => void;
     tickTimer: () => void;
+    tick: () => void;
     finishTest: () => void;
+    nextQuestion: (total: number) => void;
     resetTest: (totalTime: number) => void;
     loadQuestions: () => Promise<void>;
 }
 
 export const useExamStore = create<ExamState>((set, get) => ({
-    questions: [],
+    questions: emptyQuestionData(),
     loading: true,
     current: 0,
     selected: {},
@@ -61,7 +74,7 @@ export const useExamStore = create<ExamState>((set, get) => ({
             const data = await api.fetchQuestions();
             // Data is expected to be an object with categories (mock, practice, etc.)
             // We'll store the whole object and let components slice/filter as needed
-            set({ questions: data as any, loading: false });
+            set({ questions: data, loading: false });
         } catch (err) {
             console.error("Failed to load questions:", err);
             set({ error: "Failed to load questions", loading: false });

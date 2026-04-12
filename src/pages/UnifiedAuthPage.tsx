@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect, useReducer, type SVGProps } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, RefreshCw, User } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Mail, RefreshCw, User } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,6 +15,7 @@ import { apiService as api } from "@services/apiService";
 import { hasAccessToken } from "@services/apiClient";
 import { getPostLoginPath, preloadPostLoginRoute } from "@lib/authRedirect";
 import { buildGoogleAuthUrl, resolveGoogleOAuthConfig, storeGoogleRedirectUri } from "@lib/googleAuth";
+import { brand } from "@lib/brand";
 
 const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -78,6 +79,9 @@ const initialAuthState: AuthPageState = {
   error: null,
   seconds: 0,
 };
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error && error.message.trim() ? error.message : fallback;
 
 function authReducer(state: AuthPageState, action: AuthAction): AuthPageState {
   switch (action.type) {
@@ -203,7 +207,7 @@ const UnifiedAuthPage = () => {
         const res = await api.login(values.userId as string, values.password as string);
         setStoreUser(res.user);
         await preloadPostLoginRoute(res.user);
-        toast({ title: "Welcome back", description: "You are now in the MEC Learning workspace." });
+        toast({ title: "Welcome back", description: `You are now in the ${brand.name} workspace.` });
         navigate(getPostLoginPath(res.user), { replace: true });
       } else if (step === "credentials") {
         await sendOtp((values.email as string).trim());
@@ -233,11 +237,11 @@ const UnifiedAuthPage = () => {
         );
         setStoreUser(res.user);
         await preloadPostLoginRoute(res.user);
-        toast({ title: "Account created", description: "Your MEC Learning account is ready." });
+        toast({ title: "Account created", description: `Your ${brand.shortName} account is ready.` });
         navigate(getPostLoginPath(res.user), { replace: true });
       }
-    } catch (submitError: any) {
-      const message = submitError?.message || "Something went wrong.";
+    } catch (submitError: unknown) {
+      const message = getErrorMessage(submitError, "Something went wrong.");
       dispatch({ type: "SET_ERROR", payload: message });
       toast({
         title: isLogin ? "Sign in failed" : "Registration failed",
@@ -260,8 +264,8 @@ const UnifiedAuthPage = () => {
     try {
       await sendOtp(email, otpRequestId);
       dispatch({ type: "SET_OTP", payload: "" });
-    } catch (resendError: any) {
-      dispatch({ type: "SET_ERROR", payload: resendError?.message || "Failed to resend OTP" });
+    } catch (resendError: unknown) {
+      dispatch({ type: "SET_ERROR", payload: getErrorMessage(resendError, "Failed to resend OTP") });
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
     }
@@ -273,8 +277,8 @@ const UnifiedAuthPage = () => {
       const googleConfig = await resolveGoogleOAuthConfig();
       storeGoogleRedirectUri(googleConfig.redirectUri);
       window.location.href = buildGoogleAuthUrl(googleConfig);
-    } catch (googleError: any) {
-      dispatch({ type: "SET_ERROR", payload: googleError?.message || "Google login failed" });
+    } catch (googleError: unknown) {
+      dispatch({ type: "SET_ERROR", payload: getErrorMessage(googleError, "Google login failed") });
     } finally {
       dispatch({ type: "SET_LOADING", payload: false });
     }
@@ -283,26 +287,27 @@ const UnifiedAuthPage = () => {
   return (
     <div className="relative min-h-screen animated-bg overflow-hidden text-foreground">
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute -left-28 top-[-8rem] h-[30rem] w-[30rem] rounded-full bg-violet-500/15 blur-3xl" />
-        <div className="absolute bottom-[-10rem] right-[-8rem] h-[26rem] w-[26rem] rounded-full bg-cyan-400/10 blur-3xl" />
+        <div className="absolute -left-28 top-[-8rem] h-[30rem] w-[30rem] rounded-full bg-cyan-400/14 blur-3xl" />
+        <div className="absolute bottom-[-10rem] right-[-8rem] h-[26rem] w-[26rem] rounded-full bg-orange-400/12 blur-3xl" />
       </div>
       <AnimatedBackground />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4 py-8 sm:px-6">
-        <motion.section
-          className="w-full"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-            <div className="app-surface mx-auto w-full max-w-lg px-6 py-7 sm:px-8">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <div className="w-full">
+          <motion.section
+            className="w-full"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.06 }}
+          >
+            <div className="app-surface mx-auto w-full max-w-xl px-6 py-7 sm:px-8">
               <div className="mb-6 flex flex-col items-center text-center">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/12 ring-1 ring-violet-300/20">
-                  <RefreshCw className="h-5 w-5 text-violet-200" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/12 ring-1 ring-cyan-300/20">
+                  <RefreshCw className="h-5 w-5 text-cyan-100" />
                 </div>
                 <div className="mt-3">
-                  <p className="text-xs uppercase tracking-[0.26em] text-violet-200/70">
-                    {isLogin ? "Access" : "Onboarding"}
+                  <p className="text-xs uppercase tracking-[0.26em] text-cyan-100/70">
+                    {brand.shortName}
                   </p>
                   <h2 className="mt-2 text-xl font-semibold text-white">
                     {isLogin ? "Sign in" : step === "otp" ? "Verify your email" : step === "account" ? "Complete account" : "Start signup"}
@@ -322,7 +327,7 @@ const UnifiedAuthPage = () => {
                     <div className="text-center">
                       <p className="text-sm text-white">Enter the 6-digit OTP</p>
                       <p className="mt-1 text-sm text-slate-300/72">
-                        We sent a verification code to <span className="font-medium text-violet-200">{email}</span>.
+                        We sent a verification code to <span className="font-medium text-cyan-100">{email}</span>.
                       </p>
                     </div>
 
@@ -333,7 +338,7 @@ const UnifiedAuthPage = () => {
                           type="text"
                           maxLength={1}
                           inputMode="numeric"
-                          className="h-14 rounded-2xl border border-white/10 bg-white/5 text-center text-lg font-semibold text-white outline-none transition focus:border-violet-400"
+                          className="h-14 rounded-2xl border border-white/10 bg-white/5 text-center text-lg font-semibold text-white outline-none transition focus:border-cyan-400"
                           onChange={(event) => {
                             const nextValue = event.target.value.replace(/\D/g, "");
                             const current = otpValue.split("");
@@ -355,7 +360,7 @@ const UnifiedAuthPage = () => {
                     <Button
                       type="button"
                       onClick={() => void onSubmit({})}
-                      className="h-12 w-full rounded-2xl bg-violet-500 text-white hover:bg-violet-400"
+                      className="brand-button-primary h-12 w-full"
                       disabled={isLoading}
                     >
                       {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Verify and continue"}
@@ -365,7 +370,7 @@ const UnifiedAuthPage = () => {
                       type="button"
                       onClick={() => void resendOtp()}
                       disabled={!canResend || isLoading}
-                      className="block w-full text-center text-sm text-violet-200 transition hover:text-violet-100 disabled:cursor-not-allowed disabled:text-slate-400"
+                      className="block w-full text-center text-sm text-cyan-100 transition hover:text-cyan-50 disabled:cursor-not-allowed disabled:text-slate-400"
                     >
                       {canResend ? "Resend OTP" : `Resend OTP in ${seconds}s`}
                     </button>
@@ -389,7 +394,7 @@ const UnifiedAuthPage = () => {
                                   <FormLabel className="text-xs uppercase tracking-[0.24em] text-slate-400">User ID or Email</FormLabel>
                                   <FormControl>
                                     <div className="relative">
-                                      <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-violet-200/65" />
+                                      <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-100/65" />
                                       <Input
                                         {...field}
                                         value={(field.value as string) || ""}
@@ -421,7 +426,7 @@ const UnifiedAuthPage = () => {
                                       <button
                                         type="button"
                                         onClick={() => dispatch({ type: "TOGGLE_PASSWORD" })}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-violet-200/65 transition hover:text-violet-100"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-100/65 transition hover:text-cyan-50"
                                       >
                                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                       </button>
@@ -439,9 +444,9 @@ const UnifiedAuthPage = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-xs uppercase tracking-[0.24em] text-slate-400">Email Address</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-violet-200/65" />
+                                  <FormControl>
+                                    <div className="relative">
+                                    <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-cyan-100/65" />
                                     <Input
                                       {...field}
                                       value={(field.value as string) || ""}
@@ -517,7 +522,7 @@ const UnifiedAuthPage = () => {
 
                         <Button
                           type="submit"
-                          className="h-12 w-full rounded-2xl bg-violet-500 text-white hover:bg-violet-400"
+                          className="brand-button-primary h-12 w-full"
                           disabled={isLoading}
                         >
                           {isLoading ? (
@@ -554,6 +559,11 @@ const UnifiedAuthPage = () => {
                               <GoogleIcon className="mr-2 h-4 w-4" />
                               Continue with Google
                             </Button>
+
+                            <div className="flex items-center justify-center gap-2 pt-2 text-xs text-slate-400">
+                              <ArrowRight className="h-3.5 w-3.5 text-cyan-100" />
+                              Your workspace opens immediately after successful sign-in.
+                            </div>
                           </>
                         )}
                       </form>
@@ -569,13 +579,14 @@ const UnifiedAuthPage = () => {
                     dispatch({ type: "TOGGLE_MODE" });
                     form.reset();
                   }}
-                  className="text-sm text-slate-300/78 transition hover:text-violet-100"
+                  className="text-sm text-slate-300/78 transition hover:text-cyan-50"
                 >
                   {isLogin ? "Do not have an account? Sign up" : "Already have an account? Sign in"}
                 </button>
               </div>
             </div>
-        </motion.section>
+          </motion.section>
+        </div>
       </div>
     </div>
   );

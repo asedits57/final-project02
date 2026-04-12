@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { useProctoring } from "./ProctoringContext";
+import { useProctoring } from "./proctoring";
 
 const Timeline = () => {
   const { events } = useProctoring();

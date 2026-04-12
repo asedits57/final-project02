@@ -219,8 +219,8 @@ const QuestionPanel = ({ onComplete, onRecordingStateChange }: QuestionPanelProp
   };
 
   return (
-    <div className="glass neon-border p-6 flex flex-col h-full">
-      <div className="flex items-center gap-2 mb-4">
+    <div className="glass neon-border flex h-full flex-col p-4 sm:p-6">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <span className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-semibold">Speaking Task</span>
         <span className="text-xs text-muted-foreground">Final Question</span>
       </div>
@@ -233,7 +233,7 @@ const QuestionPanel = ({ onComplete, onRecordingStateChange }: QuestionPanelProp
       </p>
 
       {/* Waveform */}
-      <div className="flex items-end justify-center gap-1 h-16 mb-6">
+      <div className="mb-6 flex h-16 items-end justify-center gap-0.5 sm:gap-1">
         {Array.from({ length: 40 }).map((_, i) => (
           <div
             key={i}
@@ -254,7 +254,7 @@ const QuestionPanel = ({ onComplete, onRecordingStateChange }: QuestionPanelProp
       </div>
 
       {/* Controls */}
-      <div className="flex items-center justify-center gap-4 mt-auto">
+      <div className="mt-auto flex flex-col items-center justify-center gap-4 sm:flex-row">
         <button
           onClick={toggleRecording}
           disabled={isEvaluating}

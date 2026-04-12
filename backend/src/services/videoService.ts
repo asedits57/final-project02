@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 import LearningVideo from "../models/LearningVideo";
 import ApiError from "../utils/ApiError";
+import { logBestEffortFailure } from "../utils/bestEffort";
 import { buildSearchRegex, getPagination } from "../utils/query";
 import { recordAdminActivity } from "./adminActivityService";
 
@@ -205,6 +206,12 @@ export const createAdminVideo = async (payload: VideoPayload, userId: string) =>
     targetId: video._id.toString(),
     description: `Created learning video ${video.title}`,
   });
+  try {
+    const { emitVideoRealtimeEvent } = await import("./socketService");
+    emitVideoRealtimeEvent("created", { id: video._id.toString() });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit video created realtime event", error);
+  }
 
   return getAdminVideoById(video._id.toString());
 };
@@ -233,6 +240,12 @@ export const updateAdminVideo = async (videoId: string, payload: VideoPayload, u
     targetId: videoId,
     description: `Updated learning video ${video.title}`,
   });
+  try {
+    const { emitVideoRealtimeEvent } = await import("./socketService");
+    emitVideoRealtimeEvent("updated", { id: videoId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit video updated realtime event", error);
+  }
 
   return getAdminVideoById(videoId);
 };
@@ -253,6 +266,12 @@ export const deleteAdminVideo = async (videoId: string, userId: string) => {
     targetId: videoId,
     description: `Deleted learning video ${video.title}`,
   });
+  try {
+    const { emitVideoRealtimeEvent } = await import("./socketService");
+    emitVideoRealtimeEvent("deleted", { id: videoId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit video deleted realtime event", error);
+  }
 };
 
 export const publishAdminVideo = async (videoId: string, userId: string) => {

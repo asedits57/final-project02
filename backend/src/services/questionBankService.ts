@@ -1,7 +1,11 @@
 import Question from "../models/Question";
 import ApiError from "../utils/ApiError";
+import { logBestEffortFailure } from "../utils/bestEffort";
 import { getPagination, buildSearchRegex } from "../utils/query";
 import { recordAdminActivity } from "./adminActivityService";
+import { safeDel } from "../config/redis";
+
+const PUBLIC_QUESTION_CACHE_KEY = "public_questions_payload_v2";
 
 type QuestionFilters = {
   page: number;
@@ -107,6 +111,21 @@ export const createAdminQuestion = async (payload: QuestionPayload, userId: stri
     updatedBy: userId,
   });
 
+  await safeDel(PUBLIC_QUESTION_CACHE_KEY);
+  await recordAdminActivity({
+    actorId: userId,
+    action: "question.created",
+    targetType: "question",
+    targetId: question._id.toString(),
+    description: `Created question ${question.title || question._id.toString()}`,
+  });
+  try {
+    const { emitQuestionRealtimeEvent } = await import("./socketService");
+    emitQuestionRealtimeEvent("created", { id: question._id.toString() });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit question created realtime event", error);
+  }
+
   return getAdminQuestionById(question._id.toString());
 };
 
@@ -131,6 +150,21 @@ export const updateAdminQuestion = async (questionId: string, payload: QuestionP
 
   await question.save();
 
+  await safeDel(PUBLIC_QUESTION_CACHE_KEY);
+  await recordAdminActivity({
+    actorId: userId,
+    action: "question.updated",
+    targetType: "question",
+    targetId: questionId,
+    description: `Updated question ${question.title || questionId}`,
+  });
+  try {
+    const { emitQuestionRealtimeEvent } = await import("./socketService");
+    emitQuestionRealtimeEvent("updated", { id: questionId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit question updated realtime event", error);
+  }
+
   return getAdminQuestionById(questionId);
 };
 
@@ -141,6 +175,7 @@ export const deleteAdminQuestion = async (questionId: string, userId: string) =>
     throw new ApiError(404, "Question not found");
   }
 
+  await safeDel(PUBLIC_QUESTION_CACHE_KEY);
   await recordAdminActivity({
     actorId: userId,
     action: "question.deleted",
@@ -148,6 +183,12 @@ export const deleteAdminQuestion = async (questionId: string, userId: string) =>
     targetId: questionId,
     description: `Deleted question ${deletedQuestion.title || deletedQuestion._id.toString()}`,
   });
+  try {
+    const { emitQuestionRealtimeEvent } = await import("./socketService");
+    emitQuestionRealtimeEvent("deleted", { id: questionId });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit question deleted realtime event", error);
+  }
 };
 
 export const duplicateAdminQuestion = async (questionId: string, userId: string) => {
@@ -158,6 +199,9 @@ export const duplicateAdminQuestion = async (questionId: string, userId: string)
   }
 
   const { _id, createdAt, updatedAt, ...rest } = sourceQuestion;
+  void _id;
+  void createdAt;
+  void updatedAt;
   const duplicatedQuestion = await Question.create({
     ...rest,
     title: `${sourceQuestion.title || "Question"} (Copy)`,
@@ -165,6 +209,21 @@ export const duplicateAdminQuestion = async (questionId: string, userId: string)
     createdBy: userId,
     updatedBy: userId,
   });
+
+  await safeDel(PUBLIC_QUESTION_CACHE_KEY);
+  await recordAdminActivity({
+    actorId: userId,
+    action: "question.duplicated",
+    targetType: "question",
+    targetId: duplicatedQuestion._id.toString(),
+    description: `Duplicated question ${sourceQuestion.title || questionId}`,
+  });
+  try {
+    const { emitQuestionRealtimeEvent } = await import("./socketService");
+    emitQuestionRealtimeEvent("duplicated", { id: duplicatedQuestion._id.toString() });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit question duplicated realtime event", error);
+  }
 
   return getAdminQuestionById(duplicatedQuestion._id.toString());
 };

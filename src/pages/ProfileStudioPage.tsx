@@ -28,13 +28,14 @@ import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import TaskLevels from "@components/task/TaskLevels";
 import UnifiedPageShell from "@components/shared/UnifiedPageShell";
+import { brand } from "@lib/brand";
 import { useStore } from "@store/useAuthStore";
 
 const achievementsList = [
-  { id: 1, name: "First Steps", icon: Sparkles, unlocked: true, accent: "text-violet-200" },
+  { id: 1, name: "First Steps", icon: Sparkles, unlocked: true, accent: "text-cyan-100" },
   { id: 2, name: "7-Day Streak", icon: Flame, unlocked: true, accent: "text-orange-200" },
   { id: 3, name: "Vocabulary Run", icon: BookOpen, unlocked: true, accent: "text-cyan-200" },
-  { id: 4, name: "Quiz Master", icon: Trophy, unlocked: true, accent: "text-fuchsia-200" },
+  { id: 4, name: "Quiz Master", icon: Trophy, unlocked: true, accent: "text-orange-200" },
   { id: 5, name: "Deep Focus", icon: Target, unlocked: false, accent: "text-slate-500" },
   { id: 6, name: "Elite Review", icon: Award, unlocked: false, accent: "text-slate-500" },
 ];
@@ -95,8 +96,8 @@ const ProfileStudioPage = () => {
   const statsCards = [
     { label: "Total XP", value: `${score}`, icon: Zap, accent: "text-cyan-200" },
     { label: "Day Streak", value: `${streak}`, icon: Flame, accent: "text-orange-200" },
-    { label: "Practice Hours", value: "87h", icon: Clock, accent: "text-violet-200" },
-    { label: "Accuracy", value: "89%", icon: Target, accent: "text-fuchsia-200" },
+    { label: "Practice Hours", value: "87h", icon: Clock, accent: "text-sky-200" },
+    { label: "Accuracy", value: "89%", icon: Target, accent: "text-orange-200" },
   ];
 
   const quickRoutes = [
@@ -154,7 +155,8 @@ const ProfileStudioPage = () => {
     <UnifiedPageShell
       eyebrow="Identity And Momentum"
       title={`${name}'s profile studio`}
-      description="Keep your learner identity, progress, and settings in one place. This profile now uses the same product language as the rest of MEC Learning while keeping your real actions close."
+      description={`Keep your learner identity, progress, and settings in one place. This profile now uses the same product language as the rest of ${brand.name} while keeping your real actions close.`}
+      heroClassName="px-4 py-4 sm:px-5 sm:py-5"
       headerAction={
         <div className="flex items-center gap-2">
           <button
@@ -162,7 +164,7 @@ const ProfileStudioPage = () => {
             onClick={() => navigate("/settings")}
             className={glassButtonClass}
           >
-            <Settings className="h-4 w-4 text-violet-200" />
+            <Settings className="h-4 w-4 text-cyan-100" />
             Settings
           </button>
           <button
@@ -186,16 +188,16 @@ const ProfileStudioPage = () => {
 
       <div className="grid gap-6 xl:grid-cols-[0.92fr,1.08fr]">
         <motion.section
-          className="app-surface px-6 py-7 sm:px-8"
+          className="app-surface px-5 py-5 sm:px-6"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35 }}
         >
           <span className="app-kicker">Profile Identity</span>
 
-          <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start">
             <div className="relative">
-              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-[0_18px_48px_rgba(124,58,237,0.35)]">
+              <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-[2rem] bg-gradient-to-br from-cyan-400 to-orange-400 shadow-[0_18px_48px_rgba(45,212,191,0.2)]">
                 {avatarSrc ? (
                   <img src={avatarSrc} alt="Profile avatar" className="h-full w-full object-cover" />
                 ) : (
@@ -225,7 +227,7 @@ const ProfileStudioPage = () => {
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-violet-500 px-3.5 py-1.5 text-xs font-semibold text-white">
+                <span className="rounded-full bg-cyan-400 px-3.5 py-1.5 text-xs font-semibold text-slate-950">
                   {level}
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-slate-100">
@@ -236,30 +238,30 @@ const ProfileStudioPage = () => {
                 </span>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+              <div className="mt-3.5 grid gap-2.5 sm:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3.5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Email</p>
                   <p className="mt-2 break-all text-sm font-medium text-white">{email}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3.5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Track</p>
                   <p className="mt-2 text-sm font-medium text-white">{dept}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">MEC ID</p>
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3.5">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Workspace ID</p>
                   <p className="mt-2 text-sm font-medium text-white">{mecId}</p>
                 </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3.5">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Current mode</p>
                   <p className="mt-2 text-sm font-medium text-white">Focused practice</p>
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
                 <button
                   type="button"
                   onClick={openEdit}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)] transition hover:bg-violet-400"
+                  className="brand-button-primary"
                 >
                   <Edit3 className="h-4 w-4" />
                   Edit profile
@@ -317,8 +319,8 @@ const ProfileStudioPage = () => {
           <div className="mt-6 grid gap-4 lg:grid-cols-[0.95fr,1.05fr]">
             <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
               <div className="flex items-center gap-3">
-                <div className="rounded-2xl border border-violet-300/15 bg-violet-500/10 p-2.5">
-                  <TrendingUp className="h-4 w-4 text-violet-200" />
+                <div className="rounded-2xl border border-cyan-300/15 bg-cyan-500/10 p-2.5">
+                  <TrendingUp className="h-4 w-4 text-cyan-100" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">Weekly pulse</p>
@@ -330,7 +332,7 @@ const ProfileStudioPage = () => {
                 {weeklyData.map(({ day, hours }) => (
                   <div key={day} className="flex flex-1 flex-col items-center gap-3">
                     <div className="relative w-full overflow-hidden rounded-t-2xl bg-white/5" style={{ height: `${(hours / maxHours) * 100}px` }}>
-                      <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-t from-violet-500 to-cyan-400" />
+                      <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-t from-cyan-400 to-orange-400" />
                     </div>
                     <span className="text-[10px] uppercase tracking-[0.18em] text-slate-400">{day}</span>
                   </div>
@@ -407,7 +409,7 @@ const ProfileStudioPage = () => {
               >
                 <div className="flex items-start gap-3">
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-2.5">
-                    <Icon className="h-4 w-4 text-violet-200" />
+                    <Icon className="h-4 w-4 text-cyan-100" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{label}</p>
@@ -420,7 +422,7 @@ const ProfileStudioPage = () => {
                     setValue(!value);
                     showToast(`${label} ${!value ? "enabled" : "disabled"}`);
                   }}
-                  className={`relative h-7 w-14 rounded-full transition ${value ? "bg-violet-500" : "bg-white/10"}`}
+                  className={`relative h-7 w-14 rounded-full transition ${value ? "bg-cyan-400" : "bg-white/10"}`}
                   aria-label={label}
                 >
                   <span
@@ -436,7 +438,7 @@ const ProfileStudioPage = () => {
             onClick={() => navigate("/settings")}
             className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
           >
-            <Settings className="h-4 w-4 text-violet-200" />
+            <Settings className="h-4 w-4 text-cyan-100" />
             Open advanced settings
           </button>
         </motion.section>
@@ -460,7 +462,7 @@ const ProfileStudioPage = () => {
                     </div>
                     <div className="h-2 rounded-full bg-white/5">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400"
+                        className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-orange-400"
                         style={{ width: `${value}%` }}
                       />
                     </div>
@@ -515,9 +517,9 @@ const ProfileStudioPage = () => {
           <button
             type="button"
             onClick={() => navigate("/task")}
-            className="inline-flex items-center gap-2 rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_32px_rgba(109,40,217,0.35)] transition hover:bg-violet-400"
+            className="brand-button-primary"
           >
-            Return to tasks
+            Return to practice
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>
@@ -546,7 +548,7 @@ const ProfileStudioPage = () => {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.24em] text-violet-200/70">Profile Edit</p>
+                  <p className="text-xs uppercase tracking-[0.24em] text-cyan-100/70">Profile Edit</p>
                   <h2 className="mt-2 text-2xl font-bold text-white">Adjust your display setup</h2>
                 </div>
                 <button
@@ -596,7 +598,7 @@ const ProfileStudioPage = () => {
                 <button
                   type="button"
                   onClick={saveEdit}
-                  className="flex-1 rounded-2xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-400"
+                  className="brand-button-primary flex-1 px-4 py-3"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Save className="h-4 w-4" />

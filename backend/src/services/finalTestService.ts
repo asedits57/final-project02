@@ -2,6 +2,10 @@ import path from "path";
 import { promises as fs } from "fs";
 
 import FinalTestSubmission from "../models/FinalTestSubmission";
+import ApiError from "../utils/ApiError";
+import { logBestEffortFailure } from "../utils/bestEffort";
+import { answerMatchesQuestion } from "../utils/scoring";
+import { getSubmissionFinalTestConfig } from "./finalTestConfigService";
 
 type FinalTestAnswer = {
   questionId?: string;
@@ -16,6 +20,8 @@ type FinalTestRecordingInput = {
 };
 
 type FinalTestSubmissionPayload = {
+  clientRequestId?: string;
+  configId?: string;
   testTitle: string;
   testCategory: string;
   answers: FinalTestAnswer[];
@@ -99,26 +105,132 @@ const writeRecordingAsset = async (
   };
 };
 
+const buildRecommendation = (score: number, passingScore: number) => {
+  if (score >= Math.max(85, passingScore + 20)) {
+    return "Excellent final-test performance. Keep building consistency across all modules.";
+  }
+  if (score >= passingScore) {
+    return "You passed the final test. Review your weaker categories once more before the next milestone.";
+  }
+  return "The final test is below the passing threshold. Revisit the learning hub, focus on weak question types, and try again.";
+};
+
+const getPopulatedSubmissionById = (submissionId: string) =>
+  FinalTestSubmission.findById(submissionId)
+    .populate("user", "email fullName username score level streak")
+    .populate("config")
+    .lean();
+
+const getPopulatedSubmissionByClientRequestId = (userId: string, clientRequestId: string) =>
+  FinalTestSubmission.findOne({
+    user: userId,
+    clientRequestId,
+  })
+    .populate("user", "email fullName username score level streak")
+    .populate("config")
+    .lean();
+
+const isDuplicateClientRequestError = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeMongoError = error as { code?: number; keyPattern?: Record<string, unknown> };
+  return maybeMongoError.code === 11000 && Boolean(maybeMongoError.keyPattern?.clientRequestId);
+};
+
 export const submitFinalTestForUser = async (userId: string, payload: FinalTestSubmissionPayload) => {
+  if (payload.clientRequestId) {
+    const existingSubmission = await getPopulatedSubmissionByClientRequestId(userId, payload.clientRequestId);
+    if (existingSubmission) {
+      return existingSubmission;
+    }
+  }
+
+  const { config, questions, totalMarks } = await getSubmissionFinalTestConfig(payload.configId);
+
+  if (!config.allowRetake) {
+    const existingSubmission = await FinalTestSubmission.findOne({
+      user: userId,
+      config: config._id,
+    }).lean();
+
+    if (existingSubmission) {
+      throw new ApiError(409, "Retakes are disabled for the current final test configuration");
+    }
+  }
+
   const normalizedFlags = payload.flags.length > 0
     ? payload.flags
     : payload.proctoring.events
       .filter((event) => event.type === "warning" || event.type === "danger")
       .map((event) => event.message);
 
-  const submission = await FinalTestSubmission.create({
-    user: userId,
-    testTitle: payload.testTitle,
-    testCategory: payload.testCategory,
-    answers: payload.answers,
-    aiEvaluation: payload.aiEvaluation,
-    score: Math.max(0, Math.min(100, Math.round(payload.score))),
-    flags: normalizedFlags,
-    recommendation: payload.recommendation,
-    responseTranscript: payload.responseTranscript || "",
-    proctoring: payload.proctoring,
-    reviewStatus: "pending",
+  const answerMap = new Map(
+    payload.answers
+      .filter((answer) => typeof answer.questionId === "string" && answer.questionId.trim())
+      .map((answer) => [String(answer.questionId), answer.answer]),
+  );
+
+  let rawScore = 0;
+  const evaluatedAnswers = questions.map((question) => {
+    const answer = answerMap.get(question._id);
+    const points = Math.max(1, Number(question.points || 1));
+    const isCorrect =
+      answer !== undefined &&
+      question.correctAnswer !== undefined &&
+      answerMatchesQuestion(question, answer);
+
+    if (isCorrect) {
+      rawScore += points;
+    }
+
+    return {
+      questionId: question._id,
+      answer: answer ?? "",
+      isCorrect,
+    };
   });
+
+  const maxScore = Math.max(0, totalMarks || questions.reduce((total, question) => total + Math.max(1, Number(question.points || 1)), 0));
+  const normalizedScore = maxScore > 0
+    ? Math.max(0, Math.min(100, Math.round((rawScore / maxScore) * 100)))
+    : Math.max(0, Math.min(100, Math.round(payload.score)));
+  const passed = normalizedScore >= config.passingScore;
+
+  let submission;
+
+  try {
+    submission = await FinalTestSubmission.create({
+      config: config._id,
+      user: userId,
+      clientRequestId: payload.clientRequestId,
+      testTitle: config.title || payload.testTitle,
+      testCategory: payload.testCategory || "final-test",
+      answers: evaluatedAnswers,
+      aiEvaluation: payload.aiEvaluation,
+      score: normalizedScore,
+      rawScore,
+      maxScore,
+      passingScore: config.passingScore,
+      passed,
+      questionCount: questions.length,
+      flags: normalizedFlags,
+      recommendation: payload.recommendation || buildRecommendation(normalizedScore, config.passingScore),
+      responseTranscript: payload.responseTranscript || "",
+      proctoring: payload.proctoring,
+      reviewStatus: "pending",
+    });
+  } catch (error) {
+    if (payload.clientRequestId && isDuplicateClientRequestError(error)) {
+      const existingSubmission = await getPopulatedSubmissionByClientRequestId(userId, payload.clientRequestId);
+      if (existingSubmission) {
+        return existingSubmission;
+      }
+    }
+
+    throw error;
+  }
 
   const [audioRecording, videoRecording] = await Promise.all([
     writeRecordingAsset(submission._id.toString(), "audio", payload.recordings.audio),
@@ -133,7 +245,19 @@ export const submitFinalTestForUser = async (userId: string, payload: FinalTestS
     await submission.save();
   }
 
-  return FinalTestSubmission.findById(submission._id)
-    .populate("user", "email fullName username score level streak")
-    .lean();
+  const savedSubmission = await getPopulatedSubmissionById(submission._id.toString());
+
+  try {
+    const { emitFinalTestSubmissionRealtimeEvent } = await import("./socketService");
+    emitFinalTestSubmissionRealtimeEvent("created", {
+      id: submission._id.toString(),
+      configId: config._id.toString(),
+      score: normalizedScore,
+      passed,
+    });
+  } catch (error) {
+    logBestEffortFailure("Failed to emit final-test submission realtime event", error);
+  }
+
+  return savedSubmission;
 };

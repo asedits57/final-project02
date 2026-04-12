@@ -17,9 +17,9 @@ export function Podium({ topThree }: PodiumProps) {
             <div className="flex items-end justify-center gap-4 max-w-4xl mx-auto">
                 {second && (
                     <div className="flex-1 max-w-[200px] animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                        <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border-2 border-gray-600 shadow-lg hover:scale-105 transition-transform duration-300">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gray-600 rounded-full p-2">
-                                <Medal className="w-6 h-6 text-gray-300" />
+                        <div className="relative rounded-2xl border-2 border-slate-500/40 bg-gradient-to-br from-slate-800 to-slate-950 p-6 shadow-lg transition-transform duration-300 hover:scale-105">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-600 p-2">
+                                <Medal className="w-6 h-6 text-slate-200" />
                             </div>
                             <div className="flex flex-col items-center mt-2">
                                 <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-gray-600 mb-3">
@@ -38,8 +38,8 @@ export function Podium({ topThree }: PodiumProps) {
                                         {formatLiveModules(second.live_modules)}
                                     </p>
                                 ) : null}
-                                <div className="bg-gray-700 rounded-full px-4 py-1">
-                                    <p className="text-violet-400 font-bold">{second.weekly_xp.toLocaleString()} XP</p>
+                                <div className="rounded-full bg-slate-700 px-4 py-1">
+                                    <p className="font-bold text-cyan-200">{second.weekly_xp.toLocaleString()} XP</p>
                                 </div>
                             </div>
                         </div>
@@ -51,7 +51,7 @@ export function Podium({ topThree }: PodiumProps) {
 
                 {first && (
                     <div className="flex-1 max-w-[240px] -mt-8 animate-scale-in z-10" style={{ animationDelay: '0s' }}>
-                        <div className="relative bg-gradient-to-br from-violet-600 to-purple-700 rounded-2xl p-6 border-2 border-yellow-400 shadow-2xl shadow-violet-500/50 hover:scale-105 transition-transform duration-300">
+                        <div className="relative rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-cyan-500/35 via-sky-500/20 to-slate-950 p-6 shadow-2xl shadow-cyan-500/20 transition-transform duration-300 hover:scale-105">
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2">
                                 <div className="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full p-3 shadow-lg shadow-yellow-500/50 animate-pulse-glow">
                                     <Crown className="w-8 h-8 text-yellow-900" />
@@ -68,9 +68,9 @@ export function Podium({ topThree }: PodiumProps) {
                                         Live now
                                     </div>
                                 )}
-                                <p className="text-violet-200 text-sm mb-3">Level {first.level}</p>
+                                <p className="mb-3 text-sm text-cyan-100">Level {first.level}</p>
                                 {first.is_live && first.live_modules?.length ? (
-                                    <p className="mb-3 text-center text-xs text-violet-100/80">
+                                    <p className="mb-3 text-center text-xs text-slate-100/80">
                                         {formatLiveModules(first.live_modules)}
                                     </p>
                                 ) : null}
@@ -81,7 +81,7 @@ export function Podium({ topThree }: PodiumProps) {
                             <div className="absolute -top-1 -right-1 w-8 h-8">
                                 <div className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
                                 <div className="relative bg-yellow-400 rounded-full w-full h-full flex items-center justify-center">
-                                    <span className="text-yellow-900 text-xs font-bold">★</span>
+                                    <span className="text-yellow-900 text-xs font-bold">1</span>
                                 </div>
                             </div>
                         </div>
@@ -93,9 +93,9 @@ export function Podium({ topThree }: PodiumProps) {
 
                 {third && (
                     <div className="flex-1 max-w-[200px] animate-scale-in" style={{ animationDelay: '0.4s' }}>
-                        <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border-2 border-orange-700 shadow-lg hover:scale-105 transition-transform duration-300">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-700 rounded-full p-2">
-                                <Medal className="w-6 h-6 text-orange-400" />
+                        <div className="relative rounded-2xl border-2 border-orange-500/40 bg-gradient-to-br from-slate-800 to-slate-950 p-6 shadow-lg transition-transform duration-300 hover:scale-105">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-orange-600 p-2">
+                                <Medal className="w-6 h-6 text-orange-100" />
                             </div>
                             <div className="flex flex-col items-center mt-2">
                                 <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-orange-700 mb-3">
@@ -114,8 +114,8 @@ export function Podium({ topThree }: PodiumProps) {
                                         {formatLiveModules(third.live_modules)}
                                     </p>
                                 ) : null}
-                                <div className="bg-gray-700 rounded-full px-4 py-1">
-                                    <p className="text-violet-400 font-bold">{third.weekly_xp.toLocaleString()} XP</p>
+                                <div className="rounded-full bg-slate-700 px-4 py-1">
+                                    <p className="font-bold text-orange-200">{third.weekly_xp.toLocaleString()} XP</p>
                                 </div>
                             </div>
                         </div>

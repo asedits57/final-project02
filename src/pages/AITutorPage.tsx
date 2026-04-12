@@ -22,6 +22,9 @@ type TutorRouteState = {
     initialPrompt?: string;
 };
 
+const getErrorMessage = (error: unknown, fallback: string) =>
+    error instanceof Error && error.message.trim() ? error.message : fallback;
+
 const AITutorPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -80,12 +83,15 @@ const AITutorPage = () => {
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, aiMsg]);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("AI Tutor Error:", error);
+            const description = "I'm having trouble connecting to my AI brain. Would you like to try again?";
+            const fallbackReply = "I'm sorry, I'm having trouble connecting to my brain right now. Please try using the 'Try again' button above.";
+            const safeErrorMessage = getErrorMessage(error, fallbackReply);
             
             toast({
                 title: "Tutor Connection Error",
-                description: error?.message || "I'm having trouble connecting to my AI brain. Would you like to try again?",
+                description,
                 variant: "destructive",
                 action: (
                     <ToastAction altText="Try again" onClick={() => handleSend(text)}>
@@ -97,7 +103,7 @@ const AITutorPage = () => {
             const errorMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 sender: "ai",
-                text: error?.message || "I'm sorry, I'm having trouble connecting to my brain right now. Please try using the 'Try again' button above.",
+                text: safeErrorMessage === "Service error" ? fallbackReply : safeErrorMessage,
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMsg]);
